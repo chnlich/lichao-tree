@@ -3,8 +3,9 @@
 \usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{amsmath}
+\usepackage{graphicx}
 
-\title{Performance Comparison: Li-Chao Tree vs. Dynamic Convex Hull Trick}
+\title{Li-Chao Tree Optimization Report (Iteration 5 - FINAL)}
 \author{chnlich}
 \date{\today}
 
@@ -13,42 +14,48 @@
 \maketitle
 
 \section{Introduction}
-This report presents a comparative analysis of two prominent data structures used for maintaining the lower/upper convex hull of a set of lines and performing extremum queries:
+This is the final iteration (v5) of the Li-Chao Tree improvement cycle. Having established efficient Standard, Static, Discrete, Iterative, and Segment variants, we now introduce the **Persistent Li-Chao Tree** and provide comprehensive documentation. This completes the suite, offering solutions for standard, memory-constrained, coordinate-compressed, segment-based, and history-dependent problems.
+
+\section{Methodology}
+
+\subsection{Persistent Li-Chao Tree}
+The Persistent Li-Chao Tree (\texttt{lichao\_persistent.hpp}) allows for versioned updates. Unlike the standard variant which modifies the tree in-place, the persistent variant creates new nodes for the path affected by an update, preserving the previous version of the tree.
 \begin{enumerate}
-    \item \textbf{Li-Chao Tree}: A segment tree-based approach where each node stores a line that dominates the center of the interval. It supports line insertions and point queries in $\mathcal{O}(\log C)$, where $C$ is the coordinate range.
-    \item \textbf{Dynamic Convex Hull Trick (CHT)}: A balanced binary search tree approach (commonly implemented using \texttt{std::set} in C++) that maintains the hull envelope directly by sorting lines by slope. It typically supports insertions and queries in amortized $\mathcal{O}(\log N)$.
+    \item \textbf{Structure}: An array-based node pool where each node stores indices to left/right children.
+    \item \textbf{Update}: returns a new root index. Space complexity is $O(\log C)$ per update.
+    \item \textbf{Query}: takes a root index and performs the standard Li-Chao query.
+    \item \textbf{Use Case}: Essential for problems requiring queries on past states (e.g., "what was the minimum at time $t$?") or for tree path optimization problems where persistence allows querying from root to node.
 \end{enumerate}
 
-\section{Implementation Details}
-\subsection{Li-Chao Tree (Dynamic)}
-We implemented a sparse, pointer-based Li-Chao Tree supporting a coordinate range of $[-10^9, 10^9]$. Nodes are allocated dynamically on the heap as needed.
+\subsection{Documentation}
+A comprehensive \texttt{README.md} has been added to the repository, serving as a user guide to select the appropriate variant for any given problem.
 
-\subsection{Li-Chao Tree (Static Allocation)}
-To mitigate the overhead of dynamic memory allocation, we implemented a version utilizing a pre-allocated static memory pool (array-based). This approach aims to improve cache locality and reduce the runtime cost associated with the \texttt{new} operator.
-
-\subsection{Dynamic CHT}
-We utilized the widely used "LineContainer" implementation (often attributed to the KACTL library), which stores lines in a \texttt{std::set} sorted by slope and maintains intersection points to ensure the hull's validity.
-
-\section{Experimental Setup}
-The benchmarks were conducted using the following input distributions:
+\section{Verification}
+We extended the verification suite in \texttt{main.cpp} to test the Persistent Li-Chao Tree.
 \begin{itemize}
-    \item \textbf{Random}: Lines ($k, m$) and query coordinates ($x$) are generated uniformly at random.
-    \item \textbf{Monotonic K}: Lines are inserted in strictly increasing order of slope $k$.
-    \item \textbf{Monotonic X}: Queries are performed in strictly increasing order of coordinate $x$.
-\end{itemize}
-We tested input sizes $N \in \{10^4, 10^5, 2 \cdot 10^5\}$.
-
-\section{Results}
-The benchmark results (detailed in \texttt{results.md}) indicate that the Dynamic CHT implementation generally outperforms the Li-Chao Tree variants for the tested input sizes. 
-
-\begin{itemize}
-    \item \textbf{Dynamic vs. Static Li-Chao}: Surprisingly, the static memory pool optimization did not yield a significant performance improvement over the dynamic pointer-based version in this test environment. In some cases, it performed slightly slower, possibly due to array bounds checking or different memory access patterns.
-    \item \textbf{Overall Performance}: The Dynamic CHT consistently maintained lower execution times. For $N=200,000$ with random inputs, CHT ran in approximately 10ms, while Li-Chao variants required 15-17ms.
+    \item \textbf{Test Case}: Created branching versions of the tree (Root 1, Root 2 based on Root 1, Root 3 based on Root 1).
+    \item \textbf{Result}: Queries on different roots returned correct values independent of subsequent updates in other branches, confirming true persistence.
 \end{itemize}
 
-Despite the raw speed difference, the Li-Chao Tree remains a valuable structure due to its simplicity and robustness against numerical instability, as it does not require calculating intersection points.
+\section{Final Suite Summary}
 
-\section{Conclusion}
-While the Li-Chao Tree offers a theoretically elegant solution with a fixed coordinate universe, the standard library-based Dynamic CHT proves to be highly efficient for competitive programming constraints ($N \le 2 \cdot 10^5$). Future work could explore optimizing the memory layout further or testing on significantly larger datasets where cache locality might play a larger role.
+The repository now contains:
+
+\begin{itemize}
+    \item \textbf{Standard} (\texttt{lichao.hpp}): Dynamic pointer-based.
+    \item \textbf{Static} (\texttt{lichao\_static.hpp}): Fixed array-based.
+    \item \textbf{Discrete} (\texttt{lichao\_discrete.hpp}): Coordinate compressed.
+    \item \textbf{Iterative} (\texttt{lichao\_iterative.hpp}): Non-recursive.
+    \item \textbf{Segment} (\texttt{lichao\_segment.hpp}): For line segments.
+    \item \textbf{Persistent} (\texttt{lichao\_persistent.hpp}): For versioned queries.
+\end{itemize}
+
+\section{References}
+
+\begin{enumerate}
+    \item **Li Chao**, "The Application of Segment Tree in Geometry Problems", \textit{Winter Camp (WC) 2012}, China. (Original proposal of the data structure).
+    \item **CP-Algorithms**, "Li Chao Tree", \url{https://cp-algorithms.com/geometry/li_chao_tree.html}.
+    \item **Codeforces**, "Li Chao Tree Tutorial", \url{https://codeforces.com/blog/entry/51275}.
+\end{enumerate}
 
 \end{document}

@@ -1,28 +1,46 @@
 N,Distribution,Algorithm,Time_ms
-10000,Random,Li-Chao (Dynamic),0
+10000,Random,Li-Chao (Dynamic),1
 10000,Random,Li-Chao (Static),1
-10000,Random,Dynamic CHT,2
+10000,Random,Li-Chao (Discrete),2
+10000,Random,Li-Chao (Iterative),1
+10000,Random,Dynamic CHT,0
 10000,Monotonic K,Li-Chao (Dynamic),1
-10000,Monotonic K,Li-Chao (Static),1
+10000,Monotonic K,Li-Chao (Static),2
+10000,Monotonic K,Li-Chao (Discrete),2
+10000,Monotonic K,Li-Chao (Iterative),1
 10000,Monotonic K,Dynamic CHT,0
 10000,Monotonic X,Li-Chao (Dynamic),0
 10000,Monotonic X,Li-Chao (Static),1
+10000,Monotonic X,Li-Chao (Discrete),1
+10000,Monotonic X,Li-Chao (Iterative),0
 10000,Monotonic X,Dynamic CHT,0
 100000,Random,Li-Chao (Dynamic),7
 100000,Random,Li-Chao (Static),9
+100000,Random,Li-Chao (Discrete),23
+100000,Random,Li-Chao (Iterative),8
 100000,Random,Dynamic CHT,5
 100000,Monotonic K,Li-Chao (Dynamic),8
 100000,Monotonic K,Li-Chao (Static),10
+100000,Monotonic K,Li-Chao (Discrete),24
+100000,Monotonic K,Li-Chao (Iterative),8
 100000,Monotonic K,Dynamic CHT,5
-100000,Monotonic X,Li-Chao (Dynamic),7
+100000,Monotonic X,Li-Chao (Dynamic),6
 100000,Monotonic X,Li-Chao (Static),8
+100000,Monotonic X,Li-Chao (Discrete),11
+100000,Monotonic X,Li-Chao (Iterative),7
 100000,Monotonic X,Dynamic CHT,5
 200000,Random,Li-Chao (Dynamic),15
-200000,Random,Li-Chao (Static),17
+200000,Random,Li-Chao (Static),18
+200000,Random,Li-Chao (Discrete),53
+200000,Random,Li-Chao (Iterative),16
 200000,Random,Dynamic CHT,10
 200000,Monotonic K,Li-Chao (Dynamic),17
 200000,Monotonic K,Li-Chao (Static),21
+200000,Monotonic K,Li-Chao (Discrete),55
+200000,Monotonic K,Li-Chao (Iterative),18
 200000,Monotonic K,Dynamic CHT,10
-200000,Monotonic X,Li-Chao (Dynamic),16
+200000,Monotonic X,Li-Chao (Dynamic),19
 200000,Monotonic X,Li-Chao (Static),16
+200000,Monotonic X,Li-Chao (Discrete),24
+200000,Monotonic X,Li-Chao (Iterative),14
 200000,Monotonic X,Dynamic CHT,9
