@@ -2,6 +2,7 @@
 \usepackage{geometry}
 \usepackage{booktabs}
 \usepackage{hyperref}
+\usepackage{amsmath}
 
 \title{Performance Comparison: Li-Chao Tree vs. Dynamic Convex Hull Trick}
 \author{chnlich}
@@ -12,35 +13,42 @@
 \maketitle
 
 \section{Introduction}
-This report compares the performance of two popular data structures for maintaining the lower/upper convex hull of a set of lines and querying extremum values:
+This report presents a comparative analysis of two prominent data structures used for maintaining the lower/upper convex hull of a set of lines and performing extremum queries:
 \begin{enumerate}
-    \item \textbf{Li-Chao Tree}: A segment tree based approach where each node stores a line that dominates the center of the interval.
-    \item \textbf{Dynamic Convex Hull Trick (CHT)}: A balanced binary search tree (std::set) approach maintaining the hull directly by storing lines sorted by slope and maintaining intersection points.
+    \item \textbf{Li-Chao Tree}: A segment tree-based approach where each node stores a line that dominates the center of the interval. It supports line insertions and point queries in $\mathcal{O}(\log C)$, where $C$ is the coordinate range.
+    \item \textbf{Dynamic Convex Hull Trick (CHT)}: A balanced binary search tree approach (commonly implemented using \texttt{std::set} in C++) that maintains the hull envelope directly by sorting lines by slope. It typically supports insertions and queries in amortized $\mathcal{O}(\log N)$.
 \end{enumerate}
 
 \section{Implementation Details}
-\subsection{Li-Chao Tree}
-We implemented a sparse, pointer-based Li-Chao Tree supporting a coordinate range of $[-10^9, 10^9]$. The tree is built dynamically as lines are inserted.
+\subsection{Li-Chao Tree (Dynamic)}
+We implemented a sparse, pointer-based Li-Chao Tree supporting a coordinate range of $[-10^9, 10^9]$. Nodes are allocated dynamically on the heap as needed.
+
+\subsection{Li-Chao Tree (Static Allocation)}
+To mitigate the overhead of dynamic memory allocation, we implemented a version utilizing a pre-allocated static memory pool (array-based). This approach aims to improve cache locality and reduce the runtime cost associated with the \texttt{new} operator.
 
 \subsection{Dynamic CHT}
-We used the standard method (often referred to as the "LineContainer" from KACTL) which stores lines in a `std::set`, sorted by slope. It maintains the validity of the hull by removing lines that are no longer part of the hull upon insertion.
+We utilized the widely used "LineContainer" implementation (often attributed to the KACTL library), which stores lines in a \texttt{std::set} sorted by slope and maintains intersection points to ensure the hull's validity.
 
 \section{Experimental Setup}
-The benchmarks were run on a standard environment with the following distributions:
+The benchmarks were conducted using the following input distributions:
 \begin{itemize}
-    \item \textbf{Random}: Lines ($k, m$) and queries ($x$) are generated uniformly at random.
-    \item \textbf{Monotonic K}: Lines are inserted in increasing order of slope $k$.
-    \item \textbf{Monotonic X}: Queries are performed in increasing order of $x$.
+    \item \textbf{Random}: Lines ($k, m$) and query coordinates ($x$) are generated uniformly at random.
+    \item \textbf{Monotonic K}: Lines are inserted in strictly increasing order of slope $k$.
+    \item \textbf{Monotonic X}: Queries are performed in strictly increasing order of coordinate $x$.
 \end{itemize}
+We tested input sizes $N \in \{10^4, 10^5, 2 \cdot 10^5\}$.
 
 \section{Results}
-Preliminary results (see `results.md` in repository) suggest that Dynamic CHT is generally faster than the pointer-based Li-Chao Tree for $N \le 200,000$, likely due to the overhead of dynamic node allocation in the Li-Chao Tree. However, Li-Chao Tree offers better worst-case guarantees for arbitrary updates compared to CHT which can degrade if line removals are required (though standard CHT only supports addition).
+The benchmark results (detailed in \texttt{results.md}) indicate that the Dynamic CHT implementation generally outperforms the Li-Chao Tree variants for the tested input sizes. 
 
-\section{Future Work}
 \begin{itemize}
-    \item Implement an implicit (array-based) Li-Chao Tree for smaller coordinate ranges to check if cache locality improves performance.
-    \item Test on larger datasets ($N=10^6, 10^7$).
-    \item Compare memory usage.
+    \item \textbf{Dynamic vs. Static Li-Chao}: Surprisingly, the static memory pool optimization did not yield a significant performance improvement over the dynamic pointer-based version in this test environment. In some cases, it performed slightly slower, possibly due to array bounds checking or different memory access patterns.
+    \item \textbf{Overall Performance}: The Dynamic CHT consistently maintained lower execution times. For $N=200,000$ with random inputs, CHT ran in approximately 10ms, while Li-Chao variants required 15-17ms.
 \end{itemize}
+
+Despite the raw speed difference, the Li-Chao Tree remains a valuable structure due to its simplicity and robustness against numerical instability, as it does not require calculating intersection points.
+
+\section{Conclusion}
+While the Li-Chao Tree offers a theoretically elegant solution with a fixed coordinate universe, the standard library-based Dynamic CHT proves to be highly efficient for competitive programming constraints ($N \le 2 \cdot 10^5$). Future work could explore optimizing the memory layout further or testing on significantly larger datasets where cache locality might play a larger role.
 
 \end{document}
