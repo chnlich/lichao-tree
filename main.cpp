@@ -26,45 +26,45 @@ struct Result {
 };
 
 long long run_lichao(const vector<Operation>& ops) {
-    LC::LiChaoTree lct(-1e9 - 7, 1e9 + 7);
+    LC::LiChaoTree lict(-1e9 - 7, 1e9 + 7);
     long long sum = 0;
     for (const auto& op : ops) {
         if (op.type == ADD) {
-            lct.add_line(op.val1, op.val2);
+            lict.add_line(op.val1, op.val2);
         } else {
-            sum += lct.query(op.val1);
+            sum += lict.query(op.val1);
         }
     }
     return sum;
 }
 
 long long run_lichao_iterative(const vector<Operation>& ops) {
-    LCI::LiChaoTreeIterative lct(-1e9 - 7, 1e9 + 7);
+    LCI::LiChaoTreeIterative lict(-1e9 - 7, 1e9 + 7);
     long long sum = 0;
     for (const auto& op : ops) {
         if (op.type == ADD) {
-            lct.add_line(op.val1, op.val2);
+            lict.add_line(op.val1, op.val2);
         } else {
-            sum += lct.query(op.val1);
+            sum += lict.query(op.val1);
         }
     }
     return sum;
 }
 
 long long run_lichao_static(const vector<Operation>& ops) {
-    LCS::LiChaoTreeStatic lct(-1e9 - 7, 1e9 + 7);
+    LCS::LiChaoTreeStatic lict(-1e9 - 7, 1e9 + 7);
     // Estimate size to reserve memory and prevent reallocations during insert
     // A rough upper bound for Li Chao is O(N log C).
     // For N=200k, log C ~ 60, it can be large, but usually much less nodes are created.
     // Let's reserve conservatively based on N.
-    lct.reserve(ops.size() * 2); 
+    lict.reserve(ops.size() * 2); 
     
     long long sum = 0;
     for (const auto& op : ops) {
         if (op.type == ADD) {
-            lct.add_line(op.val1, op.val2);
+            lict.add_line(op.val1, op.val2);
         } else {
-            sum += lct.query(op.val1);
+            sum += lict.query(op.val1);
         }
     }
     return sum;
@@ -83,15 +83,15 @@ long long run_lichao_discrete(const vector<Operation>& ops) {
     coords.erase(unique(coords.begin(), coords.end()), coords.end());
 
     // 2. Build Tree
-    LCD::LiChaoTreeDiscrete lct(coords);
+    LCD::LiChaoTreeDiscrete lict(coords);
     
     // 3. Process
     long long sum = 0;
     for (const auto& op : ops) {
         if (op.type == ADD) {
-            lct.add_line(op.val1, op.val2);
+            lict.add_line(op.val1, op.val2);
         } else {
-            sum += lct.query(op.val1);
+            sum += lict.query(op.val1);
         }
     }
     return sum;
@@ -160,29 +160,29 @@ void benchmark(int n, string dist_name, vector<Operation> ops, vector<Result>& r
 
 void verify_persistent_lichao() {
     cout << "Verifying Li-Chao Persistent..." << endl;
-    LCP::PersistentLiChaoTree plct(-100, 100);
+    LCP::PersistentLiChaoTree plict(-100, 100);
     
     // Root 0: Empty (implicit infinite)
     int r0 = -1;
     
     // Root 1: Add y = x + 0. At x=10, val=10.
-    int r1 = plct.add_line(r0, 1, 0);
+    int r1 = plict.add_line(r0, 1, 0);
     
     // Root 2: Add y = -x + 10. At x=10, val=0. Better than 10.
     // Based on r1.
-    int r2 = plct.add_line(r1, -1, 10);
+    int r2 = plict.add_line(r1, -1, 10);
     
     // Root 3: Based on r1 (NOT r2). Add y = -20.
-    int r3 = plct.add_line(r1, 0, -20);
+    int r3 = plict.add_line(r1, 0, -20);
     
     // Checks:
     // Query r1 at 10: y=x -> 10.
     // Query r2 at 10: min(10, 0) -> 0.
     // Query r3 at 10: min(10, -20) -> -20.
     
-    long long q1 = plct.query(r1, 10);
-    long long q2 = plct.query(r2, 10);
-    long long q3 = plct.query(r3, 10);
+    long long q1 = plict.query(r1, 10);
+    long long q2 = plict.query(r2, 10);
+    long long q3 = plict.query(r3, 10);
     
     if (q1 != 10) cerr << "Persistent verify failed r1 at 10: expected 10, got " << q1 << endl;
     if (q2 != 0) cerr << "Persistent verify failed r2 at 10: expected 0, got " << q2 << endl;
@@ -196,13 +196,13 @@ void verify_persistent_lichao() {
 void verify_segment_lichao() {
     cout << "Verifying Li-Chao Segment..." << endl;
     vector<long long> coords = {1, 2, 3, 4, 5, 10, 20};
-    LCSeg::LiChaoTreeSegment lct(coords);
+    LCSeg::LiChaoTreeSegment lict(coords);
 
     // Segment 1: y = 2x + 1 for x in [1, 3] -> (3, 5, 7)
-    lct.add_segment(2, 1, 1, 3);
+    lict.add_segment(2, 1, 1, 3);
     
     // Segment 2: y = -x + 10 for x in [3, 10] -> (7, 6, 5, 0) at x=3,4,5,10
-    lct.add_segment(-1, 10, 3, 10);
+    lict.add_segment(-1, 10, 3, 10);
 
     // Expected:
     // x=1: min(3, INF) = 3
@@ -213,10 +213,10 @@ void verify_segment_lichao() {
     // x=10: min(INF, 0) = 0
     // x=20: INF
 
-    long long q1 = lct.query(1);
-    long long q3 = lct.query(3);
-    long long q4 = lct.query(4);
-    long long q20 = lct.query(20);
+    long long q1 = lict.query(1);
+    long long q3 = lict.query(3);
+    long long q4 = lict.query(4);
+    long long q20 = lict.query(20);
 
     if (q1 != 3) cerr << "Segment verification failed at x=1, expected 3, got " << q1 << endl;
     if (q3 != 7) cerr << "Segment verification failed at x=3, expected 7, got " << q3 << endl;
@@ -231,7 +231,7 @@ void verify_segment_lichao() {
 int main() {
     verify_persistent_lichao();
     verify_segment_lichao();
-    vector<int> sizes = {10000, 100000, 200000};
+    vector<int> sizes = {10000, 100000, 200000, 1000000, 10000000};
     Generator gen(42);
     vector<Result> results;
 
