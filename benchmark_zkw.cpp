@@ -94,6 +94,8 @@ int main() {
     benchmark(n, "Random", gen.generate_random(n), results);
     benchmark(n, "Monotonic K", gen.generate_monotonic_k(n), results);
     benchmark(n, "Monotonic X", gen.generate_monotonic_x(n), results);
+    benchmark(n, "All on Hull", gen.generate_all_on_hull(n), results);
+    benchmark(n, "Similar Slopes", gen.generate_similar_slopes(n), results);
 
     cout << "\n# Benchmark Results (N = " << n << ")\n\n";
     cout << "| Distribution | Algorithm | Time (ms) | Checksum |\n";

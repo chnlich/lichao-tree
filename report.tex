@@ -278,8 +278,17 @@ All benchmarks were conducted on a Linux system with the following configuration
     \item CPU: x86\_64 architecture
     \item Compiler: g++ with -O2 optimization
     \item Test sizes: $10^4$ to $10^7$ operations
-    \item Distributions: Random, Monotonic K (slopes), Monotonic X (queries)
+    \item Distributions: 
+    \begin{itemize}
+        \item \textbf{Random:} Random slopes and intercepts. Expected hull size: $O(\sqrt{N})$.
+        \item \textbf{Monotonic K:} Sorted slopes, random intercepts.
+        \item \textbf{Monotonic X:} Random lines, sorted query points.
+        \item \textbf{All on Hull:} Lines constructed so all $N$ lines contribute to the lower envelope (e.g., $y = i \cdot x - i^2$).
+        \item \textbf{Similar Slopes:} Slopes in narrow range $[-100, 100]$, large intercept spread. Many lines remain relevant.
+    \end{itemize}
 \end{itemize}
+
+The \textbf{All on Hull} and \textbf{Similar Slopes} distributions are particularly important because they test cases where $\Theta(N)$ lines remain in the convex hull. For random lines, only $O(\sqrt{N})$ lines typically contribute to the hull, giving the Dynamic CHT (which stores only hull lines) an advantage. When all lines are on the hull, the LICT's uniform $O(\log C)$ behavior becomes more competitive.
 
 We compare against the Dynamic CHT (balanced BST-based) as the baseline, as it is the only CHT variant that supports arbitrary line insertions like the LICT. The monotonic deque-based CHT is excluded from comparison since it cannot handle arbitrary insertions.
 
