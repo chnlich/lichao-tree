@@ -140,9 +140,10 @@ This is preferred over explicit individual headers for simplicity and faster com
 Papers should follow this structure:
 1. **Abstract** - Summary of contributions and key findings
 2. **Introduction** - Problem definition, background, motivation, contributions
-3. **Related Work** - Prior approaches and their limitations
-4. **Overview** - High-level description of the approach, key trade-offs, summary of results (before diving into details)
+3. **Related Work** - Prior approaches and their limitations (e.g., CHT variants)
+4. **Main Contribution Section** - The paper's primary contribution (e.g., "The Li-Chao Tree") with algorithmic approach, comparison with prior work, trade-offs, and summary of results
 5. **Detailed Sections** - Implementation details, benchmarks, analysis (at minimum: Implementation and Benchmark sections)
-6. **Conclusion** - Summary of findings and future directions
+6. **Discussion** - Analysis of advantages, selection guidelines
+7. **Conclusion** - Summary of findings
 
-The Overview section serves as a bridge between Related Work and the detailed technical sections, giving readers a high-level understanding before presenting code and empirical results.
+The main contribution section should come AFTER Related Work and BEFORE the detailed Implementation/Benchmarks sections. Related Work should only cover prior approaches, not the paper's own contribution.
