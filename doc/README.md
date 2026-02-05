@@ -13,13 +13,24 @@ This repository provides optimized implementations for maintaining the lower env
 | **LICT (Standard)** | `lichao.hpp` | Classic pointer-based segment tree implementation | $O(\log C)$ insertion/query |
 | **Dynamic CHT** | `cht.hpp` | Classic Convex Hull Trick with balanced BST | $O(\log n)$ insertion/query |
 
-## Files
+## Structure
 
-- `lichao.hpp` - Standard Li-Chao Tree (pointer-based segment tree)
-- `cht.hpp` - Dynamic CHT implementation (balanced BST-based)
-- `generator.hpp` - Test data generator with multiple distributions
-- `benchmark.cpp` - Benchmark comparing the two implementations
-- `report.tex` - LaTeX report with analysis
+```
+lichao-tree/
+├── implementation/
+│   ├── lichao.hpp    - Standard Li-Chao Tree (pointer-based segment tree)
+│   └── cht.hpp       - Dynamic CHT implementation (balanced BST-based)
+├── generator/
+│   └── generator.hpp - Test data generator with multiple distributions
+├── benchmark/
+│   ├── benchmark.cpp - Benchmark comparing the two implementations
+│   └── benchmark_results.csv - Output results
+├── doc/
+│   ├── report.tex    - LaTeX report with analysis
+│   ├── report.pdf    - Compiled PDF report
+│   └── README.md     - This file
+└── Makefile          - Build configuration
+```
 
 ## Usage
 
@@ -45,7 +56,7 @@ g++ -O3 -std=c++17 -o benchmark benchmark.cpp
 ### Using LICT (Standard)
 
 ```cpp
-#include "lichao.hpp"
+#include "implementation/lichao.hpp"
 
 LC::LiChaoTree lict(-1e9, 1e9);  // Create with coordinate range
 lict.add_line(2, 3);  // Add line y = 2x + 3
@@ -55,7 +66,7 @@ long long val = lict.query(5);  // Query at x = 5, returns 13
 ### Using Dynamic CHT
 
 ```cpp
-#include "cht.hpp"
+#include "implementation/cht.hpp"
 
 CHT::DynamicCHT cht;
 cht.add_line(2, 3);  // Add line y = 2x + 3

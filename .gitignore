@@ -1,2 +1,2 @@
-benchmark
+benchmark/benchmark_runner
 *.o

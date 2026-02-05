@@ -1,13 +1,19 @@
 CXX = g++
 CXXFLAGS = -O3 -std=c++17 -Wall -Wextra
 
-all: benchmark
+BENCHMARK_DIR = benchmark
+BENCHMARK_SRC = $(BENCHMARK_DIR)/benchmark.cpp
+BENCHMARK_BIN = $(BENCHMARK_DIR)/benchmark_runner
 
-benchmark: benchmark.cpp lichao.hpp cht.hpp generator.hpp
-	$(CXX) $(CXXFLAGS) -o benchmark benchmark.cpp
+.PHONY: all clean run
+
+all: $(BENCHMARK_BIN)
+
+$(BENCHMARK_BIN): $(BENCHMARK_SRC) implementation/lichao.hpp implementation/cht.hpp generator/generator.hpp
+	$(CXX) $(CXXFLAGS) -o $(BENCHMARK_BIN) $(BENCHMARK_SRC)
 
 clean:
-	rm -f benchmark benchmark_results.csv
+	rm -f $(BENCHMARK_BIN) $(BENCHMARK_DIR)/benchmark_results.csv
 
-run: benchmark
-	./benchmark
+run: $(BENCHMARK_BIN)
+	./$(BENCHMARK_BIN)
