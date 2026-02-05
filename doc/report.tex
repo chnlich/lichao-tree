@@ -80,7 +80,7 @@ That is the entire algorithm. No intersection calculations. No handling parallel
 
 This paper makes three concrete contributions:
 \begin{enumerate}
-    \item \textbf{Evidence-based comparison:} We provide the first detailed performance benchmarks directly comparing the LICT and Dynamic CHT across realistic workloads, confirming a 1.5--2.2$\times$ speed advantage for the CHT.
+    \item \textbf{Evidence-based comparison:} We provide the first detailed performance benchmarks directly comparing the LICT and Dynamic CHT across realistic workloads, confirming a $1.5$--$2.2\times$ speed advantage for the CHT.
     \item \textbf{Reference implementations:} We present clean, documented implementations of both data structures, suitable for use in contests and production systems.
     \item \textbf{Selection guidance:} We offer clear criteria for choosing between the two structures, based on implementation constraints rather than performance alone.
 \end{enumerate}
@@ -273,14 +273,14 @@ Table~\ref{tab:results} presents the performance comparison across all three tes
 \toprule
 \textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} & \textbf{Ratio} \\
 \midrule
-$10^5$ & Random & 10 ms & 5 ms & 2.00$\times$ \\
-$10^5$ & All on Hull & 6 ms & 4 ms & 1.50$\times$ \\
+$10^5$ & Random & 10 ms & 5 ms & $2.00\times$ \\
+$10^5$ & All on Hull & 6 ms & 4 ms & $1.50\times$ \\
 \midrule
-$10^6$ & Random & 77 ms & 52 ms & 1.48$\times$ \\
-$10^6$ & All on Hull & 67 ms & 41 ms & 1.63$\times$ \\
+$10^6$ & Random & 77 ms & 52 ms & $1.48\times$ \\
+$10^6$ & All on Hull & 67 ms & 41 ms & $1.63\times$ \\
 \midrule
-$10^7$ & Random & 789 ms & 545 ms & 1.45$\times$ \\
-$10^7$ & All on Hull & 687 ms & 426 ms & 1.61$\times$ \\
+$10^7$ & Random & 789 ms & 545 ms & $1.45\times$ \\
+$10^7$ & All on Hull & 687 ms & 426 ms & $1.61\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
