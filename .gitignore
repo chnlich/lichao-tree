@@ -1,2 +1,8 @@
-benchmark/benchmark_runner
+# Build artifacts
 *.o
+
+# Benchmark binary (in benchmark/ folder)
+benchmark/benchmark_runner
+
+# Generated benchmark results
+benchmark/benchmark_results.csv

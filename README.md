@@ -17,19 +17,21 @@ This repository provides optimized implementations for maintaining the lower env
 
 ```
 lichao-tree/
+├── README.md                    - This file
+├── Makefile                     - Root makefile (delegates to benchmark/)
+├── .gitignore                   - Git ignore rules
 ├── implementation/
-│   ├── lichao.hpp    - Standard Li-Chao Tree (pointer-based segment tree)
-│   └── cht.hpp       - Dynamic CHT implementation (balanced BST-based)
+│   ├── lichao.hpp               - Standard Li-Chao Tree
+│   └── cht.hpp                  - Dynamic CHT implementation
 ├── generator/
-│   └── generator.hpp - Test data generator with multiple distributions
+│   └── generator.hpp            - Test data generator
 ├── benchmark/
-│   ├── benchmark.cpp - Benchmark comparing the two implementations
-│   └── benchmark_results.csv - Output results
-├── doc/
-│   ├── report.tex    - LaTeX report with analysis
-│   ├── report.pdf    - Compiled PDF report
-│   └── README.md     - This file
-└── Makefile          - Build configuration
+│   ├── Makefile                 - Benchmark-specific makefile
+│   ├── benchmark.cpp            - Benchmark source
+│   └── benchmark_results.csv    - Generated results
+└── doc/
+    ├── report.tex               - LaTeX report
+    └── report.pdf               - Compiled PDF
 ```
 
 ## Usage

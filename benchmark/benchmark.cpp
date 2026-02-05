@@ -5,9 +5,9 @@
 #include <string>
 #include <fstream>
 
-#include "../implementation/lichao.hpp"
-#include "../implementation/cht.hpp"
-#include "../generator/generator.hpp"
+#include "lichao.hpp"
+#include "cht.hpp"
+#include "generator.hpp"
 
 using namespace std;
 using namespace std::chrono;
