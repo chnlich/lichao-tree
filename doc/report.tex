@@ -45,7 +45,7 @@
 \maketitle
 
 \begin{abstract}
-The Li-Chao Tree (LICT), introduced at ZJOI 2012, has become one of the most widely adopted data structures for online line envelope maintenance---despite being consistently outperformed by the Dynamic Convex Hull Trick (CHT). This apparent contradiction motivated our retrospective analysis. Through streamlined implementations and benchmarks across three scales ($10^5$, $10^6$, and $10^7$ operations), we confirm that the Dynamic CHT is $1.5$--$2.2\times$ faster. Yet the LICT remains indispensable due to its remarkable simplicity: it requires no intersection calculations, no special cases for parallel lines, and no floating-point arithmetic. We present clean, production-ready implementations of both data structures and offer evidence-based guidance on when to choose each. Our findings suggest that the LICT's enduring popularity stems not from raw speed, but from its unique combination of acceptable performance and exceptional implementability.
+The Li-Chao Tree (LICT), introduced at ZJOI 2012, has become one of the most widely adopted data structures for online line envelope maintenance---despite being consistently outperformed by the Dynamic Convex Hull Trick (CHT). This apparent contradiction motivated our retrospective analysis. Through streamlined implementations and benchmarks across three scales ($10^5$, $10^6$, and $10^7$ operations), we confirm that the Dynamic CHT is $1.5$--$2.0\times$ faster. Yet the LICT remains indispensable due to its remarkable simplicity: it requires no intersection calculations, no special cases for parallel lines, and no floating-point arithmetic. We present clean, production-ready implementations of both data structures and offer evidence-based guidance on when to choose each. Our findings suggest that the LICT's enduring popularity stems not from raw speed, but from its unique combination of acceptable performance and exceptional implementability.
 \end{abstract}
 
 \section{Introduction}
@@ -169,7 +169,7 @@ struct LineContainer : multiset<Line, less<>> {
 };
 \end{lstlisting}
 
-The complexity in this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete.
+The complexity in this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete. Each insertion takes $O(\log n)$ amortized time, where the amortization accounts for the removal of lines that become obsolete due to the new insertion.
 
 In contrast to the Dynamic CHT's geometric approach, the Li-Chao Tree achieves simplicity by avoiding intersection calculations entirely. Instead, it relies on direct value comparisons at interval midpoints.
 
