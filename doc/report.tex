@@ -78,6 +78,8 @@ This paper makes the following contributions:
 
 \section{Related Work}\label{sec:related}
 
+The Convex Hull Trick represents the classical approach to line envelope maintenance. We review its variants to establish the context for the LICT.
+
 \subsection{Convex Hull Trick}
 
 The Convex Hull Trick encompasses two primary variants with different applicability constraints.
@@ -88,9 +90,15 @@ The Convex Hull Trick encompasses two primary variants with different applicabil
 
 The Dynamic CHT requires computing intersection points as $x_{\text{intersect}} = \frac{m_2 - m_1}{k_1 - k_2}$, necessitating careful handling of division by zero (parallel lines), integer overflow, and sign conventions for floored division.
 
-\subsection{The Li-Chao Tree}
+\section{The Li-Chao Tree}\label{sec:lichao}
+
+This section presents the Li-Chao Tree, the primary contribution of this paper.
+
+\subsection{Algorithmic Approach}
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the optimal line at each interval midpoint, recursively partitioning the query range.
+
+Each node in the tree represents an interval $[l, r]$ and stores the line optimal at the midpoint. Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. This approach eliminates intersection calculations entirely, at the cost of exploring the full tree height regardless of hull size.
 
 \begin{itemize}
     \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C$ represents the coordinate range (typically $C \approx 10^9$ for 32 bit integers).
@@ -100,7 +108,7 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 
 The LICT's complexity depends on the coordinate range rather than the number of lines. This provides consistent performance regardless of hull size, though it cannot exploit cases where the hull remains small relative to the number of insertions.
 
-\subsection{Comparison of Approaches}
+\subsection{Comparison with Dynamic CHT}
 
 Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CHT and LICT.
 
@@ -122,16 +130,6 @@ Implementation Complexity & Higher & Lower \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\section{Overview}\label{sec:overview}
-
-This section provides a high level overview of both data structures before presenting detailed implementations and empirical analysis.
-
-\subsection{Algorithmic Approach}
-
-The fundamental distinction between the Dynamic CHT and the LICT lies in their approach to envelope maintenance. The Dynamic CHT maintains the convex hull explicitly, tracking intersection points between adjacent lines and removing obsolete lines as new ones are inserted. This explicit geometric approach yields optimal time complexity but requires careful handling of numerical precision.
-
-The LICT, in contrast, maintains the envelope implicitly through a recursive interval subdivision strategy. Each node in the tree represents an interval $[l, r]$ and stores the line optimal at the midpoint. Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. This approach eliminates intersection calculations entirely, at the cost of exploring the full tree height regardless of hull size.
 
 \subsection{Key Trade-offs}
 
