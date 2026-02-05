@@ -101,6 +101,8 @@ The Dynamic CHT maintains the hull \emph{explicitly}: lines are sorted by slope,
 
 \subsection{The Li-Chao Tree}
 
+While the Dynamic CHT represents the explicit approach to hull maintenance, the Li-Chao Tree offers an alternative philosophy: implicit maintenance through divide-and-conquer.
+
 The LICT, introduced at ZJOI 2012, takes a fundamentally different approach. Rather than maintaining the hull explicitly, it maintains it \emph{implicitly} through a segment tree over the query coordinate range.
 
 \begin{itemize}
@@ -110,6 +112,8 @@ The LICT, introduced at ZJOI 2012, takes a fundamentally different approach. Rat
 \end{itemize}
 
 The LICT's $O(\log C)$ complexity is independent of the number of lines inserted. This is both a strength and a weakness: it performs consistently regardless of hull size, but cannot take advantage of cases where the hull remains small.
+
+Having established the theoretical foundations of both approaches, we now turn to their practical realization in code. Our implementations prioritize clarity and correctness---the qualities most valued by practitioners who must adapt these data structures to novel problems.
 
 \section{Implementation}\label{sec:implementation}
 
@@ -169,7 +173,9 @@ The complexity in this implementation lies in the intersection calculations and 
 
 Listing~\ref{lst:lichao} shows our Standard LICT implementation using a pointer-based segment tree. Each node represents an interval $[l, r]$ and stores the line that is optimal at the midpoint.
 
-\begin{lstlisting}[language=C++, caption={Standard LICT Implementation}, label={lst:lichao}]
+\begin{lstlisting}[language=C++, caption={Standard LICT Implementation (min query)}, label={lst:lichao}]
+const llint INF = 4e18;  // Sufficiently large infinity
+
 struct Line {
     llint k, m;
     llint eval(llint x) const { return k * x + m; }
@@ -214,6 +220,9 @@ class LiChaoTree {
     }
 
 public:
+    LiChaoTree(llint min_val = -1e9, llint max_val = 1e9)
+        : min_x(min_val), max_x(max_val) {}
+
     void add_line(llint k, llint m) {
         insert(root, {k, m}, min_x, max_x);
     }
@@ -225,6 +234,8 @@ public:
 \end{lstlisting}
 
 The elegance of this implementation lies in its simplicity: no intersection calculations, no special cases for parallel lines---just direct comparison of line values at interval boundaries.
+
+With both implementations now specified, we can evaluate their relative performance empirically. While theoretical complexity provides asymptotic guarantees, real-world performance depends on constant factors, cache behavior, and the distribution of operations.
 
 \section{Benchmarks}\label{sec:benchmarks}
 
@@ -243,6 +254,8 @@ All benchmarks were conducted with the following configuration:
 \end{itemize}
 
 Each benchmark measures wall-clock time for a sequence of interleaved add and query operations (approximately 50\% each). All results are the median of three runs.
+
+With this experimental framework in place, we now present the performance results across all test configurations.
 
 \subsection{Results}
 
@@ -309,6 +322,8 @@ Given that the Dynamic CHT is faster, why does the LICT remain relevant? The ans
     \item The hull size is expected to remain small (random data)
     \item You are comfortable with the implementation complexity
 \end{itemize}
+
+These recommendations synthesize the theoretical and empirical insights from our analysis. As we reflect on the broader significance of the Li-Chao Tree, we see that its legacy extends beyond any single performance comparison.
 
 \section{Conclusion}\label{sec:conclusion}
 
