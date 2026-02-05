@@ -116,7 +116,7 @@ struct Line {
 struct LineContainer : multiset<Line, less<>> {
     static const llint inf = LLONG_MAX;
     
-    // Floored division handling negative numbers correctly
+    // Floored division that handles negative numbers correctly
     llint div(llint a, llint b) {
         return a / b - ((a ^ b) < 0 && a % b);
     }
@@ -150,7 +150,7 @@ struct LineContainer : multiset<Line, less<>> {
 };
 \end{lstlisting}
 
-The complexity of this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete.
+The complexity in this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete.
 
 \subsection{Standard LICT}
 
