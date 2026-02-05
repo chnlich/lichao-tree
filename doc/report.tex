@@ -252,7 +252,7 @@ All benchmarks were conducted with the following configuration:
     \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
     \item \textbf{Distributions:}
     \begin{itemize}
-        \item \textbf{Random:} Random slopes and intercepts. Expected hull size: $O(\sqrt{N})$.
+        \item \textbf{Random:} Random slopes and intercepts. Expected hull size: $\Theta(\sqrt{N})$ for uniformly random lines (a classic result in computational geometry~\cite{renyi1963}).
         \item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i = 1 \ldots N$. All $N$ lines contribute to the hull.
     \end{itemize}
 \end{itemize}
@@ -378,6 +378,11 @@ I\_LOVE\_TIGER.
 KTH Algorithm Library (KACTL).
 \newblock LineContainer.
 \newblock \url{https://github.com/kth-competitive-programming/kactl}, 2024.
+
+\bibitem{renyi1963}
+A.~R\'{e}nyi and R.~Sulanke.
+\newblock \"{U}ber die konvexe H\''{u}lle von $n$ zuf\''{a}llig gew\''{a}hlten Punkten.
+\newblock \textit{Zeitschrift f\''{u}r Wahrscheinlichkeitstheorie und Verwandte Gebiete}, 2(1):75--84, 1963.
 
 \end{thebibliography}
 
