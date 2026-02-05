@@ -60,7 +60,7 @@ In the winter of 2012, at the Zhejiang Provincial Olympiad in Informatics (ZJOI)
 \textit{Maintain a set of lines $y = kx + m$ supporting two operations: (1) add a new line, and (2) query the minimum $y$-value at a given $x$-coordinate. Both operations must be efficient.}
 \end{quote}
 
-The naive approach---storing all lines and evaluating each at query time---requires $O(n)$ per query, yielding $O(n^2)$ total time for $n$ operations. The standard optimization, the Convex Hull Trick (CHT), reduces this to $O(\log n)$ per operation. But the CHT comes with baggage: it requires either monotonic insertions (limiting its applicability) or complex intersection point calculations (introducing bugs). What was needed was something simpler---a data structure that could handle arbitrary insertions with minimal code, no floating-point arithmetic, and straightforward correctness proofs.
+The naive approach---storing all lines and evaluating each at query time---requires $O(N)$ per query, yielding $O(N^2)$ total time for $N$ operations. The standard optimization, the Convex Hull Trick (CHT), reduces this to $O(\log N)$ per operation. But the CHT comes with baggage: it requires either monotonic insertions (limiting its applicability) or complex intersection point calculations (introducing bugs). What was needed was something simpler---a data structure that could handle arbitrary insertions with minimal code, no floating-point arithmetic, and straightforward correctness proofs.
 
 \subsection{The Insight}
 
@@ -169,7 +169,7 @@ struct LineContainer : multiset<Line, less<>> {
 };
 \end{lstlisting}
 
-The complexity in this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete. Each insertion takes $O(\log n)$ amortized time, where the amortization accounts for the removal of lines that become obsolete due to the new insertion.
+The complexity in this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete. Each insertion takes $O(\log N)$ amortized time, where the amortization accounts for the removal of lines that become obsolete due to the new insertion.
 
 In contrast to the Dynamic CHT's geometric approach, the Li-Chao Tree achieves simplicity by avoiding intersection calculations entirely. Instead, it relies on direct value comparisons at interval midpoints.
 
@@ -289,7 +289,7 @@ $10^7$ & All on Hull & 687 ms & 426 ms & $1.61\times$ \\
 
 \textbf{Performance Gap:} The Dynamic CHT is consistently $1.5$--$2.0\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around $1.5\times$.
 
-\textbf{Hull Size Impact:} Interestingly, the performance gap is \emph{smaller} when all lines are on the hull. This suggests that the Dynamic CHT's advantage comes partly from skipping hull-irrelevant lines---when all lines are relevant, both structures must do more work, and the gap narrows.
+\textbf{Hull Size Impact:} The relationship between hull size and performance is nuanced. At $N=10^5$, the gap is smaller when all lines are on the hull ($1.63\times$ vs $2.17\times$), suggesting the Dynamic CHT benefits from skipping irrelevant lines in the random case. However, at larger scales ($N \geq 10^6$), this pattern reverses, possibly due to cache effects: when all lines reside on the hull, both structures process more data, and the LICT's pointer-chasing behavior becomes relatively more expensive.
 
 \textbf{Scalability:} Both implementations demonstrate excellent logarithmic scaling. From $10^5$ to $10^7$ ($100\times$ increase), time increases by approximately $60$--$130\times$, consistent with the $O(\log C)$ vs $O(\log N)$ complexities (where $\log C \approx 30$ and $\log N$ grows from 17 to 24).
 
