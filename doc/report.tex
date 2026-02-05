@@ -70,10 +70,10 @@ In 2012, the Li-Chao Tree was informally presented in a lecture context and subs
 
 This paper makes the following contributions:
 \begin{enumerate}
-    \item We present clean, production ready implementations of both the Standard LICT and Dynamic CHT, suitable for educational and practical use.
+    \item We present clean, production-ready implementations of both the Standard LICT and Dynamic CHT, suitable for educational and practical use.
     \item We conduct systematic performance evaluation comparing both approaches across multiple problem scales and data distributions.
-    \item We analyze the theoretical and practical trade offs between the two data structures, with particular attention to extensibility features including persistence, line segment support, and higher dimensional generalizations.
-    \item We provide evidence based guidelines for selecting the appropriate data structure for specific application contexts.
+    \item We analyze the theoretical and practical trade-offs between the two data structures, with particular attention to extensibility features including persistence, line segment support, and higher-dimensional generalizations.
+    \item We provide evidence-based guidelines for selecting the appropriate data structure for specific application contexts.
 \end{enumerate}
 
 \section{Related Work}\label{sec:related}
@@ -101,8 +101,8 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 Each node in the tree represents an interval $[l, r]$ and stores the line that is optimal at the midpoint $m = \lfloor(l+r)/2\rfloor$ among all lines that have been inserted through that node (i.e., lines whose evaluation at $m$ is better than any line previously stored at this node). Note that this line is not necessarily globally optimal at $m$, as other lines may have been routed to different branches of the tree. Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. This approach eliminates intersection calculations entirely, at the cost of exploring the full tree height regardless of hull size.
 
 \begin{itemize}
-    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C$ represents the coordinate range (typically $C \approx 10^9$ for 32 bit integers).
-    \item \textbf{Space Complexity:} $O(N \log C)$ for $N$ inserted lines, with dynamic node creation ensuring only visited nodes are allocated.
+    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C$ represents the coordinate range (typically $C \approx 10^9$ for 32-bit integers).
+    \item \textbf{Space Complexity:} $O(n \log C)$ for $n$ inserted lines, with dynamic node creation ensuring only visited nodes are allocated.
     \item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line value comparisons at integer coordinates.
 \end{itemize}
 
@@ -114,14 +114,14 @@ Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CH
 
 \begin{table}[h]
 \centering
-\caption{Comparison of Dynamic CHT and Li Chao Tree}
+\caption{Comparison of Dynamic CHT and Li-Chao Tree}
 \label{tab:comparison}
 \begin{tabular}{@{}lcc@{}}
 \toprule
 \textbf{Characteristic} & \textbf{Dynamic CHT} & \textbf{LICT} \\
 \midrule
 Time Complexity & $O(\log n)$ amortized & $O(\log C)$ \\
-Space Complexity & $O(n)$ & $O(N \log C)$ \\
+Space Complexity & $O(n)$ & $O(n \log C)$ \\
 Intersection Calculations & Required & None \\
 Numerical Precision & Care required & Straightforward \\
 Line Segment Extension & Complex & Natural \\
@@ -135,15 +135,15 @@ Implementation Complexity & Higher & Lower \\
 
 The choice between these approaches involves several trade-offs:
 
-\textbf{Performance versus Simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull size remains small relative to the number of insertions. The LICT trades this performance for implementation simplicity and reduced code complexity.
+\textbf{Performance versus simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull size remains small relative to the number of insertions. The LICT trades this performance for implementation simplicity and reduced code complexity.
 
-\textbf{Geometric versus Combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points) that require careful numerical handling. The LICT uses only combinatorial operations (line evaluations at integer coordinates), avoiding precision concerns.
+\textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points) that require careful numerical handling. The LICT uses only combinatorial operations (line evaluations at integer coordinates), avoiding precision concerns.
 
-\textbf{Static versus Extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions.
+\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions.
 
 \subsection{Summary of Results}
 
-Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45 to 2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires roughly half the code and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
+Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45--2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires roughly half the code and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
 
 \section{Implementation}\label{sec:implementation}
 
@@ -277,8 +277,8 @@ All benchmarks were conducted with the following configuration:
     \item \textbf{Random seed:} 42 (fixed for reproducibility)
     \item \textbf{Distributions:}
     \begin{itemize}
-        \item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size: $\Theta(\sqrt{N})$.
-        \item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, N]$. All $N$ lines contribute to the hull.
+        \item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size: $\Theta(\sqrt{n})$.
+        \item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
     \end{itemize}
 \end{itemize}
 
@@ -310,27 +310,27 @@ $10^7$ & All on Hull & 687 ms & 426 ms & $1.61\times$ \\
 
 The Dynamic CHT demonstrates consistently faster execution across all test cases, with performance advantage ranging from 1.45 to 2.00 times. The gap is most pronounced at smaller problem sizes and narrows as $N$ increases.
 
-The relationship between hull size and performance exhibits scale dependent behavior. At smaller scales, the Dynamic CHT benefits more significantly from skipping irrelevant lines. At larger scales, cache effects become dominant, and the pattern becomes less pronounced.
+The relationship between hull size and performance exhibits scale-dependent behavior. At smaller scales, the Dynamic CHT benefits more significantly from skipping irrelevant lines. At larger scales, cache effects become dominant, and the pattern becomes less pronounced.
 
 Both implementations exhibit logarithmic scaling consistent with their theoretical complexity guarantees.
 
 \section{Discussion}\label{sec:discussion}
 
-\subsection{Advantages of the Li Chao Tree}
+\subsection{Advantages of the Li-Chao Tree}
 
 Despite higher computational cost, the LICT offers significant advantages for practical applications:
 
-\textbf{1. Implementation Simplicity.} The LICT requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates complex geometric calculations. This reduces implementation time and probability of errors, particularly important in competitive programming and rapid prototyping contexts.
+\textbf{1. Implementation simplicity.} The LICT requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates complex geometric calculations. This reduces implementation time and probability of errors, particularly important in competitive programming and rapid prototyping contexts.
 
-\textbf{2. Numerical Stability.} The LICT performs only integer addition and multiplication for line evaluation. The Dynamic CHT requires division for intersection calculations, necessitating careful handling of edge cases including parallel lines and overflow conditions.
+\textbf{2. Numerical stability.} The LICT performs only integer addition and multiplication for line evaluation. The Dynamic CHT requires division for intersection calculations, necessitating careful handling of edge cases including parallel lines and overflow conditions.
 
-\textbf{3. Floating-Point Queries.} For non-integer (floating-point) query coordinates, the LICT complexity becomes $O(\log(C/\epsilon))$ where $\epsilon$ is the required precision. With coordinate range $10^9$ and double precision ($\epsilon \approx 10^{-9}$), the tree depth increases from approximately 30 to 60. In such cases, the Dynamic CHT's $O(\log n)$ complexity (independent of coordinate precision) becomes relatively more attractive. For applications requiring both floating-point coordinates and the LICT's implementation advantages, one may use $\epsilon = 1$ as the smallest representable unit after appropriate coordinate transformation.
+\textbf{3. Floating-point queries.} For non-integer (floating-point) query coordinates, the LICT complexity becomes $O(\log(C/\epsilon))$ where $\epsilon$ is the required precision. With coordinate range $10^9$ and double precision ($\epsilon \approx 10^{-9}$), the tree depth increases from approximately 30 to 60. In such cases, the Dynamic CHT's $O(\log n)$ complexity (independent of coordinate precision) becomes relatively more attractive. For applications requiring both floating-point coordinates and the LICT's implementation advantages, one may use $\epsilon = 1$ as the smallest representable unit after appropriate coordinate transformation.
 
 \textbf{4. Extensibility.} The LICT's structure facilitates extensions that are difficult with the Dynamic CHT:
 \begin{itemize}
-    \item \textbf{Line Segments:} Lines valid only on subranges $[x_l, x_r]$ integrate naturally by limiting recursion bounds.
+    \item \textbf{Line segments:} Lines valid only on subranges $[x_l, x_r]$ integrate naturally by limiting recursion bounds.
     \item \textbf{Persistence:} Path copying for versioned access requires minimal modification.
-    \item \textbf{Higher Dimensions:} Generalization to multi dimensional query spaces follows naturally from the recursive structure.
+    \item \textbf{Higher dimensions:} Generalization to multi-dimensional query spaces follows naturally from the recursive structure.
 \end{itemize}
 
 \subsection{Selection Guidelines}
@@ -354,7 +354,7 @@ Despite higher computational cost, the LICT offers significant advantages for pr
 
 This paper has presented a comprehensive analysis of the Li Chao Tree as an alternative to the Dynamic Convex Hull Trick for online line envelope maintenance. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
 
-The Li Chao Tree represents a distinct point in the design space, trading constant factor performance for reduced implementation complexity and enhanced flexibility. For applications requiring persistence, line segment support, or rapid implementation, the LICT offers compelling advantages. For performance critical applications with bounded hull size, the Dynamic CHT remains preferable.
+The Li Chao Tree represents a distinct point in the design space, trading constant factor performance for reduced implementation complexity and enhanced flexibility. For applications requiring persistence, line segment support, or rapid implementation, the LICT offers compelling advantages. For performance-critical applications with bounded hull size, the Dynamic CHT remains preferable.
 
 Since its introduction in 2012, the LICT has found widespread adoption in competitive programming and algorithmic education. Its continued relevance demonstrates that optimal asymptotic complexity is not the sole criterion for practical data structure selection; implementation clarity and extensibility play equally important roles in determining utility.
 
