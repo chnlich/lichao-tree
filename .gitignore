@@ -6,3 +6,6 @@ benchmark/benchmark_runner
 
 # Generated benchmark results
 benchmark/benchmark_results.csv
+
+# Generated PDF (build from source)
+doc/report.pdf
