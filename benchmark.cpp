@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 
-#include "rb_lichao.hpp"
+#include "lichao.hpp"
 #include "cht.hpp"
 #include "generator.hpp"
 
@@ -20,8 +20,8 @@ struct Result {
     long long checksum;
 };
 
-long long run_lichao_rb(const vector<Operation>& ops) {
-    RB_LC::RBLiChaoTree lict;
+long long run_lichao(const vector<Operation>& ops) {
+    LC::LiChaoTree lict(-1e9 - 7, 1e9 + 7);
     long long sum = 0;
     for (const auto& op : ops) {
         if (op.type == ADD) {
@@ -51,12 +51,12 @@ long long run_cht(const vector<Operation>& ops) {
 void benchmark(int n, string dist_name, vector<Operation> ops, vector<Result>& results) {
     cerr << "Running benchmark: N=" << n << ", Dist=" << dist_name << endl;
 
-    // Run Li Chao (RB/Set)
+    // Run Li Chao (Standard)
     auto start = high_resolution_clock::now();
-    long long sum_rb = run_lichao_rb(ops);
+    long long sum_lc = run_lichao(ops);
     auto end = high_resolution_clock::now();
-    double time_rb = duration_cast<milliseconds>(end - start).count();
-    results.push_back({"LICT (RB/Set)", n, dist_name, time_rb, sum_rb});
+    double time_lc = duration_cast<milliseconds>(end - start).count();
+    results.push_back({"LICT (Standard)", n, dist_name, time_lc, sum_lc});
 
     // Run Dynamic CHT
     start = high_resolution_clock::now();
@@ -65,8 +65,8 @@ void benchmark(int n, string dist_name, vector<Operation> ops, vector<Result>& r
     double time_cht = duration_cast<milliseconds>(end - start).count();
     results.push_back({"Dynamic CHT", n, dist_name, time_cht, sum_cht});
 
-    if (sum_rb != sum_cht) {
-        cerr << "WARNING: Checksum mismatch! RB: " << sum_rb << " CHT: " << sum_cht << endl;
+    if (sum_lc != sum_cht) {
+        cerr << "WARNING: Checksum mismatch! LICT: " << sum_lc << " CHT: " << sum_cht << endl;
     }
 }
 

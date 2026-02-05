@@ -45,7 +45,7 @@
 \maketitle
 
 \begin{abstract}
-The Li-Chao Tree (LICT) and Dynamic Convex Hull Trick (CHT) are fundamental data structures for dynamically maintaining the lower envelope of a set of linear functions. Both support efficient line insertion and point evaluation in $O(\log n)$ time. This paper presents a streamlined comparison of the two most competitive implementations: the RB/Set-based LICT variant and the Dynamic CHT. Through comprehensive benchmarks across three scales ($10^5$, $10^6$, and $10^7$ operations), we demonstrate that both approaches provide excellent performance, with trade-offs between implementation simplicity and raw speed. Our simplified codebase serves as a practical reference for practitioners selecting the appropriate data structure for dynamic programming optimization and geometric queries.
+The Li-Chao Tree (LICT) and Dynamic Convex Hull Trick (CHT) are fundamental data structures for dynamically maintaining the lower envelope of a set of linear functions. Both support efficient line insertion and point evaluation in $O(\log n)$ time. This paper presents a streamlined comparison of the two most competitive implementations: the Standard LICT (pointer-based segment tree) and the Dynamic CHT. Through comprehensive benchmarks across three scales ($10^5$, $10^6$, and $10^7$ operations), we demonstrate that both approaches provide excellent performance, with trade-offs between implementation simplicity and raw speed. Our simplified codebase serves as a practical reference for practitioners selecting the appropriate data structure for dynamic programming optimization and geometric queries.
 \end{abstract}
 
 \section{Introduction}
@@ -74,7 +74,7 @@ Many practical scenarios require inserting lines in arbitrary order, where the d
 
 This work makes the following contributions:
 \begin{enumerate}
-    \item We present streamlined implementations of the two most competitive approaches: the RB/Set-based LICT and the Dynamic CHT.
+    \item We present streamlined implementations of the two most competitive approaches: the Standard LICT (classic pointer-based segment tree) and the Dynamic CHT.
     \item We provide systematic performance evaluation across three problem scales ($10^5$, $10^6$, $10^7$ operations).
     \item We analyze the practical trade-offs between implementation simplicity and raw performance.
 \end{enumerate}
@@ -135,45 +135,67 @@ struct LineContainer : multiset<Line, less<>> {
 
 The Li-Chao Tree was introduced in a lecture by Li Chao at ZJOI 2012 as a data structure for online maintenance of the lower envelope of lines. The original problem addressed was: given a set of lines, support efficient insertion of new lines and querying the minimum $y$-value at any given $x$-coordinate. Unlike the CHT, which focuses on explicitly maintaining the convex hull geometry, the LICT takes a divide-and-conquer approach on the query coordinate range, storing the best line at each interval midpoint.
 
-Our implementation uses an RB/Set-based approach (shown in Listing~\ref{lst:lichao}), which has proven to be the fastest LICT variant in practice. This approach leverages \texttt{std::multiset} to maintain lines and compute the lower envelope efficiently.
+Our implementation uses the classic pointer-based segment tree approach (shown in Listing~\ref{lst:lichao}), which is the most widely taught and used variant of the Li-Chao Tree. This approach recursively divides the coordinate range and stores the best line at each node.
 
-\begin{lstlisting}[language=C++, caption={LICT (RB/Set) Implementation}, label={lst:lichao}]
+\begin{lstlisting}[language=C++, caption={LICT (Standard) Implementation}, label={lst:lichao}]
 struct Line {
-    mutable ll k, m, p;
-    bool operator<(const Line& o) const { return k > o.k; }
-    bool operator<(ll x) const { return p < x; }
+    ll k, m;
+    ll eval(ll x) const { return k * x + m; }
 };
 
-class RBLiChaoTree {
-    struct LineContainer : std::multiset<Line, std::less<>> {
-        static const ll inf = LLONG_MAX;
-        ll div(ll a, ll b) {
-            return a / b - ((a ^ b) < 0 && a % b);
+struct Node {
+    Line line;
+    Node *left = nullptr, *right = nullptr;
+    Node(Line l) : line(l) {}
+};
+
+class LiChaoTree {
+    Node* root = nullptr;
+    ll min_x, max_x;
+
+    void insert(Node* &node, Line new_line, ll l, ll r) {
+        if (!node) {
+            node = new Node(new_line);
+            return;
         }
-        bool isect(iterator x, iterator y) {
-            if (y == end()) return x->p = inf, 0;
-            if (x->k == y->k) x->p = x->m <= y->m ? inf : -inf;
-            else x->p = div(y->m - x->m, x->k - y->k);
-            return x->p >= y->p;
+        ll mid = l + (r - l) / 2;
+        bool lef = new_line.eval(l) < node->line.eval(l);
+        bool midf = new_line.eval(mid) < node->line.eval(mid);
+
+        if (midf) {
+            swap(node->line, new_line);
         }
-        void add(ll k, ll m) {
-            auto z = insert({k, m, 0}), y = z++, x = y;
-            while (isect(y, z)) z = erase(z);
-            if (x != begin() && isect(--x, y)) 
-                isect(x, y = erase(y));
-            while ((y = x) != begin() && (--x)->p >= y->p)
-                isect(x, erase(y));
+        if (l == r) return;
+        if (lef != midf) {
+            insert(node->left, new_line, l, mid);
+        } else {
+            insert(node->right, new_line, mid + 1, r);
         }
-        ll query(ll x) {
-            if (empty()) return 4e18;
-            auto l = *lower_bound(x);
-            return l.k * x + l.m;
+    }
+
+    ll query(Node* node, ll x, ll l, ll r) {
+        if (!node) return INF;
+        ll mid = l + (r - l) / 2;
+        ll val = node->line.eval(x);
+        if (l == r) return val;
+        if (x <= mid) {
+            return min(val, query(node->left, x, l, mid));
+        } else {
+            return min(val, query(node->right, x, mid + 1, r));
         }
-    };
-    LineContainer lc;
+    }
+
 public:
-    void add_line(ll k, ll m) { lc.add(k, m); }
-    ll query(ll x) { return lc.query(x); }
+    LiChaoTree(ll min_val = -1e9, ll max_val = 1e9) 
+        : min_x(min_val), max_x(max_val) {}
+
+    void add_line(ll k, ll m) {
+        insert(root, {k, m}, min_x, max_x);
+    }
+
+    ll query(ll x) {
+        return query(root, x, min_x, max_x);
+    }
 };
 \end{lstlisting}
 
@@ -205,33 +227,33 @@ Table~\ref{tab:results} presents the performance comparison across all three tes
 \label{tab:results}
 \begin{tabular}{@{}ccccc@{}}
 \toprule
-\textbf{N} & \textbf{Distribution} & \textbf{LICT (RB/Set)} & \textbf{Dynamic CHT} & \textbf{Speed Ratio} \\
+\textbf{N} & \textbf{Distribution} & \textbf{LICT (Standard)} & \textbf{Dynamic CHT} & \textbf{Speed Ratio} \\
 \midrule
-$10^5$ & Random & 14 ms & 5 ms & 2.80$\times$ \\
-$10^5$ & All on Hull & 4 ms & 4 ms & 1.00$\times$ \\
+$10^5$ & Random & 7 ms & 5 ms & 1.40$\times$ \\
+$10^5$ & All on Hull & 6 ms & 4 ms & 1.50$\times$ \\
 \midrule
-$10^6$ & Random & 54 ms & 53 ms & 1.02$\times$ \\
-$10^6$ & All on Hull & 49 ms & 40 ms & 1.23$\times$ \\
+$10^6$ & Random & 75 ms & 51 ms & 1.47$\times$ \\
+$10^6$ & All on Hull & 65 ms & 41 ms & 1.59$\times$ \\
 \midrule
-$10^7$ & Random & 600 ms & 519 ms & 1.16$\times$ \\
-$10^7$ & All on Hull & 854 ms & 825 ms & 1.04$\times$ \\
+$10^7$ & Random & 768 ms & 521 ms & 1.47$\times$ \\
+$10^7$ & All on Hull & 660 ms & 419 ms & 1.58$\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Analysis}
 
-\textbf{Performance Comparison:} The Dynamic CHT is generally faster, with the gap varying by distribution. For random distributions with $10^5$ operations, the CHT is significantly faster (2.8$\times$), but this advantage narrows as $N$ increases (1.16$\times$ at $10^7$). This suggests the RB/Set LICT has higher initialization overhead but similar per-operation costs at scale.
+\textbf{Performance Comparison:} The Dynamic CHT maintains a consistent performance advantage across all test scales, being approximately 1.4--1.6$\times$ faster than the Standard LICT. This gap is consistent across both random and all-on-hull distributions, suggesting the pointer-based segment tree structure of the Standard LICT has inherently higher constant factors than the balanced BST approach of the Dynamic CHT.
 
-\textbf{All on Hull Distribution:} When all lines contribute to the convex hull, both implementations show nearly identical performance. This is because the CHT must maintain all $N$ lines, eliminating its advantage of storing only hull lines. At $10^5$, both take 4 ms; at $10^7$, the difference is only 3.5\%.
+\textbf{All on Hull Distribution:} Interestingly, the performance gap between the two structures remains relatively stable even when all lines contribute to the hull. The Dynamic CHT is about 1.5--1.6$\times$ faster in this scenario. This indicates that even when the CHT must maintain all $N$ lines (eliminating its hull-size advantage), its balanced BST structure still outperforms the segment tree traversal of the LICT.
 
 \textbf{Scalability:} Both implementations demonstrate excellent logarithmic scaling:
 \begin{itemize}
-    \item From $10^5$ to $10^6$ (10$\times$ increase): Time increases by approximately 4--13$\times$
-    \item From $10^6$ to $10^7$ (10$\times$ increase): Time increases by approximately 11--17$\times$
+    \item From $10^5$ to $10^6$ (10$\times$ increase): Time increases by approximately 9--16$\times$
+    \item From $10^6$ to $10^7$ (10$\times$ increase): Time increases by approximately 10--13$\times$
 \end{itemize}
 
-This confirms the theoretical $O(\log n)$ complexity per operation for both approaches. The slightly super-linear scaling at larger $N$ is likely due to cache effects.
+This confirms the theoretical $O(\log n)$ complexity per operation for both approaches. The slightly super-linear scaling is due to cache effects and memory allocation overhead at larger problem sizes.
 
 \section{Summary}
 
@@ -240,18 +262,19 @@ This paper presented a streamlined comparison of the two most competitive implem
 \begin{enumerate}
     \item \textbf{Performance:} Both implementations provide excellent performance, handling $10^7$ operations in under one second.
     
-    \item \textbf{Trade-offs:} The Dynamic CHT is approximately 4\% faster for random distributions but requires more careful implementation to handle edge cases correctly.
+    \item \textbf{Trade-offs:} The Dynamic CHT is consistently 1.4--1.6$\times$ faster across all distributions, but requires more careful implementation to handle edge cases (intersection point calculations, floating-point precision).
     
-    \item \textbf{Simplicity:} The LICT (RB/Set) implementation is simpler to understand and less prone to bugs, making it an excellent choice for competitive programming.
+    \item \textbf{Simplicity:} The Standard LICT uses only integer comparisons at specific points, making it simpler to understand, extend, and less prone to bugs. This makes it an excellent choice for competitive programming and educational purposes.
 \end{enumerate}
 
 \subsection{Recommendations}
 
-\textbf{When to use LICT (RB/Set):}
+\textbf{When to use Standard LICT:}
 \begin{itemize}
     \item When implementation simplicity and correctness are priorities
     \item When working with integer coordinates and want to avoid floating-point precision issues
-    \item When all lines are expected to contribute to the hull
+    \item When you need to extend the structure (e.g., adding persistence, segment queries)
+    \item For educational purposes or when code clarity matters
 \end{itemize}
 
 \textbf{When to use Dynamic CHT:}

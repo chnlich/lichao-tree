@@ -10,12 +10,12 @@ This repository provides optimized implementations for maintaining the lower env
 
 | Implementation | Header File | Description | Time Complexity |
 |---------------|-------------|-------------|-----------------|
-| **LICT (RB/Set)** | `rb_lichao.hpp` | Fastest Li-Chao variant using balanced BST (std::set) | $O(\log n)$ insertion/query |
+| **LICT (Standard)** | `lichao.hpp` | Classic pointer-based segment tree implementation | $O(\log C)$ insertion/query |
 | **Dynamic CHT** | `cht.hpp` | Classic Convex Hull Trick with balanced BST | $O(\log n)$ insertion/query |
 
 ## Files
 
-- `rb_lichao.hpp` - Red-Black Tree based LICT (fastest variant)
+- `lichao.hpp` - Standard Li-Chao Tree (pointer-based segment tree)
 - `cht.hpp` - Dynamic CHT implementation (balanced BST-based)
 - `generator.hpp` - Test data generator with multiple distributions
 - `benchmark.cpp` - Benchmark comparing the two implementations
@@ -42,12 +42,12 @@ g++ -O3 -std=c++17 -o benchmark benchmark.cpp
 ./benchmark
 ```
 
-### Using LICT (RB/Set)
+### Using LICT (Standard)
 
 ```cpp
-#include "rb_lichao.hpp"
+#include "lichao.hpp"
 
-RB_LC::RBLiChaoTree lict;
+LC::LiChaoTree lict(-1e9, 1e9);  // Create with coordinate range
 lict.add_line(2, 3);  // Add line y = 2x + 3
 long long val = lict.query(5);  // Query at x = 5, returns 13
 ```
@@ -74,25 +74,45 @@ The benchmark compares both implementations across:
 
 Based on empirical testing:
 
-| N | Distribution | LICT (RB/Set) | Dynamic CHT |
-|---|--------------|---------------|-------------|
-| $10^5$ | Random | ~5 ms | ~5 ms |
-| $10^6$ | Random | ~55 ms | ~53 ms |
-| $10^7$ | Random | ~540 ms | ~520 ms |
+| N | Distribution | LICT (Standard) | Dynamic CHT |
+|---|--------------|-----------------|-------------|
+| $10^5$ | Random | ~7 ms | ~5 ms |
+| $10^6$ | Random | ~76 ms | ~53 ms |
+| $10^7$ | Random | ~766 ms | ~520 ms |
 
-Both implementations provide excellent performance with $O(\log n)$ complexity per operation.
+Both implementations provide excellent performance with logarithmic complexity per operation.
 
 ## When to Use Which?
 
-- **Use LICT (RB/Set)** when:
+- **Use LICT (Standard)** when:
   - You need the simplest, most reliable implementation
-  - Working with integer coordinates only
-  - Want to avoid floating-point precision issues
+  - Working with integer coordinates and want to avoid floating-point precision issues
+  - Need to handle arbitrary coordinate ranges easily
+  - Want extensibility (segments, persistence) in the future
 
 - **Use Dynamic CHT** when:
-  - You need absolute maximum performance
+  - You need maximum performance
   - Comfortable with intersection point calculations
-  - Working with lines that may have similar slopes
+  - Working with lines where only a subset remain on the hull
+
+## Technical Details
+
+### Standard LICT
+The Standard Li-Chao Tree is a binary segment tree where each node stores the line that is optimal at the midpoint of its interval. Insertion and query both take $O(\log C)$ time where $C$ is the coordinate range.
+
+**Key advantages:**
+- Simple integer comparisons (no floating-point)
+- Easy to extend to line segments
+- Natural support for persistence
+- Works with any coordinate range
+
+### Dynamic CHT
+The Dynamic CHT uses a balanced BST (std::multiset) to maintain the convex hull explicitly. Insertion and query take $O(\log n)$ time where $n$ is the number of lines.
+
+**Key advantages:**
+- Better performance when few lines remain on hull
+- Lower memory usage for sparse hulls
+- Directly stores only relevant lines
 
 ## History
 
