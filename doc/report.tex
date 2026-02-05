@@ -54,7 +54,7 @@ Every competitive programmer knows the feeling: a dynamic programming problem th
 
 \subsection{The Original Problem}
 
-In the winter of 2012, at the Zhejiang Provincial Olympiad in Informatics (ZJOI), a deceptively simple problem emerged:
+In the winter of 2012, at the Zhejiang Provincial Olympiad in Informatics (ZJOI)~\cite{zjoi2012}, a deceptively simple problem emerged:
 
 \begin{quote}
 \textit{Maintain a set of lines $y = kx + m$ supporting two operations: (1) add a new line, and (2) query the minimum $y$-value at a given $x$-coordinate. Both operations must be efficient.}
@@ -123,7 +123,7 @@ We present streamlined implementations of both data structures. Our code priorit
 
 \subsection{Dynamic CHT}
 
-Listing~\ref{lst:dcht} shows our Dynamic CHT implementation using \texttt{std::multiset}. This implementation, adapted from KACTL, maintains lines sorted by slope with intersection points computed on insertion.
+Listing~\ref{lst:dcht} shows our Dynamic CHT implementation using \texttt{std::multiset}. This implementation, adapted from KACTL~\cite{kactl}, maintains lines sorted by slope with intersection points computed on insertion.
 
 \begin{lstlisting}[language=C++, caption={Dynamic CHT Implementation (max hull; wrapper class for min)}, label={lst:dcht}]
 struct Line {
@@ -287,7 +287,7 @@ $10^7$ & All on Hull & 687 ms & 426 ms & 1.61$\times$ \\
 
 \subsection{Analysis}
 
-\textbf{Performance Gap:} The Dynamic CHT is consistently $1.5$--$2.2\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around $1.5\times$.
+\textbf{Performance Gap:} The Dynamic CHT is consistently $1.5$--$2.0\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around $1.5\times$.
 
 \textbf{Hull Size Impact:} Interestingly, the performance gap is \emph{smaller} when all lines are on the hull. This suggests that the Dynamic CHT's advantage comes partly from skipping hull-irrelevant lines---when all lines are relevant, both structures must do more work, and the gap narrows.
 
@@ -345,11 +345,11 @@ More than a decade has passed since the Li-Chao Tree was introduced at ZJOI 2012
 
 The LICT's popularity stems not from performance supremacy, but from an insight that seems obvious only in hindsight: that maintaining the lower envelope through midpoint comparisons eliminates an entire class of geometric complications. This simplicity emerged not from genius in isolation, but from the collaborative crucible of competitive programming, where thousands of practitioners refine, share, and extend ideas.
 
-We are reminded that the best solutions often trade absolute optimality for clarity and reliability. The LICT embodies this principle: it sacrifices the $O(\log n)$ guarantee of the Dynamic CHT for an $O(\log C)$ bound that is easier to understand, implement correctly, and extend to new domains.
+We are reminded that the best solutions often trade absolute optimality for clarity and reliability. The LICT embodies this principle: it sacrifices the $O(\log N)$ guarantee of the Dynamic CHT for an $O(\log C)$ bound that is easier to understand, implement correctly, and extend to new domains.
 
 \subsection{Legacy}
 
-The Li-Chao Tree has transcended its origins. Beyond its original purpose of online line envelope maintenance, it has become instrumental in dynamic programming optimization, enabling solutions to problems that once seemed intractable. Its presence in standard algorithm libraries (KACTL, CP-Algorithms), competitive programming tutorials, and university curricula testifies to its educational and practical value.
+The Li-Chao Tree has transcended its origins. Beyond its original purpose of online line envelope maintenance, it has become instrumental in dynamic programming optimization, enabling solutions to problems that once seemed intractable. Its presence in standard algorithm libraries (KACTL~\cite{kactl}, CP-Algorithms~\cite{cp-algorithms}), competitive programming tutorials~\cite{codeforces}, and university curricula testifies to its educational and practical value.
 
 This story illustrates a broader truth about algorithmic innovation: the most enduring contributions are not always the fastest, but those that empower others. The LICT has enabled countless programmers to solve problems they might otherwise have abandoned, and in doing so, has earned its place in the canon of fundamental data structures.
 
@@ -357,16 +357,28 @@ This story illustrates a broader truth about algorithmic innovation: the most en
 
 The Li-Chao Tree stands as a testament to the unexpected journeys of good ideas. Born from the constraints of a single contest problem, it has traveled farther than its original context could have predicted---not because it conquers every metric, but because it solves real problems for real people. In algorithm design, as in all engineering, this is the measure that ultimately matters.
 
-\section*{References}
+\begin{thebibliography}{4}
 
-\begin{enumerate}
-    \item Li Chao. \textit{Lecture at Zhejiang Provincial Olympiad in Informatics (ZJOI 2012)}. China, 2012.
-    
-    \item CP-Algorithms. ``Li Chao Tree.'' \url{https://cp-algorithms.com/geometry/li_chao_tree.html}, 2024.
-    
-    \item Codeforces. ``Li Chao Tree Tutorial,'' by user \textit{I\_LOVE\_TIGER}. \url{https://codeforces.com/blog/entry/51275}, 2017.
-    
-    \item KACTL (KTH Algorithm Library). ``LineContainer.'' \url{https://github.com/kth-competitive-programming/kactl}, 2024.
-\end{enumerate}
+\bibitem{zjoi2012}
+Li Chao.
+\newblock Lecture at Zhejiang Provincial Olympiad in Informatics (ZJOI 2012).
+\newblock China, 2012.
+
+\bibitem{cp-algorithms}
+CP-Algorithms.
+\newblock Li Chao Tree.
+\newblock \url{https://cp-algorithms.com/geometry/li_chao_tree.html}, 2024.
+
+\bibitem{codeforces}
+I\_LOVE\_TIGER.
+\newblock Li Chao Tree Tutorial.
+\newblock \url{https://codeforces.com/blog/entry/51275}, 2017.
+
+\bibitem{kactl}
+KTH Algorithm Library (KACTL).
+\newblock LineContainer.
+\newblock \url{https://github.com/kth-competitive-programming/kactl}, 2024.
+
+\end{thebibliography}
 
 \end{document}
