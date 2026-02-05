@@ -135,3 +135,14 @@ This is preferred over explicit individual headers for simplicity and faster com
 - **Abstract**: Frame LICT as a viable alternative with distinct advantages (simplicity, persistency, extensibility)
 - **Comparison**: Highlight persistency, line segment support, and implementation advantages as key differentiators
 - **Conclusion**: Emphasize LICT's unique position in the design space, not as second-best
+
+### Paper Organization
+Papers should follow this structure:
+1. **Abstract** - Summary of contributions and key findings
+2. **Introduction** - Problem definition, background, motivation, contributions
+3. **Related Work** - Prior approaches and their limitations
+4. **Overview** - High-level description of the approach, key trade-offs, summary of results (before diving into details)
+5. **Detailed Sections** - Implementation details, benchmarks, analysis (at minimum: Implementation and Benchmark sections)
+6. **Conclusion** - Summary of findings and future directions
+
+The Overview section serves as a bridge between Related Work and the detailed technical sections, giving readers a high-level understanding before presenting code and empirical results.

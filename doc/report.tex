@@ -123,6 +123,30 @@ Implementation Complexity & Higher & Lower \\
 \end{tabular}
 \end{table}
 
+\section{Overview}\label{sec:overview}
+
+This section provides a high level overview of both data structures before presenting detailed implementations and empirical analysis.
+
+\subsection{Algorithmic Approach}
+
+The fundamental distinction between the Dynamic CHT and the LICT lies in their approach to envelope maintenance. The Dynamic CHT maintains the convex hull explicitly, tracking intersection points between adjacent lines and removing obsolete lines as new ones are inserted. This explicit geometric approach yields optimal time complexity but requires careful handling of numerical precision.
+
+The LICT, in contrast, maintains the envelope implicitly through a recursive interval subdivision strategy. Each node in the tree represents an interval $[l, r]$ and stores the line optimal at the midpoint. Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. This approach eliminates intersection calculations entirely, at the cost of exploring the full tree height regardless of hull size.
+
+\subsection{Key Trade-offs}
+
+The choice between these approaches involves several trade-offs:
+
+\textbf{Performance versus Simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull size remains small relative to the number of insertions. The LICT trades this performance for implementation simplicity and reduced code complexity.
+
+\textbf{Geometric versus Combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points) that require careful numerical handling. The LICT uses only combinatorial operations (line evaluations at integer coordinates), avoiding precision concerns.
+
+\textbf{Static versus Extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions.
+
+\subsection{Summary of Results}
+
+Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45 to 2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires roughly half the code and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
+
 \section{Implementation}\label{sec:implementation}
 
 We present streamlined implementations emphasizing clarity and correctness.
