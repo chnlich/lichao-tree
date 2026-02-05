@@ -48,17 +48,18 @@ make
 make run
 ```
 
-Or manually:
+Or manually in the benchmark folder:
 
 ```bash
-g++ -O3 -std=c++17 -o benchmark benchmark.cpp
-./benchmark
+cd benchmark
+make
+./benchmark_runner
 ```
 
 ### Using LICT (Standard)
 
 ```cpp
-#include "implementation/lichao.hpp"
+#include "implementation/lichao.hpp"  // Or copy lichao.hpp to your project
 
 LC::LiChaoTree lict(-1e9, 1e9);  // Create with coordinate range
 lict.add_line(2, 3);  // Add line y = 2x + 3
@@ -68,7 +69,7 @@ long long val = lict.query(5);  // Query at x = 5, returns 13
 ### Using Dynamic CHT
 
 ```cpp
-#include "implementation/cht.hpp"
+#include "implementation/cht.hpp"  // Or copy cht.hpp to your project
 
 CHT::DynamicCHT cht;
 cht.add_line(2, 3);  // Add line y = 2x + 3
