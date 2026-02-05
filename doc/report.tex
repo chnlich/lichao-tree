@@ -45,7 +45,7 @@
 \maketitle
 
 \begin{abstract}
-The Li-Chao Tree (LICT), introduced at ZJOI 2012, has become one of the most widely adopted data structures for online line envelope maintenance---despite being consistently outperformed by the Dynamic Convex Hull Trick (CHT). This apparent contradiction motivated our retrospective analysis. Through streamlined implementations and benchmarks across three scales ($10^5$, $10^6$, and $10^7$ operations), we confirm that the Dynamic CHT is 1.5--2.2$\times$ faster. Yet the LICT remains indispensable due to its remarkable simplicity: it requires no intersection calculations, no special cases for parallel lines, and no floating-point arithmetic. We present clean, production-ready implementations of both data structures and offer evidence-based guidance on when to choose each. Our findings suggest that the LICT's enduring popularity stems not from raw speed, but from its unique combination of acceptable performance and exceptional implementability.
+The Li-Chao Tree (LICT), introduced at ZJOI 2012, has become one of the most widely adopted data structures for online line envelope maintenance---despite being consistently outperformed by the Dynamic Convex Hull Trick (CHT). This apparent contradiction motivated our retrospective analysis. Through streamlined implementations and benchmarks across three scales ($10^5$, $10^6$, and $10^7$ operations), we confirm that the Dynamic CHT is $1.5$--$2.2\times$ faster. Yet the LICT remains indispensable due to its remarkable simplicity: it requires no intersection calculations, no special cases for parallel lines, and no floating-point arithmetic. We present clean, production-ready implementations of both data structures and offer evidence-based guidance on when to choose each. Our findings suggest that the LICT's enduring popularity stems not from raw speed, but from its unique combination of acceptable performance and exceptional implementability.
 \end{abstract}
 
 \section{Introduction}
@@ -123,7 +123,7 @@ We present streamlined implementations of both data structures. Our code priorit
 
 Listing~\ref{lst:dcht} shows our Dynamic CHT implementation using \texttt{std::multiset}. This implementation, adapted from KACTL, maintains lines sorted by slope with intersection points computed on insertion.
 
-\begin{lstlisting}[language=C++, caption={Dynamic CHT Implementation (Balanced BST-based)}, label={lst:dcht}]
+\begin{lstlisting}[language=C++, caption={Dynamic CHT Implementation (max hull; wrapper class for min)}, label={lst:dcht}]
 struct Line {
     mutable llint k, m, p;  // slope, intercept, intersection point
     bool operator<(const Line& o) const { return k < o.k; }
@@ -283,7 +283,7 @@ $10^7$ & All on Hull & 658 ms & 411 ms & 1.60$\times$ \\
 
 \subsection{Analysis}
 
-\textbf{Performance Gap:} The Dynamic CHT is consistently 1.5--2.2$\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around 1.5$\times$.
+\textbf{Performance Gap:} The Dynamic CHT is consistently $1.5$--$2.2\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around 1.5$\times$.
 
 \textbf{Hull Size Impact:} Interestingly, the performance gap is \emph{smaller} when all lines are on the hull. This suggests that the Dynamic CHT's advantage comes partly from skipping hull-irrelevant lines---when all lines are relevant, both structures must do more work, and the gap narrows.
 
