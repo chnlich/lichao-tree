@@ -1,20 +1,19 @@
 #ifndef LICHAO_HPP
 #define LICHAO_HPP
 
-#include <algorithm>
-#include <limits>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-typedef long long ll;
+typedef long long llint;
 
-const ll INF = 4e18; // Sufficiently large infinity
+const llint INF = 4e18; // Sufficiently large infinity
 
 namespace LC {
 
 struct Line {
-    ll k, m;
-    ll eval(ll x) const { return k * x + m; }
+    llint k, m;
+    llint eval(llint x) const { return k * x + m; }
 };
 
 struct Node {
@@ -26,14 +25,14 @@ struct Node {
 
 class LiChaoTree {
     Node* root = nullptr;
-    ll min_x, max_x;
+    llint min_x, max_x;
 
-    void insert(Node* &node, Line new_line, ll l, ll r) {
+    void insert(Node* &node, Line new_line, llint l, llint r) {
         if (!node) {
             node = new Node(new_line);
             return;
         }
-        ll mid = l + (r - l) / 2;
+        llint mid = l + (r - l) / 2;
         bool lef = new_line.eval(l) < node->line.eval(l);
         bool midf = new_line.eval(mid) < node->line.eval(mid);
 
@@ -48,10 +47,10 @@ class LiChaoTree {
         }
     }
 
-    ll query(Node* node, ll x, ll l, ll r) {
+    llint query(Node* node, llint x, llint l, llint r) {
         if (!node) return INF;
-        ll mid = l + (r - l) / 2;
-        ll val = node->line.eval(x);
+        llint mid = l + (r - l) / 2;
+        llint val = node->line.eval(x);
         if (l == r) return val;
         if (x <= mid) {
             return min(val, query(node->left, x, l, mid));
@@ -68,17 +67,17 @@ class LiChaoTree {
     }
 
 public:
-    LiChaoTree(ll min_val = -1e9, ll max_val = 1e9) : min_x(min_val), max_x(max_val) {}
+    LiChaoTree(llint min_val = -1e9, llint max_val = 1e9) : min_x(min_val), max_x(max_val) {}
     
     ~LiChaoTree() {
         destroy(root);
     }
 
-    void add_line(ll k, ll m) {
+    void add_line(llint k, llint m) {
         insert(root, {k, m}, min_x, max_x);
     }
 
-    ll query(ll x) {
+    llint query(llint x) {
         return query(root, x, min_x, max_x);
     }
     

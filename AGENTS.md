@@ -95,3 +95,26 @@ git commit -m "descriptive message"
 - `generator/generator.hpp` - Keep only 2 test cases (random + all_on_hull)
 - `implementation/` - Only Standard LICT and Dynamic CHT
 - No adding back deleted variants without strong justification
+
+## Coding Preferences
+
+### Type Aliases
+Use `llint` (not `ll`) for `long long`:
+```cpp
+typedef long long llint;
+```
+
+### Includes
+Use `<bits/stdc++.h>` for competitive programming style:
+```cpp
+#include <bits/stdc++.h>
+```
+
+This is preferred over explicit individual headers for simplicity and faster compilation in CP contexts.
+
+### Naming Conventions
+- `llint` for 64-bit integers
+- `INF` for infinity constants (uppercase)
+- Classes in `PascalCase`
+- Methods in `snake_case`
+- Member variables: use trailing underscore or clear naming (avoid `m_` prefix)

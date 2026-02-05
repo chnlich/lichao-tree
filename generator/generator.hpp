@@ -1,30 +1,29 @@
 #ifndef GENERATOR_HPP
 #define GENERATOR_HPP
 
-#include <vector>
-#include <random>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-typedef long long ll;
+typedef long long llint;
 
 enum OpType { ADD, QUERY };
 
 struct Operation {
     OpType type;
-    ll val1; // k for ADD, x for QUERY
-    ll val2; // m for ADD, ignored for QUERY
+    llint val1; // k for ADD, x for QUERY
+    llint val2; // m for ADD, ignored for QUERY
 };
 
 class Generator {
     mt19937_64 rng;
-    ll min_coord, max_coord;
+    llint min_coord, max_coord;
 
 public:
-    Generator(ll seed, ll min_c = -1e9, ll max_c = 1e9) : rng(seed), min_coord(min_c), max_coord(max_c) {}
+    Generator(llint seed, llint min_c = -1e9, llint max_c = 1e9) : rng(seed), min_coord(min_c), max_coord(max_c) {}
 
-    ll random(ll l, ll r) {
-        uniform_int_distribution<ll> dist(l, r);
+    llint random(llint l, llint r) {
+        uniform_int_distribution<llint> dist(l, r);
         return dist(rng);
     }
 
@@ -50,11 +49,11 @@ public:
         
         for (int i = 0; i < n; ++i) {
             if (uniform_real_distribution<>(0, 1)(rng) < query_ratio && i > 0) {
-                ll x = random(max_coord / 4, max_coord / 2);
+                llint x = random(max_coord / 4, max_coord / 2);
                 ops.push_back({QUERY, x, 0});
             } else {
-                ll k = i + 1;
-                ll m = -(ll)(i + 1) * (i + 1);
+                llint k = i + 1;
+                llint m = -(llint)(i + 1) * (i + 1);
                 ops.push_back({ADD, k, m});
             }
         }

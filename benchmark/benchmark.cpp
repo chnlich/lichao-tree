@@ -1,10 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <chrono>
-#include <iomanip>
-#include <string>
-#include <fstream>
-
+#include <bits/stdc++.h>
 #include "lichao.hpp"
 #include "cht.hpp"
 #include "generator.hpp"
@@ -27,7 +21,7 @@ long long run_lichao(const vector<Operation>& ops) {
         if (op.type == ADD) {
             lict.add_line(op.val1, op.val2);
         } else {
-            ll res = lict.query(op.val1);
+            llint res = lict.query(op.val1);
             if (res < 2e18) sum += res;
         }
     }
@@ -41,7 +35,7 @@ long long run_cht(const vector<Operation>& ops) {
         if (op.type == ADD) {
             cht.add_line(op.val1, op.val2);
         } else {
-            ll res = cht.query(op.val1);
+            llint res = cht.query(op.val1);
             if (res < 2e18) sum += res;
         }
     }
