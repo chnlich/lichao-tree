@@ -118,3 +118,20 @@ This is preferred over explicit individual headers for simplicity and faster com
 - Classes in `PascalCase`
 - Methods in `snake_case`
 - Member variables: use trailing underscore or clear naming (avoid `m_` prefix)
+
+## Paper Writing Preferences
+
+### Tone and Style
+- **Academic and formal**: Use strong academic language, avoid overly narrative or "humble" tones
+- **Objective framing**: Present LICT as an alternative approach with its own advantages, not as inferior/outperformed
+- **No contest references**: Don't mention specific contests like "ZJOI 2012", just say "2012"
+
+### Typography
+- **No dashes**: Replace `--` (en-dash) with "to" or rephrase (e.g., "1.5 to 2.0 times" instead of "1.5--2.0×")
+- Use proper mathematical notation: `$1.5$ to $2.0\times$`
+
+### Content Structure
+- **Introduction**: Keep benchmark details (sizes, specific numbers) out of the introduction
+- **Abstract**: Frame LICT as a viable alternative with distinct advantages (simplicity, persistency, extensibility)
+- **Comparison**: Highlight persistency, line segment support, and implementation advantages as key differentiators
+- **Conclusion**: Emphasize LICT's unique position in the design space, not as second-best
