@@ -3,8 +3,11 @@ CXXFLAGS = -O3 -std=c++17 -Wall -Wextra
 
 all: benchmark
 
-benchmark: main.cpp lichao.hpp lichao_iterative.hpp cht.hpp generator.hpp
-	$(CXX) $(CXXFLAGS) -o benchmark main.cpp
+benchmark: benchmark.cpp rb_lichao.hpp cht.hpp generator.hpp
+	$(CXX) $(CXXFLAGS) -o benchmark benchmark.cpp
 
 clean:
-	rm -f benchmark
+	rm -f benchmark benchmark_results.csv
+
+run: benchmark
+	./benchmark
