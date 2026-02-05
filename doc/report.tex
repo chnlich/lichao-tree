@@ -315,7 +315,7 @@ Despite higher computational cost, the LICT offers significant advantages for pr
 
 \textbf{2. Numerical Stability.} The LICT performs only integer addition and multiplication for line evaluation. The Dynamic CHT requires division for intersection calculations, necessitating careful handling of edge cases including parallel lines and overflow conditions.
 
-\textbf{3. Floating-Point Queries.} For non-integer (floating-point) query coordinates, the LICT complexity becomes $O(\log(C/\epsilon))$ where $\epsilon$ is the required precision. With coordinate range $10^9$ and double precision ($\epsilon \approx 10^{-9}$), the tree depth increases from approximately 30 to 60. In such cases, the Dynamic CHT's $O(\log n)$ complexity (independent of coordinate precision) becomes relatively more attractive. However, many practical applications can scale and quantize floating-point coordinates to integers (e.g., multiply by $10^6$) while maintaining required precision.
+\textbf{3. Floating-Point Queries.} For non-integer (floating-point) query coordinates, the LICT complexity becomes $O(\log(C/\epsilon))$ where $\epsilon$ is the required precision. With coordinate range $10^9$ and double precision ($\epsilon \approx 10^{-9}$), the tree depth increases from approximately 30 to 60. In such cases, the Dynamic CHT's $O(\log n)$ complexity (independent of coordinate precision) becomes relatively more attractive. For applications requiring both floating-point coordinates and the LICT's implementation advantages, one may use $\epsilon = 1$ as the smallest representable unit after appropriate coordinate transformation.
 
 \textbf{4. Extensibility.} The LICT's structure facilitates extensions that are difficult with the Dynamic CHT:
 \begin{itemize}
