@@ -89,13 +89,15 @@ The remainder of this paper is organized as follows. Section~\ref{sec:related} r
 
 \section{Related Work}\label{sec:related}
 
+To understand the significance of the Li-Chao Tree, we must first examine the landscape of line envelope maintenance techniques that preceded and competed with it. The Convex Hull Trick, in its various forms, was the dominant approach before 2012, and it remains a strong competitor today.
+
 \subsection{Convex Hull Trick}
 
 The Convex Hull Trick predates the LICT by many years in competitive programming lore. There are two fundamentally different approaches:
 
 \textbf{1. Monotonic CHT (Deque-based):} When lines are inserted in order of monotonic slope (either increasing or decreasing), the lower hull can be maintained in a deque. Queries for a monotonic sequence of $x$ values are answered in $O(1)$ amortized time. This variant is elegant when applicable but fails for arbitrary insertion orders.
 
-\textbf{2. Dynamic CHT (Balanced BST-based):} When lines can be inserted in arbitrary order, a balanced binary search tree maintains the hull. Each insertion and query takes $O(\log n)$ time. This is the correct baseline for comparison with LICT.
+\textbf{2. Dynamic CHT (Balanced BST-based):} When lines can be inserted in arbitrary order, a balanced binary search tree maintains the hull. Each insertion and query takes $O(\log N)$ time. This is the correct baseline for comparison with LICT.
 
 The Dynamic CHT maintains the hull \emph{explicitly}: lines are sorted by slope, and intersection points between adjacent lines are computed and maintained. This requires careful handling of edge cases (parallel lines, identical slopes) and numerical precision.
 
@@ -168,6 +170,8 @@ struct LineContainer : multiset<Line, less<>> {
 \end{lstlisting}
 
 The complexity in this implementation lies in the intersection calculations and the careful handling of line removal when a new line makes existing lines obsolete.
+
+In contrast to the Dynamic CHT's geometric approach, the Li-Chao Tree achieves simplicity by avoiding intersection calculations entirely. Instead, it relies on direct value comparisons at interval midpoints.
 
 \subsection{Standard LICT}
 
@@ -269,25 +273,27 @@ Table~\ref{tab:results} presents the performance comparison across all three tes
 \toprule
 \textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} & \textbf{Ratio} \\
 \midrule
-$10^5$ & Random & 11 ms & 5 ms & 2.20$\times$ \\
+$10^5$ & Random & 10 ms & 5 ms & 2.00$\times$ \\
 $10^5$ & All on Hull & 6 ms & 4 ms & 1.50$\times$ \\
 \midrule
-$10^6$ & Random & 74 ms & 51 ms & 1.45$\times$ \\
-$10^6$ & All on Hull & 65 ms & 41 ms & 1.59$\times$ \\
+$10^6$ & Random & 77 ms & 52 ms & 1.48$\times$ \\
+$10^6$ & All on Hull & 67 ms & 41 ms & 1.63$\times$ \\
 \midrule
-$10^7$ & Random & 772 ms & 522 ms & 1.48$\times$ \\
-$10^7$ & All on Hull & 658 ms & 411 ms & 1.60$\times$ \\
+$10^7$ & Random & 789 ms & 545 ms & 1.45$\times$ \\
+$10^7$ & All on Hull & 687 ms & 426 ms & 1.61$\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Analysis}
 
-\textbf{Performance Gap:} The Dynamic CHT is consistently $1.5$--$2.2\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around 1.5$\times$.
+\textbf{Performance Gap:} The Dynamic CHT is consistently $1.5$--$2.2\times$ faster than the LICT. This gap is most pronounced at smaller scales, where the LICT's pointer-based tree traversal overhead is relatively higher. As $N$ increases, the ratio stabilizes around $1.5\times$.
 
 \textbf{Hull Size Impact:} Interestingly, the performance gap is \emph{smaller} when all lines are on the hull. This suggests that the Dynamic CHT's advantage comes partly from skipping hull-irrelevant lines---when all lines are relevant, both structures must do more work, and the gap narrows.
 
-\textbf{Scalability:} Both implementations demonstrate excellent logarithmic scaling. From $10^5$ to $10^7$ ($100\times$ increase), time increases by approximately $60$--$130\times$, consistent with the $O(\log C)$ vs $O(\log n)$ complexities (where $\log C \approx 30$ and $\log n$ grows from 17 to 24).
+\textbf{Scalability:} Both implementations demonstrate excellent logarithmic scaling. From $10^5$ to $10^7$ ($100\times$ increase), time increases by approximately $60$--$130\times$, consistent with the $O(\log C)$ vs $O(\log N)$ complexities (where $\log C \approx 30$ and $\log N$ grows from 17 to 24).
+
+These benchmark results quantify the performance trade-off between the two approaches, but numbers alone do not tell the complete story. The practical choice between LICT and Dynamic CHT depends on factors beyond raw speed.
 
 \section{Discussion}\label{sec:discussion}
 
