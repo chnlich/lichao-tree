@@ -89,7 +89,7 @@ int main() {
     }
 
     // Output CSV to file
-    ofstream csv("benchmark/benchmark_results.csv");
+    ofstream csv("benchmark_results.csv");
     csv << "N,Distribution,Algorithm,Time_ms,Checksum\n";
     for (const auto& res : results) {
         csv << res.n << "," << res.distribution << "," << res.name << "," << res.time_ms << "," << res.checksum << "\n";
