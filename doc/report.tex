@@ -50,12 +50,12 @@ The Li-Chao tree (LICT) was informally introduced in a lecture in 2012 and subse
 
 \section{Introduction}
 
-Dynamic line container maintenance is a fundamental problem in computational geometry with extensive applications in dynamic programming optimization, operations research, and computer graphics. The problem is defined as follows: given a dynamic set of linear functions $y = kx + m$, support efficient insertion of new lines and querying the minimum (or maximum) value at arbitrary $x$ coordinates.
+Dynamic line container maintenance is a fundamental problem in computational geometry with extensive applications in dynamic programming optimization, operations research, and computer graphics. A dynamic line container is a data structure that maintains a set of linear functions while supporting insertion and query operations. The problem is defined as follows: given a dynamic set of linear functions $y = kx + b$, support efficient insertion of new lines and querying the minimum (or maximum) value at arbitrary $x$ coordinates.
 
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
-    \item \textbf{Add Line:} Insert a new line $y = kx + m$ into the structure.
-    \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + m_i\}$ over all lines currently in the structure.
+    \item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
+    \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + b_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
 Both operations must execute in logarithmic time to achieve acceptable performance for large-scale applications. The LICT achieves $O(\log C)$ time per operation, where $C$ is the coordinate range.
@@ -64,7 +64,7 @@ Both operations must execute in logarithmic time to achieve acceptable performan
 
 The classical solution to this problem is the Convex Hull Trick (CHT), which maintains the lower envelope of lines explicitly. The Dynamic CHT variant uses a balanced binary search tree to support arbitrary insertion orders in $O(\log n)$ amortized time per operation. While asymptotically optimal, this approach requires complex intersection point calculations and careful handling of numerical precision.
 
-In 2012, the Li-Chao tree was informally presented in a lecture context. It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. This technical report addresses this gap by providing a formal treatment of the LICT. We present precise algorithmic specifications, implementation details, and empirical performance analysis relative to the established Dynamic CHT baseline. We present clean, production-ready implementations and conduct systematic performance evaluation with particular attention to extensibility features.
+In 2012, the Li-Chao tree was informally presented in a lecture context. It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. This technical report addresses this gap by providing a formal treatment of the LICT. We present precise algorithmic specifications, implementation details, and empirical performance analysis relative to the established Dynamic CHT baseline. We present well-tested, reference implementations and conduct systematic performance evaluation with particular attention to extensibility features.
 
 \section{Related Work}\label{sec:related}
 
@@ -76,7 +76,7 @@ Dynamic maintenance of geometric configurations has been studied extensively in 
 
 For arbitrary insertion sequences, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log n)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
 
-The Dynamic CHT requires computing intersection points as $x_{\text{intersect}} = \frac{m_2 - m_1}{k_1 - k_2}$, necessitating careful handling of division by zero (parallel lines), integer overflow, and sign conventions for floored division.
+The Dynamic CHT requires computing intersection points as $x_{\text{intersect}} = \frac{b_2 - b_1}{k_1 - k_2}$, necessitating careful handling of division by zero (parallel lines), integer overflow, and sign conventions for floored division.
 
 \section{Overview}\label{sec:lichao}
 
@@ -88,11 +88,13 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 
 Each node in the tree represents an interval $[l, r]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint $m = \lfloor(l+r)/2\rfloor$ is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
-\textbf{Key invariant.} A line stored at a node is the best among all lines routed through that node at the midpoint of the node's interval. This is \emph{local} optimality: the stored line minimizes $kx + m$ at $m$ among lines routed to that specific node, but may not be globally optimal at $m$ if other lines were routed down different branches.
+\textbf{Key invariant.} A line stored at a node is the best among all lines routed through that node at the midpoint of the node's interval. This is \emph{local} optimality: the stored line minimizes $kx + b$ at midpoint $m$ among lines routed to that specific node. However, this does not guarantee global optimality at $m$ because lines routed down other branches may achieve lower values at that coordinate.
 
 \textbf{Why this maintains the lower envelope.} The LICT stores at each node the line that achieves the lower value at the midpoint among lines routed there. Because two lines intersect at most once, if line $A$ achieves a lower value than line $B$ at the midpoint but yields a higher value at one endpoint, then $B$ can only achieve a lower value on the side of the midpoint containing that endpoint. Thus $B$ is routed to exactly one child---the side where it might achieve a lower value. At query time, we traverse the path to $x_0$ and take the minimum over all stored lines on that path. For any line $L$ and query point $x_0$, $L$ is stored at some node on the path to $x_0$ if and only if $L$ achieves the lower value at that node's midpoint among lines routed there. Since the path covers all intervals containing $x_0$, the minimum among stored lines on the path equals the global lower envelope at $x_0$.
 
-Insertion proceeds as follows: if the new line yields a lower value at the midpoint, the lines are swapped and the suboptimal line continues down. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line yields a higher value at the midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both. This property guarantees that the suboptimal line need only be propagated down a single child path, ensuring the algorithm terminates in $O(\log C)$ steps.
+Insertion proceeds as follows: if the new line yields a lower value at the midpoint, the lines are swapped and the suboptimal line continues down. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line yields a higher value at the midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both. This property guarantees that the suboptimal line need only be propagated down a single child path.
+
+\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[x_{\min}, x_{\max}]$ with depth $O(\log C)$ where $C = x_{\max} - x_{\min}$. During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint, and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
 
 The appropriate child is determined by where the relative ordering changes: if the ordering between the new line and the stored line changes between the left endpoint and the midpoint (i.e., the new line is better at $l$ but worse at $m$, or vice versa), we recurse on the left child; otherwise, we recurse on the right child. This follows directly from the single-intersection property: the crossing point (the $x$-coordinate where two lines intersect, if they do), must lie on the side where the ordering changes.
 
@@ -375,16 +377,19 @@ Li Chao.
 CP-Algorithms.
 \newblock Li-Chao tree.
 \newblock \url{https://cp-algorithms.com/geometry/li_chao_tree.html}, 2024.
+\newblock Accessed: 2025-02-06.
 
 \bibitem{codeforces}
 I\_LOVE\_TIGER.
 \newblock Li-Chao tree Tutorial.
 \newblock \url{https://codeforces.com/blog/entry/51275}, 2017.
+\newblock Accessed: 2025-02-06.
 
 \bibitem{kactl}
 KTH Algorithm Library (KACTL).
 \newblock LineContainer.
 \newblock \url{https://github.com/kth-competitive-programming/kactl}, 2024.
+\newblock Accessed: 2025-02-06.
 
 \end{thebibliography}
 
