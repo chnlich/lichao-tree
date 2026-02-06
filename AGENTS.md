@@ -127,8 +127,11 @@ This is preferred over explicit individual headers for simplicity and faster com
 - **No contest references**: Don't mention specific contests like "ZJOI 2012", just say "2012"
 
 ### Typography
-- **No dashes**: Replace `--` (en-dash) with "to" or rephrase (e.g., "1.5 to 2.0 times" instead of "1.5--2.0×")
+- **NO DASHES ALLOWED**: Never use `--` (en-dash) in the paper. Always replace with "to" or rephrase:
+  - ❌ Wrong: `1.45--2.00 times`, `time---$O(\log C)$---to`, `midpoint---never both`
+  - ✅ Correct: `1.45 to 2.00 times`, `time $O(\log C)$ to`, `midpoint, never both`
 - Use proper mathematical notation: `$1.5$ to $2.0\times$`
+- This is a strict rule - check for `--` before every commit
 
 ### Content Structure
 - **Introduction**: Keep benchmark details (sizes, specific numbers) out of the introduction

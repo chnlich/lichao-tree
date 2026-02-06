@@ -58,7 +58,7 @@ Formally, we require a data structure supporting two operations:
     \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + m_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
-Both operations must execute in logarithmic time---$O(\log C)$ for the LICT (where $C$ is the coordinate range)---to achieve acceptable performance for large-scale applications.
+Both operations must execute in logarithmic time $O(\log C)$ for the LICT (where $C$ is the coordinate range) to achieve acceptable performance for large-scale applications.
 
 \subsection{Background}
 
@@ -88,7 +88,7 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 
 Each node in the tree represents an interval $[l, r]$ and stores the line that is optimal at the midpoint $m = \lfloor(l+r)/2\rfloor$ among all lines that have been inserted through that node (i.e., lines whose evaluation at $m$ is better than any line previously stored at this node). Note that this line is not necessarily globally optimal at $m$, as other lines may have been routed to different branches of the tree.
 
-Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line is worse at the midpoint, it can be better than the stored line on at most one side of the midpoint---never both. This property guarantees that the worse line need only be propagated down a single child path, ensuring the algorithm terminates in $O(\log C)$ steps.
+Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line is worse at the midpoint, it can be better than the stored line on at most one side of the midpoint, never both. This property guarantees that the worse line need only be propagated down a single child path, ensuring the algorithm terminates in $O(\log C)$ steps.
 
 The appropriate child is determined by where the relative ordering changes: if the ordering between the new line and the stored line changes between the left endpoint and the midpoint (i.e., the new line is better at $l$ but worse at $m$, or vice versa), we recurse on the left child; otherwise, we recurse on the right child. This follows directly from the single-intersection property: the crossing point, if it exists, must lie on the side where the ordering changes.
 
@@ -135,7 +135,7 @@ The choice between these approaches involves several trade-offs:
 
 \subsection{Summary of Results}
 
-Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45--2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires roughly half the code and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
+Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45 to 2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires roughly half the code and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
 
 \section{Implementation}\label{sec:implementation}
 
@@ -343,7 +343,7 @@ Since its introduction in 2012, the LICT has found widespread adoption in compet
 \bibitem{overmars1981}
 Overmars, M.H. and van Leeuwen, J.
 \newblock Maintenance of configurations in the plane.
-\newblock \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
+\newblock \emph{Journal of Computer and System Sciences}, 23(2):166 to 204, 1981.
 
 \bibitem{zjoi2012}
 Li Chao.
