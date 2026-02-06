@@ -36,7 +36,7 @@
 }
 \lstset{style=mystyle}
 
-\title{\textbf{The Li-Chao Tree: An Alternative Approach to Dynamic Line Envelope Maintenance}}
+\title{\textbf{The Li-Chao Tree: An Alternative Approach to Dynamic Line Container Queries}}
 \author{Li Chao}
 \date{\today}
 
@@ -45,12 +45,12 @@
 \maketitle
 
 \begin{abstract}
-The Li-Chao Tree (LICT) was informally introduced in a lecture in 2012 and subsequently gained widespread adoption in the competitive programming community as an alternative approach to online line envelope maintenance. Despite its practical utility, the structure has not been formally documented in the academic literature. This paper, written in 2026, aims to formalize the LICT and provide a comprehensive analysis comparing it to the Dynamic Convex Hull Trick (CHT). While the Dynamic CHT has traditionally been the standard solution, the LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments. Our empirical evaluation indicates that the Dynamic CHT achieves approximately 1.5 to 2.0 times faster execution in standard benchmarks, while the LICT provides superior ease of implementation and greater flexibility for extensions. We offer practical guidance for selecting the appropriate data structure based on application requirements.
+The Li-Chao Tree (LICT) was informally introduced in a lecture in 2012 and subsequently gained widespread adoption in the competitive programming community as an alternative approach to online line container queries. Despite its practical utility, the structure has not been formally documented in the academic literature. This paper, written in 2026, aims to formalize the LICT and provide a comprehensive analysis comparing it to the Dynamic Convex Hull Trick (CHT). While the Dynamic CHT has traditionally been the standard solution, the LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
 \end{abstract}
 
 \section{Introduction}
 
-Dynamic line envelope maintenance is a fundamental problem in computational geometry with extensive applications in dynamic programming optimization, operations research, and computer graphics. The problem is defined as follows: given a dynamic set of linear functions $y = kx + m$, support efficient insertion of new lines and querying the minimum (or maximum) value at arbitrary $x$ coordinates.
+Dynamic line container maintenance is a fundamental problem in computational geometry with extensive applications in dynamic programming optimization, operations research, and computer graphics. The problem is defined as follows: given a dynamic set of linear functions $y = kx + m$, support efficient insertion of new lines and querying the minimum (or maximum) value at arbitrary $x$ coordinates.
 
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
@@ -58,39 +58,27 @@ Formally, we require a data structure supporting two operations:
     \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + m_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
-Both operations must execute in logarithmic time---$O(\log n)$ for the Dynamic CHT and $O(\log C)$ for the LICT (where $C$ is the coordinate range)---to achieve acceptable performance for large-scale applications.
+Both operations must execute in logarithmic time---$O(\log C)$ for the LICT (where $C$ is the coordinate range)---to achieve acceptable performance for large-scale applications.
 
-\subsection{Background and Motivation}
+\subsection{Background}
 
 The classical solution to this problem is the Convex Hull Trick (CHT), which maintains the lower envelope of lines explicitly. The Dynamic CHT variant uses a balanced binary search tree to support arbitrary insertion orders in $O(\log n)$ amortized time per operation. While asymptotically optimal, this approach requires complex intersection point calculations and careful handling of numerical precision.
 
-In 2012, the Li-Chao Tree was informally presented in a lecture context and subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries and educational materials, the structure has not been formally documented in the peer-reviewed literature. This paper, prepared in 2026, aims to address this gap by providing a formal treatment of the LICT, including precise algorithmic specifications, implementation details, and empirical performance analysis relative to the established Dynamic CHT baseline.
-
-\subsection{Contributions}
-
-This paper makes the following contributions:
-\begin{enumerate}
-    \item We present clean, production-ready implementations of both the Standard LICT and Dynamic CHT, suitable for educational and practical use.
-    \item We conduct systematic performance evaluation comparing both approaches across multiple problem scales and data distributions.
-    \item We analyze the theoretical and practical trade-offs between the two data structures, with particular attention to extensibility features including persistence, line segment support, and higher-dimensional generalizations.
-    \item We provide evidence-based guidelines for selecting the appropriate data structure for specific application contexts.
-\end{enumerate}
+In 2012, the Li-Chao Tree was informally presented in a lecture context and subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries and educational materials, the structure has not been formally documented in the academic literature. This technical report, prepared in 2026, aims to address this gap by providing a formal treatment of the LICT, including precise algorithmic specifications, implementation details, and empirical performance analysis relative to the established Dynamic CHT baseline. We present clean, production-ready implementations suitable for educational and practical use, conduct systematic performance evaluation, analyze the theoretical and practical trade-offs with particular attention to extensibility features, and provide evidence-based guidelines for data structure selection.
 
 \section{Related Work}\label{sec:related}
 
-The Convex Hull Trick represents the classical approach to line envelope maintenance. We review its variants to establish the context for the LICT.
+The Convex Hull Trick represents the classical approach to line container maintenance. We review the Dynamic CHT and related work to establish the context for the LICT.
 
-\subsection{Convex Hull Trick}
+Dynamic maintenance of geometric configurations has been studied extensively in computational geometry. Overmars and van Leeuwen \cite{overmars1981} presented foundational work on dynamic convex hull maintenance, demonstrating that the lower envelope of lines can be maintained efficiently using balanced binary search trees. Their work established the theoretical framework for dynamic geometric data structures.
 
-The Convex Hull Trick encompasses two primary variants with different applicability constraints.
+\subsection{Dynamic Convex Hull Trick}
 
-\textbf{1. Monotonic CHT:} When lines are inserted in order of monotonic slope, the lower hull can be maintained in a deque, achieving $O(1)$ amortized time per operation for both insertions and queries. This variant is highly efficient when applicable but fails for arbitrary insertion orders.
-
-\textbf{2. Dynamic CHT:} For arbitrary insertion sequences, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log n)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
+For arbitrary insertion sequences, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log n)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
 
 The Dynamic CHT requires computing intersection points as $x_{\text{intersect}} = \frac{m_2 - m_1}{k_1 - k_2}$, necessitating careful handling of division by zero (parallel lines), integer overflow, and sign conventions for floored division.
 
-\section{The Li-Chao Tree}\label{sec:lichao}
+\section{Overview}\label{sec:lichao}
 
 This section presents the Li-Chao Tree, the primary contribution of this paper.
 
@@ -342,32 +330,20 @@ Despite higher computational cost, the LICT offers significant advantages for pr
     \item \textbf{Higher dimensions:} Generalization to multi-dimensional query spaces follows naturally from the recursive structure.
 \end{itemize}
 
-\subsection{Selection Guidelines}
-
-\textbf{Select LICT when:}
-\begin{itemize}
-    \item Implementation time and correctness are primary concerns
-    \item Persistence or line segment support is required
-    \item Working with integer coordinates exclusively
-    \item The coordinate range is bounded and known
-\end{itemize}
-
-\textbf{Select Dynamic CHT when:}
-\begin{itemize}
-    \item Maximum query throughput is required
-    \item The hull size is expected to remain small
-    \item Implementation complexity can be managed
-\end{itemize}
-
 \section{Conclusion}\label{sec:conclusion}
 
-This paper has presented a comprehensive analysis of the Li Chao Tree as an alternative to the Dynamic Convex Hull Trick for online line envelope maintenance. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
+This paper has presented a comprehensive analysis of the Li Chao Tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
 
 The Li Chao Tree represents a distinct point in the design space, trading constant factor performance for reduced implementation complexity and enhanced flexibility. For applications requiring persistence, line segment support, or rapid implementation, the LICT offers compelling advantages. For performance-critical applications with bounded hull size, the Dynamic CHT remains preferable.
 
 Since its introduction in 2012, the LICT has found widespread adoption in competitive programming and algorithmic education. Its continued relevance demonstrates that optimal asymptotic complexity is not the sole criterion for practical data structure selection; implementation clarity and extensibility play equally important roles in determining utility.
 
-\begin{thebibliography}{4}
+\begin{thebibliography}{5}
+
+\bibitem{overmars1981}
+Overmars, M.H. and van Leeuwen, J.
+\newblock Maintenance of configurations in the plane.
+\newblock \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
 
 \bibitem{zjoi2012}
 Li Chao.
