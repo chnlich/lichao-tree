@@ -58,13 +58,13 @@ Formally, we require a data structure supporting two operations:
     \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + m_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
-Both operations must execute in logarithmic time $O(\log C)$ for the LICT (where $C$ is the coordinate range) to achieve acceptable performance for large-scale applications.
+Both operations must execute in logarithmic time to achieve acceptable performance for large-scale applications. The LICT achieves $O(\log C)$ per operation, where $C$ is the coordinate range.
 
 \subsection{Background}
 
 The classical solution to this problem is the Convex Hull Trick (CHT), which maintains the lower envelope of lines explicitly. The Dynamic CHT variant uses a balanced binary search tree to support arbitrary insertion orders in $O(\log n)$ amortized time per operation. While asymptotically optimal, this approach requires complex intersection point calculations and careful handling of numerical precision.
 
-In 2012, the Li-Chao Tree was informally presented in a lecture context and subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries and educational materials, the structure has not been formally documented in the academic literature. This technical report, prepared in 2026, aims to address this gap by providing a formal treatment of the LICT, including precise algorithmic specifications, implementation details, and empirical performance analysis relative to the established Dynamic CHT baseline. We present clean, production-ready implementations suitable for educational and practical use, conduct systematic performance evaluation, analyze the theoretical and practical trade-offs with particular attention to extensibility features, and provide evidence-based guidelines for data structure selection.
+In 2012, the Li-Chao Tree was informally presented in a lecture context and subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries and educational materials, the structure has not been formally documented in the academic literature. This technical report aims to address this gap by providing a formal treatment of the LICT, including precise algorithmic specifications, implementation details, and empirical performance analysis relative to the established Dynamic CHT baseline. We present clean, production-ready implementations suitable for educational and practical use, conduct systematic performance evaluation, analyze the theoretical and practical trade-offs with particular attention to extensibility features, and provide evidence-based guidelines for data structure selection.
 
 \section{Related Work}\label{sec:related}
 
@@ -80,17 +80,19 @@ The Dynamic CHT requires computing intersection points as $x_{\text{intersect}} 
 
 \section{Overview}\label{sec:lichao}
 
-This section presents the Li-Chao Tree, the primary contribution of this paper.
+This section presents the Li-Chao Tree, the primary contribution of this technical report.
 
 \subsection{Algorithmic Approach}
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the optimal line at each interval midpoint, recursively partitioning the query range.
 
-Each node in the tree represents an interval $[l, r]$ and stores the line that is locally optimal at the midpoint $m = \lfloor(l+r)/2\rfloor$ among all lines that have traversed that node during insertion. A line is locally optimal at $m$ if it yields the minimum value at $m$ compared to all other lines that have been compared at this specific node. Note that this line is not necessarily globally optimal at $m$, as other lines may have been routed to different branches of the tree based on their performance at other midpoints.
+Each node in the tree represents an interval $[l, r]$ and stores the line that is locally optimal at the midpoint $m = \lfloor(l+r)/2\rfloor$ among all lines that have been routed to that node during insertion. A line is routed to a node if, during insertion, it was determined to potentially be optimal somewhere within that node's interval. A stored line is locally optimal at $m$ if it yields the minimum value at $m$ compared to all other lines that have been routed to this specific node. Note that this line is not necessarily globally optimal at $m$, as other lines may have been routed to different branches of the tree based on their performance at other midpoints.
 
 Insertion proceeds by comparing the new line with the stored line at each node: if the new line is better at the midpoint, the lines are swapped and the worse line continues down the appropriate child interval. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line is worse at the midpoint, it can be better than the stored line on at most one side of the midpoint, never both. This property guarantees that the worse line need only be propagated down a single child path, ensuring the algorithm terminates in $O(\log C)$ steps.
 
-The appropriate child is determined by where the relative ordering changes: if the ordering between the new line and the stored line changes between the left endpoint and the midpoint (i.e., the new line is better at $l$ but worse at $m$, or vice versa), we recurse on the left child; otherwise, we recurse on the right child. This follows directly from the single-intersection property: the crossing point, if it exists, must lie on the side where the ordering changes.
+The appropriate child is determined by where the relative ordering changes: if the ordering between the new line and the stored line changes between the left endpoint and the midpoint (i.e., the new line is better at $l$ but worse at $m$, or vice versa), we recurse on the left child; otherwise, we recurse on the right child. This follows directly from the single-intersection property: the crossing point (the $x$-coordinate where two lines intersect, if they do), must lie on the side where the ordering changes.
+
+\textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
 \begin{itemize}
     \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C$ represents the coordinate range (typically $C \approx 10^9$ for 32-bit integers).
@@ -137,7 +139,7 @@ The choice between these approaches involves several trade-offs:
 
 \subsection{Summary of Results}
 
-Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45 to 2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires roughly half the code and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
+Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) confirms that the Dynamic CHT achieves approximately 1.45 to 2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
 
 \section{Implementation}\label{sec:implementation}
 
@@ -325,7 +327,7 @@ Both implementations exhibit logarithmic scaling consistent with their theoretic
 
 Despite higher computational cost, the LICT offers significant advantages for practical applications:
 
-\textbf{1. Implementation simplicity.} The LICT requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates complex geometric calculations. This reduces implementation time and probability of errors, particularly important in competitive programming and rapid prototyping contexts.
+\textbf{1. Implementation simplicity.} The LICT eliminates complex geometric calculations, reducing implementation time and probability of errors. This is particularly important in competitive programming and rapid prototyping contexts.
 
 \textbf{2. Numerical stability.} The LICT performs only integer addition and multiplication for line evaluation. The Dynamic CHT requires division for intersection calculations, necessitating careful handling of edge cases including parallel lines and overflow conditions.
 
@@ -340,7 +342,7 @@ Despite higher computational cost, the LICT offers significant advantages for pr
 
 \section{Conclusion}\label{sec:conclusion}
 
-This paper has presented a comprehensive analysis of the Li-Chao Tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
+This technical report has presented a comprehensive analysis of the Li-Chao Tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
 
 The Li Chao Tree represents a distinct point in the design space, trading constant factor performance for reduced implementation complexity and enhanced flexibility. For applications requiring persistence, line segment support, or rapid implementation, the LICT offers compelling advantages. For performance-critical applications with bounded hull size, the Dynamic CHT remains preferable.
 
