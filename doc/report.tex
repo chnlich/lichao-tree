@@ -58,7 +58,7 @@ Formally, we require a data structure supporting two operations:
     \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + b_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
-Both operations must execute in logarithmic time for acceptable performance at scale. The LICT provides $O(\log C)$ time per operation for minimum (or maximum) queries, where $C$ denotes the range of possible $x$-coordinates.
+Both operations must execute in logarithmic time for acceptable performance at scale. The LICT provides $O(\log C)$ time per operation for minimum (or maximum) queries, where $C = \frac{\text{coordinate range}}{\text{precision level}}$ represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
 
 \subsection{Background}
 
@@ -128,12 +128,12 @@ where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is
 \end{equation*}
 This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m+1, r]$.
 
-\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[l, r]$ with depth $O(\log C)$ where $C = r - l$. During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint, and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
+\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[l, r]$ with depth $O(\log C)$ where $C = \frac{r - l}{\epsilon}$ and $\epsilon$ is the precision level (for integer coordinates, $\epsilon = 1$). During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint, and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
 \begin{itemize}
-    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C$ represents the coordinate range (typically $C \approx 10^9$ for 32-bit integers).
+    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C = \frac{\text{coordinate range}}{\text{precision level}}$ (typically $C \approx 10^9$ for 32-bit integer coordinates).
     \item \textbf{Space Complexity:} At most $O(n \log C)$ nodes in the worst case when all lines follow disjoint paths through the tree. In practice, heavy node sharing occurs as lines with similar slopes traverse common paths, typically resulting in significantly lower memory usage.
     \item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line value comparisons at integer coordinates.
 \end{itemize}
@@ -323,7 +323,7 @@ All benchmarks were conducted with the following configuration:
     \item \textbf{Compiler:} g++ 11.4.0 with \texttt{-O3 -std=c++17}
     \item \textbf{Platform:} Linux x86\_64
     \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
-    \item \textbf{Coordinate range:} $C = 10^9$, with $x, k, m \in [-10^9, 10^9]$
+    \item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
     \item \textbf{Random seed:} 42 (fixed for reproducibility)
     \item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
     \item \textbf{Distributions:} We write $X \sim U(a, b)$ to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
