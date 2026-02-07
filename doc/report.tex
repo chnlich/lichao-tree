@@ -58,6 +58,8 @@ Formally, we require a data structure supporting two operations:
     \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + b_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
+The structure also supports line segments (lines defined only on finite intervals $[x_l, x_r]$) in addition to infinite lines.
+
 Both operations must execute in logarithmic time for acceptable performance at scale. The LICT provides $O(\log C)$ time per operation for minimum (or maximum) queries, where $C = \frac{\text{coordinate range}}{\text{precision level}}$ represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
 
 \subsection{Background}
