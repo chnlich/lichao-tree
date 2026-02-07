@@ -647,36 +647,35 @@ Third, the performance gap between structures is smaller in the $N = C$ regime c
 
 \subsection{Floating-Point Performance Comparison}
 
-While the standard implementations use integer coordinates, many practical applications require floating-point arithmetic. We compare performance using both integer and double-precision floating-point values.
+While the standard implementations use integer coordinates, many practical applications require double-precision coefficients. We compare performance using both integer and double-precision line coefficients, with query coordinates remaining as integers throughout.
 
 \begin{itemize}
-\item \textbf{Integer configuration:} $k, b \sim U(-10^6, 10^6)$ as 64-bit integers
-\item \textbf{Double configuration:} $k, b \sim U(-10^6, 10^6)$ as double-precision floating-point values
-\item \textbf{Query points:} Matching precision to line parameters
+\item \textbf{Integer configuration:} $k, b \sim U(-10^6, 10^6)$ as 64-bit integers, $x$ as 64-bit integers
+\item \textbf{Double configuration:} $k, b \sim U(-10^6, 10^6)$ as double-precision floating-point values, $x$ as 64-bit integers
 \end{itemize}
 
 \begin{table}[h]
 \centering
-\caption{Integer versus Floating-Point Performance (Time in milliseconds)}
+\caption{Integer versus Floating-Point Performance (Time in milliseconds). The ``double'' type denotes double-precision line coefficients ($k$, $b$) with integer query coordinates ($x$).}
 \label{tab:floating-point}
 \begin{tabular}{@{}cccccc@{}}
 \toprule
 \textbf{N} & \textbf{Type} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & int & LICT & 4.26 & 1.23 & 5.50 \\
-$10^5$ & int & Dynamic CHT & 4.31 & 0.43 & 4.74 \\
-$10^5$ & double & LICT & 5.11 & 1.57 & 6.67 \\
-$10^5$ & double & Dynamic CHT & 3.19 & 0.52 & 3.71 \\
+$10^5$ & int & LICT & 3.96 & 1.23 & 5.19 \\
+$10^5$ & int & Dynamic CHT & 4.15 & 0.56 & 4.72 \\
+$10^5$ & double & LICT & 5.95 & 1.64 & 7.59 \\
+$10^5$ & double & Dynamic CHT & 3.06 & 0.66 & 3.73 \\
 \midrule
-$10^6$ & int & LICT & 42.30 & 13.78 & 56.08 \\
-$10^6$ & int & Dynamic CHT & 45.00 & 5.35 & 50.35 \\
-$10^6$ & double & LICT & 52.21 & 16.16 & 68.37 \\
-$10^6$ & double & Dynamic CHT & 34.03 & 5.76 & 39.79 \\
+$10^6$ & int & LICT & 40.67 & 14.11 & 54.78 \\
+$10^6$ & int & Dynamic CHT & 42.40 & 6.51 & 48.91 \\
+$10^6$ & double & LICT & 60.95 & 16.51 & 77.47 \\
+$10^6$ & double & Dynamic CHT & 32.81 & 6.55 & 39.36 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:floating-point} presents the performance comparison when using double-precision coefficients ($k$, $b$) with integer query coordinates ($x$). Both structures exhibit comparable performance between integer and floating-point configurations. For $N = 10^6$, the LICT requires 52.21 ms for insertions with doubles versus 42.30 ms with integers, showing a modest increase due to double-precision arithmetic operations. The Dynamic CHT shows similar behavior (34.03 ms for doubles versus 45.00 ms for integers).
+Table~\ref{tab:floating-point} presents the performance comparison when using double-precision coefficients ($k$, $b$) with integer query coordinates ($x$). Both structures exhibit comparable performance between integer and floating-point configurations. For $N = 10^6$, the LICT requires 60.95 ms for insertions with doubles versus 40.67 ms with integers, showing a modest increase due to double-precision arithmetic operations. The Dynamic CHT shows similar behavior (32.81 ms for doubles versus 42.40 ms for integers).
 
 When using integer query coordinates with double-precision line coefficients, both structures maintain their relative performance characteristics. The LICT's tree traversal and line evaluation operations involve double-precision multiplication and addition, which incur slightly higher computational cost than integer operations but remain efficient. The Dynamic CHT's balanced tree structure handles the mixed-type configuration naturally, with intersection computations performed in double precision.
 
