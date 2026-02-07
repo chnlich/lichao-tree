@@ -164,7 +164,7 @@ Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CH
 \toprule
 \textbf{Characteristic} & \textbf{Dynamic CHT} & \textbf{LICT} \\
 \midrule
-Time Complexity & $O(\log n)$ amortized & $O(\log C)$ \\
+Time Complexity & $O(\log n)$ amortized & $O(\log C)$~\footnote{Line segment insertion requires $O(\log^2 C)$ time; see Section~\ref{sec:discussion}.} \\
 Space Complexity & $O(n)$ & $O(n \log C)$ worst case \\
 Intersection Calculations & Required & None \\
 Numerical Precision & Care required & Straightforward \\
@@ -389,7 +389,7 @@ Despite higher computational cost, the LICT offers significant advantages for pr
 
 \textbf{4. Extensibility.} The LICT's structure facilitates extensions that are difficult with the Dynamic CHT:
 \begin{itemize}
-    \item \textbf{Line segments:} Lines valid only on subranges $[l', r']$ integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm.
+    \item \textbf{Line segments:} Lines valid only on subranges $[l', r']$ integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion.
     \item \textbf{Persistence:} Path copying for versioned access requires minimal modification.
     \item \textbf{Higher dimensions:} Generalization to multi-dimensional query spaces follows naturally from the recursive structure.
 \end{itemize}
