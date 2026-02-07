@@ -158,12 +158,12 @@ vector<NCResult> experiment1_nc_regime() {
 // EXPERIMENT 2: FLOATING-POINT COMPARISON
 // ============================================================================
 
-// Double-precision Li Chao Tree
+// Double-precision Li Chao Tree (integer queries, double coefficients)
 namespace LC_Double {
 
 struct Line {
     double k, m;
-    double eval(double x) const { return k * x + m; }
+    double eval(llint x) const { return k * (double)x + m; }
 };
 
 struct Node {
@@ -174,38 +174,38 @@ struct Node {
 
 class LiChaoTree {
     Node* root = nullptr;
-    double min_x, max_x;
+    llint min_x, max_x;
     const double INF = 1e300;
 
-    void insert(Node* &node, Line new_line, double l, double r) {
+    void insert(Node* &node, Line new_line, llint l, llint r) {
         if (!node) {
             node = new Node(new_line);
             return;
         }
-        double mid = l + (r - l) / 2.0;
+        llint mid = l + (r - l) / 2;
         bool lef = new_line.eval(l) < node->line.eval(l);
         bool midf = new_line.eval(mid) < node->line.eval(mid);
 
         if (midf) {
             swap(node->line, new_line);
         }
-        if (l == r || fabs(r - l) < 1e-9) return;
+        if (l == r) return;
         if (lef != midf) {
             insert(node->left, new_line, l, mid);
         } else {
-            insert(node->right, new_line, mid, r);
+            insert(node->right, new_line, mid + 1, r);
         }
     }
 
-    double query(Node* node, double x, double l, double r) {
+    double query(Node* node, llint x, llint l, llint r) {
         if (!node) return INF;
-        double mid = l + (r - l) / 2.0;
+        llint mid = l + (r - l) / 2;
         double val = node->line.eval(x);
-        if (l == r || fabs(r - l) < 1e-9) return val;
+        if (l == r) return val;
         if (x <= mid) {
             return min(val, query(node->left, x, l, mid));
         } else {
-            return min(val, query(node->right, x, mid, r));
+            return min(val, query(node->right, x, mid + 1, r));
         }
     }
 
@@ -217,8 +217,8 @@ class LiChaoTree {
     }
 
 public:
-    LiChaoTree(double min_val = -1e6, double max_val = 1e6) : min_x(min_val), max_x(max_val) {}
-    
+    LiChaoTree(llint min_val = -1000000, llint max_val = 1000000) : min_x(min_val), max_x(max_val) {}
+
     ~LiChaoTree() {
         destroy(root);
     }
@@ -227,11 +227,11 @@ public:
         insert(root, {k, m}, min_x, max_x);
     }
 
-    double query(double x) {
+    double query(llint x) {
         double res = query(root, x, min_x, max_x);
         return (res >= INF/2) ? NAN : res;
     }
-    
+
     void clear() {
         destroy(root);
         root = nullptr;
@@ -240,22 +240,22 @@ public:
 
 }
 
-// Double-precision CHT
+// Double-precision CHT (integer queries, double coefficients)
 namespace CHT_Double {
 
 struct Line {
     mutable double k, m, p;
     bool operator<(const Line& o) const { return k < o.k; }
-    bool operator<(double x) const { return p < x; }
+    bool operator<(llint x) const { return p < (double)x; }
 };
 
 struct LineContainer : multiset<Line, less<>> {
     static const double inf;
-    
+
     double div(double a, double b) {
         return a / b;
     }
-    
+
     bool isect(iterator x, iterator y) {
         if (y == end()) return x->p = inf, 0;
         if (fabs(x->k - y->k) < 1e-12) {
@@ -265,7 +265,7 @@ struct LineContainer : multiset<Line, less<>> {
         }
         return x->p >= y->p;
     }
-    
+
     void add(double k, double m) {
         auto z = insert({k, m, 0}), y = z++, x = y;
         while (isect(y, z)) z = erase(z);
@@ -273,13 +273,13 @@ struct LineContainer : multiset<Line, less<>> {
         while ((y = x) != begin() && (--x)->p >= y->p)
             isect(x, erase(y));
     }
-    
-    double query(double x) {
+
+    double query(llint x) {
         if (empty()) return 0;
         auto l = *lower_bound(x);
-        return l.k * x + l.m;
+        return l.k * (double)x + l.m;
     }
-    
+
     void clear_all() {
         clear();
     }
@@ -294,11 +294,11 @@ public:
         lc.add(-k, -m);
     }
 
-    double query(double x) {
+    double query(llint x) {
         if (lc.empty()) return NAN;
         return -lc.query(x);
     }
-    
+
     void clear() {
         lc.clear_all();
     }
@@ -342,22 +342,22 @@ public:
         return {inserts, queries};
     }
     
-    // Generate double operations
-    pair<vector<pair<double,double>>, vector<double>> generate_double(int n) {
+    // Generate double operations (double k,b but integer x queries)
+    pair<vector<pair<double,double>>, vector<llint>> generate_double(int n) {
         vector<pair<double,double>> inserts;
-        vector<double> queries;
-        
+        vector<llint> queries;
+
         uniform_real_distribution<double> dist_k(-1e6, 1e6);
         uniform_real_distribution<double> dist_b(-1e6, 1e6);
-        uniform_real_distribution<double> dist_x(-1e6, 1e6);
-        
+        uniform_int_distribution<llint> dist_x(-1000000, 1000000);
+
         for (int i = 0; i < n / 2; ++i) {
             inserts.push_back({dist_k(rng), dist_b(rng)});
         }
         for (int i = 0; i < n / 2; ++i) {
             queries.push_back(dist_x(rng));
         }
-        
+
         return {inserts, queries};
     }
 };
@@ -422,25 +422,25 @@ FPResult run_fp_cht_int(const vector<pair<llint,llint>>& inserts, const vector<l
     return res;
 }
 
-FPResult run_fp_lichao_double(const vector<pair<double,double>>& inserts, const vector<double>& queries) {
+FPResult run_fp_lichao_double(const vector<pair<double,double>>& inserts, const vector<llint>& queries) {
     FPResult res;
-    LC_Double::LiChaoTree lict(-1e6, 1e6);
-    
+    LC_Double::LiChaoTree lict(-1000000, 1000000);
+
     auto start = high_resolution_clock::now();
     for (const auto& ins : inserts) {
         lict.add_line(ins.first, ins.second);
     }
     auto mid = high_resolution_clock::now();
-    
+
     double sum = 0;
     int issues = 0;
-    for (double x : queries) {
+    for (llint x : queries) {
         double val = lict.query(x);
         if (std::isnan(val) || std::isinf(val)) issues++;
         else sum += val;
     }
     auto end = high_resolution_clock::now();
-    
+
     res.insert_time_ms = duration_cast<microseconds>(mid - start).count() / 1000.0;
     res.query_time_ms = duration_cast<microseconds>(end - mid).count() / 1000.0;
     res.total_time_ms = duration_cast<microseconds>(end - start).count() / 1000.0;
@@ -448,29 +448,29 @@ FPResult run_fp_lichao_double(const vector<pair<double,double>>& inserts, const 
     res.precision_issues = issues;
     res.algorithm = "LICT";
     res.type = "double";
-    
+
     return res;
 }
 
-FPResult run_fp_cht_double(const vector<pair<double,double>>& inserts, const vector<double>& queries) {
+FPResult run_fp_cht_double(const vector<pair<double,double>>& inserts, const vector<llint>& queries) {
     FPResult res;
     CHT_Double::DynamicCHT cht;
-    
+
     auto start = high_resolution_clock::now();
     for (const auto& ins : inserts) {
         cht.add_line(ins.first, ins.second);
     }
     auto mid = high_resolution_clock::now();
-    
+
     double sum = 0;
     int issues = 0;
-    for (double x : queries) {
+    for (llint x : queries) {
         double val = cht.query(x);
         if (std::isnan(val) || std::isinf(val)) issues++;
         else sum += val;
     }
     auto end = high_resolution_clock::now();
-    
+
     res.insert_time_ms = duration_cast<microseconds>(mid - start).count() / 1000.0;
     res.query_time_ms = duration_cast<microseconds>(end - mid).count() / 1000.0;
     res.total_time_ms = duration_cast<microseconds>(end - start).count() / 1000.0;
@@ -478,7 +478,7 @@ FPResult run_fp_cht_double(const vector<pair<double,double>>& inserts, const vec
     res.precision_issues = issues;
     res.algorithm = "Dynamic CHT";
     res.type = "double";
-    
+
     return res;
 }
 
