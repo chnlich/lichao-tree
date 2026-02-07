@@ -13,6 +13,13 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{amsthm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -20,22 +27,22 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,
-    breaklines=true,
-    captionpos=b,
-    keepspaces=true,
-    numbers=left,
-    numbersep=5pt,
-    showspaces=false,
-    showstringspaces=false,
-    showtabs=false,
-    tabsize=2
+backgroundcolor=\color{backcolour},
+commentstyle=\color{codegreen},
+keywordstyle=\color{magenta},
+numberstyle=\tiny\color{codegray},
+stringstyle=\color{codepurple},
+basicstyle=\ttfamily\footnotesize,
+breakatwhitespace=false,
+breaklines=true,
+captionpos=b,
+keepspaces=true,
+numbers=left,
+numbersep=5pt,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2
 }
 \lstset{style=mystyle}
 
@@ -57,8 +64,8 @@ Dynamic Lower Envelope maintenance is a fundamental problem in computational geo
 
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
-    \item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
-    \item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + b_i\}$ over all lines currently in the structure.
+\item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
+\item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + b_i\}$ over all lines currently in the structure.
 \end{enumerate}
 
 The structure also supports line segments (lines defined only on finite intervals $[x_l, x_r]$) in addition to infinite lines.
@@ -112,39 +119,39 @@ Each node in the tree represents an interval $[\text{left}, \text{right}]$ and s
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[scale=1.0]
-    % Draw axes
-    \draw[->] (0,0) -- (10,0) node[right] {$x$};
-    \draw[->] (0,0) -- (0,5) node[above] {$y$};
-    
-    % Draw interval [left, right] on x-axis
-    \draw[thick] (1,0.1) -- (1,-0.1) node[below] {\text{left}};
-    \draw[thick] (9,0.1) -- (9,-0.1) node[below] {\text{right}};
-    \draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[\text{left}, \text{right}]$};
-    
-    % Draw midpoint
-    \draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$\text{mid}$};
-    \draw[thick] (5,0.1) -- (5,-0.1);
-    
-    % Draw two intersecting lines
-    % Line A: y = 0.3x + 1 (stored at node - lower at midpoint)
-    \draw[thick, blue] (0.5,1.15) -- (9.5,3.85) node[right] {Line $A$ (stored)};
-    % Line B: y = -0.4x + 5 (routed to left child - lower at left)
-    \draw[thick, red, dashed] (0.5,4.8) -- (9.5,1.2) node[right] {Line $B$ (routed)};
-    
-    % Mark intersection point
-    \filldraw[black] (5.714,2.714) circle (2pt);
-    \node[above right] at (5.714,2.714) {\small intersection};
-    
-    % Mark values at midpoint
-    \filldraw[blue] (5,2.5) circle (2pt);
-    \filldraw[red] (5,3.0) circle (2pt);
-    \draw[thick, <->] (5.3,2.5) -- (5.3,3.0);
-    \node[right] at (5.4,2.75) {\small $A(\text{mid}) < B(\text{mid})$};
-    
-    % Mark values at left endpoint
-    \filldraw[blue] (1,1.3) circle (2pt);
-    \filldraw[red] (1,4.6) circle (2pt);
-    \node[left] at (0.9,4.6) {\small $B(\text{left}) < A(\text{left})$};
+% Draw axes
+\draw[->] (0,0) -- (10,0) node[right] {$x$};
+\draw[->] (0,0) -- (0,5) node[above] {$y$};
+
+% Draw interval [left, right] on x-axis
+\draw[thick] (1,0.1) -- (1,-0.1) node[below] {\text{left}};
+\draw[thick] (9,0.1) -- (9,-0.1) node[below] {\text{right}};
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[\text{left}, \text{right}]$};
+
+% Draw midpoint
+\draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$\text{mid}$};
+\draw[thick] (5,0.1) -- (5,-0.1);
+
+% Draw two intersecting lines
+% Line A: y = 0.3x + 1 (stored at node - lower at midpoint)
+\draw[thick, blue] (0.5,1.15) -- (9.5,3.85) node[right] {Line $A$ (stored)};
+% Line B: y = -0.4x + 5 (routed to left child - lower at left)
+\draw[thick, red, dashed] (0.5,4.8) -- (9.5,1.2) node[right] {Line $B$ (routed)};
+
+% Mark intersection point
+\filldraw[black] (5.714,2.714) circle (2pt);
+\node[above right] at (5.714,2.714) {\small intersection};
+
+% Mark values at midpoint
+\filldraw[blue] (5,2.5) circle (2pt);
+\filldraw[red] (5,3.0) circle (2pt);
+\draw[thick, <->] (5.3,2.5) -- (5.3,3.0);
+\node[right] at (5.4,2.75) {\small $A(\text{mid}) < B(\text{mid})$};
+
+% Mark values at left endpoint
+\filldraw[blue] (1,1.3) circle (2pt);
+\filldraw[red] (1,4.6) circle (2pt);
+\node[left] at (0.9,4.6) {\small $B(\text{left}) < A(\text{left})$};
 \end{tikzpicture}
 \caption{Interval Advantage Line Diagram. The node stores Line $A$ because it achieves the lower value at the midpoint. Line $B$ is routed to the left child where it may be optimal.}
 \label{fig:interval-advantage}
@@ -154,16 +161,16 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 
 \textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint:
 \begin{itemize}
-    \item If $A$ achieves a lower value than $B$ at $\text{mid}$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $\text{mid}$ containing that endpoint (since two lines intersect at most once).
-    \item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
+\item If $A$ achieves a lower value than $B$ at $\text{mid}$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $\text{mid}$ containing that endpoint (since two lines intersect at most once).
+\item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
 \end{itemize}
 
 At query time, we traverse the path to $x_0$ and take the minimum over all stored lines on that path. For any line $L$ and query point $x_0$:
 \begin{enumerate}
-    \item Line $L$ is routed down exactly one root-to-leaf path.
-    \item The query for $x_0$ traverses exactly this path (the unique path whose intervals all contain $x_0$).
-    \item Line $L$ is stored at some node on this path if and only if $L$ achieved the minimum value at that node's midpoint.
-    \item Therefore, all lines that could potentially be optimal at $x_0$ are evaluated.
+\item Line $L$ is routed down exactly one root-to-leaf path.
+\item The query for $x_0$ traverses exactly this path (the unique path whose intervals all contain $x_0$).
+\item Line $L$ is stored at some node on this path if and only if $L$ achieved the minimum value at that node's midpoint.
+\item Therefore, all lines that could potentially be optimal at $x_0$ are evaluated.
 \end{enumerate}
 The minimum among stored lines on the path equals the global lower envelope at $x_0$.
 
@@ -171,16 +178,16 @@ Insertion proceeds as follows: if the new line yields a lower value at the midpo
 
 The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define the comparison indicators:
 \begin{align*}
-    L &= \mathbb{I}[f_\text{new}(\text{left}) < f_\text{stored}(\text{left})] \\
-    M &= \mathbb{I}[f_\text{new}(\text{mid}) < f_\text{stored}(\text{mid})]
+L &= \mathbb{I}[f_\text{new}(\text{left}) < f_\text{stored}(\text{left})] \\
+M &= \mathbb{I}[f_\text{new}(\text{mid}) < f_\text{stored}(\text{mid})]
 \end{align*}
 where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is:
 \begin{equation*}
-    \text{child} =
-    \begin{cases}
-        \text{left} & \text{if } L \neq M \\
-        \text{right} & \text{if } L = M
-    \end{cases}
+\text{child} =
+\begin{cases}
+\text{left} & \text{if } L \neq M \\
+\text{right} & \text{if } L = M
+\end{cases}
 \end{equation*}
 This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
@@ -205,9 +212,9 @@ We proceed by induction on the sequence of insertions.
 
 \textbf{Inductive step:} Assume the invariant holds before inserting a new line $L_{\text{new}}$. Consider the insertion path from root to leaf. At each node $v$ along this path:
 \begin{enumerate}
-    \item Let $L_{\text{stored}}$ be the line currently at $v$.
-    \item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$, we keep $L_{\text{stored}}$ and route $L_{\text{new}}$ to a child. The invariant at $v$ remains satisfied.
-    \item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$, we swap the lines, storing $L_{\text{new}}$ and routing $L_{\text{stored}}$ to a child. The invariant at $v$ is now satisfied by $L_{\text{new}}$.
+\item Let $L_{\text{stored}}$ be the line currently at $v$.
+\item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$, we keep $L_{\text{stored}}$ and route $L_{\text{new}}$ to a child. The invariant at $v$ remains satisfied.
+\item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$, we swap the lines, storing $L_{\text{new}}$ and routing $L_{\text{stored}}$ to a child. The invariant at $v$ is now satisfied by $L_{\text{new}}$.
 \end{enumerate}
 The routed line proceeds to exactly one child (determined by the intersection point location), so the inductive hypothesis applies to subtrees. By induction, the invariant holds after all insertions.
 \end{proof}
@@ -221,8 +228,8 @@ Consider any line $L$ in the structure and the query point $x_0$. Let $P$ be the
 
 We claim $L$ is evaluated at $x_0$ if and only if $x_0$ lies in the interval where $L$ is optimal among lines routed through some node on $P_L$. There are two cases:
 \begin{enumerate}
-    \item If $P_L = P$, then $L$ is stored at some node on $P$ (specifically, at the deepest node where it achieved minimum at the midpoint), and is evaluated during the query.
-    \item If $P_L \neq P$, let $v$ be the deepest node common to both paths. Since $x_0$ is not in the child interval that $L$ was routed to, $x_0$ lies on the opposite side of the midpoint from where $L$ could potentially be better than the stored line. By the single-intersection property of lines, $L$ cannot be optimal at $x_0$.
+\item If $P_L = P$, then $L$ is stored at some node on $P$ (specifically, at the deepest node where it achieved minimum at the midpoint), and is evaluated during the query.
+\item If $P_L \neq P$, let $v$ be the deepest node common to both paths. Since $x_0$ is not in the child interval that $L$ was routed to, $x_0$ lies on the opposite side of the midpoint from where $L$ could potentially be better than the stored line. By the single-intersection property of lines, $L$ cannot be optimal at $x_0$.
 \end{enumerate}
 Thus, exactly those lines that could be optimal at $x_0$ are evaluated, and the minimum over evaluated lines equals the global minimum.
 \end{proof}
@@ -254,9 +261,9 @@ Each line insertion creates at most one new node per level along its insertion p
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
 \begin{itemize}
-    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C = \frac{\text{coordinate range}}{\text{precision level}}$.
-    \item \textbf{Space Complexity:} At most $O(n \log C)$ nodes in the worst case when all lines follow disjoint paths through the tree. In practice, heavy node sharing occurs as lines with similar slopes traverse common paths, typically resulting in significantly lower memory usage.
-    \item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line evaluations ($kx+b$) at query points. This avoids the division operations ($\frac{b_2-b_1}{k_1-k_2}$) required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
+\item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C = \frac{\text{coordinate range}}{\text{precision level}}$.
+\item \textbf{Space Complexity:} At most $O(n \log C)$ nodes in the worst case when all lines follow disjoint paths through the tree. In practice, heavy node sharing occurs as lines with similar slopes traverse common paths, typically resulting in significantly lower memory usage.
+\item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line evaluations ($kx+b$) at query points. This avoids the division operations ($\frac{b_2-b_1}{k_1-k_2}$) required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
 \end{itemize}
 
 \textbf{Deletion.} Unlike the Dynamic CHT, which can support deletion of arbitrary lines in $O(\log n)$ amortized time, the standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
@@ -309,42 +316,42 @@ The choice between these approaches involves several trade-offs:
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[scale=0.9, level distance=1.5cm,
-    level 1/.style={sibling distance=6cm},
-    level 2/.style={sibling distance=3cm},
-    level 3/.style={sibling distance=1.5cm}]
-    
-    % Tree structure showing segment decomposition
-    \node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 8]$}
-        child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 4]$}
-            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[0, 2]$}
-                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[0,1]$}}
-                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[1,2]$}}
-            }
-            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[2, 4]$}
-                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[2,3]$}}
-                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[3,4]$}}
-            }
-        }
-        child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[4, 8]$}
-            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[4, 6]$}
-                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[4,5]$}}
-                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[5,6]$}}
-            }
-            child {node[draw, circle, fill=white, minimum size=0.8cm] {$[6, 8]$}
-                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[6,7]$}}
-                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[7,8]$}}
-            }
-        };
-    
-    % Segment bracket above
-    \draw[thick, decorate, decoration={brace, amplitude=8pt}] (0,0.8) -- (5.5,0.8);
-    \node at (2.75, 1.6) {Segment $[x_l, x_r] = [1, 5]$};
-    
-    % Legend
-    \node[draw, circle, fill=blue!20, minimum size=0.5cm] at (-2, -5.5) {};
-    \node[right] at (-1.7, -5.5) {Canonical nodes ($O(\log C)$)};
-    \node[draw, circle, fill=gray!20, minimum size=0.5cm] at (2.5, -5.5) {};
-    \node[right] at (2.8, -5.5) {Visited but not stored};
+level 1/.style={sibling distance=6cm},
+level 2/.style={sibling distance=3cm},
+level 3/.style={sibling distance=1.5cm}]
+
+% Tree structure showing segment decomposition
+\node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 8]$}
+child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 4]$}
+child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[0, 2]$}
+child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[0,1]$}}
+child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[1,2]$}}
+}
+child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[2, 4]$}
+child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[2,3]$}}
+child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[3,4]$}}
+}
+}
+child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[4, 8]$}
+child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[4, 6]$}
+child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[4,5]$}}
+child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[5,6]$}}
+}
+child {node[draw, circle, fill=white, minimum size=0.8cm] {$[6, 8]$}
+child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[6,7]$}}
+child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[7,8]$}}
+}
+};
+
+% Segment bracket above
+\draw[thick, decorate, decoration={brace, amplitude=8pt}] (0,0.8) -- (5.5,0.8);
+\node at (2.75, 1.6) {Segment $[x_l, x_r] = [1, 5]$};
+
+% Legend
+\node[draw, circle, fill=blue!20, minimum size=0.5cm] at (-2, -5.5) {};
+\node[right] at (-1.7, -5.5) {Canonical nodes ($O(\log C)$)};
+\node[draw, circle, fill=gray!20, minimum size=0.5cm] at (2.5, -5.5) {};
+\node[right] at (2.8, -5.5) {Visited but not stored};
 \end{tikzpicture}
 \caption{Segment Decomposition Diagram. A segment $[x_l, x_r]$ spanning multiple intervals decomposes into $O(\log C)$ canonical nodes (blue) that completely cover the segment. The insertion visits $O(\log C)$ additional nodes (gray) but skips their subtrees when outside the segment range.}
 \label{fig:segment-decomposition}
@@ -368,14 +375,14 @@ The LICT is implemented as a binary tree where each node represents an interval 
 
 \begin{lstlisting}[language=C++, caption={Node Structure}]
 struct Line {
-    ll k, m;
-    ll eval(ll x) const { return k * x + m; }
+ll k, m;
+ll eval(ll x) const { return k * x + m; }
 };
 
 struct Node {
-    Line line;
-    Node *left = nullptr, *right = nullptr;
-    Node(Line l) : line(l) {}
+Line line;
+Node *left = nullptr, *right = nullptr;
+Node(Line l) : line(l) {}
 };
 \end{lstlisting}
 
@@ -389,22 +396,22 @@ Algorithm~\ref{alg:insert} presents the insertion procedure. At each node, the n
 \begin{algorithmic}[1]
 \Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
 \If{$node$ is null}
-    \State $node \gets \text{new Node}(new\_line)$
-    \State \Return
+\State $node \gets \text{new Node}(new\_line)$
+\State \Return
 \EndIf
 \State $mid \gets l + (r - l) / 2$
 \State $lef \gets new\_line.eval(l) < node.line.eval(l)$
 \State $midf \gets new\_line.eval(mid) < node.line.eval(mid)$
 \If{$midf$}
-    \State swap($node.line$, $new\_line$)
+\State swap($node.line$, $new\_line$)
 \EndIf
 \If{$l = r$}
-    \State \Return
+\State \Return
 \EndIf
 \If{$lef \neq midf$}
-    \State \Call{Insert}{$node.left$, $new\_line$, $l$, $mid$}
+\State \Call{Insert}{$node.left$, $new\_line$, $l$, $mid$}
 \Else
-    \State \Call{Insert}{$node.right$, $new\_line$, $mid+1$, $r$}
+\State \Call{Insert}{$node.right$, $new\_line$, $mid+1$, $r$}
 \EndIf
 \end{algorithmic}
 \end{algorithm}
@@ -418,17 +425,17 @@ Algorithm~\ref{alg:query} presents the query procedure. The algorithm traverses 
 \Require Node pointer $node$, query coordinate $x$, interval $[l, r]$
 \Ensure Minimum value at coordinate $x$
 \If{$node$ is null}
-    \State \Return $+\infty$
+\State \Return $+\infty$
 \EndIf
 \State $mid \gets l + (r - l) / 2$
 \State $val \gets node.line.eval(x)$
 \If{$l = r$}
-    \State \Return $val$
+\State \Return $val$
 \EndIf
 \If{$x \leq mid$}
-    \State \Return $\min(val, \text{\Call{Query}{$node.left$, $x$, $l$, $mid$}})$
+\State \Return $\min(val, \text{\Call{Query}{$node.left$, $x$, $l$, $mid$}})$
 \Else
-    \State \Return $\min(val, \text{\Call{Query}{$node.right$, $x$, $mid+1$, $r$}})$
+\State \Return $\min(val, \text{\Call{Query}{$node.right$, $x$, $mid+1$, $r$}})$
 \EndIf
 \end{algorithmic}
 \end{algorithm}
@@ -441,10 +448,10 @@ The LICT uses dynamic node allocation: nodes are created only when a line traver
 
 \begin{lstlisting}[language=C++, caption={Tree Destruction}]
 void destroy(Node* node) {
-    if (!node) return;
-    destroy(node->left);
-    destroy(node->right);
-    delete node;
+if (!node) return;
+destroy(node->left);
+destroy(node->right);
+delete node;
 }
 \end{lstlisting}
 
@@ -464,33 +471,33 @@ All benchmarks were conducted with the following configuration.
 
 \textbf{Hardware Specifications:}
 \begin{itemize}
-    \item \textbf{CPU:} Intel Xeon @ 2.20GHz (Model 79, Broadwell microarchitecture)
-    \item \textbf{Core Configuration:} 1 core, 2 threads (SMT enabled)
-    \item \textbf{L1 Cache:} 32 KiB L1 data cache, 32 KiB L1 instruction cache
-    \item \textbf{L2 Cache:} 256 KiB
-    \item \textbf{L3 Cache:} 55 MiB (shared)
-    \item \textbf{Memory:} 4 GB DRAM
-    \item \textbf{Platform:} Linux x86\_64 (KVM virtualized)
+\item \textbf{CPU:} Intel Xeon @ 2.20GHz (Model 79, Broadwell microarchitecture)
+\item \textbf{Core Configuration:} 1 core, 2 threads (SMT enabled)
+\item \textbf{L1 Cache:} 32 KiB L1 data cache, 32 KiB L1 instruction cache
+\item \textbf{L2 Cache:} 256 KiB
+\item \textbf{L3 Cache:} 55 MiB (shared)
+\item \textbf{Memory:} 4 GB DRAM
+\item \textbf{Platform:} Linux x86\_64 (KVM virtualized)
 \end{itemize}
 
 \textbf{Software Configuration:}
 \begin{itemize}
-    \item \textbf{Compiler:} g++ 11.4.0
-    \item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
-    \item \textbf{Operating System:} Linux x86\_64
+\item \textbf{Compiler:} g++ 11.4.0
+\item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
+\item \textbf{Operating System:} Linux x86\_64
 \end{itemize}
 
 \textbf{Experimental Parameters:}
 \begin{itemize}
-    \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
-    \item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
-    \item \textbf{Random seed:} 42 (fixed for reproducibility)
-    \item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
-    \item \textbf{Distributions:} We write $X \sim U(a, b)$ to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
-    \begin{itemize}
-        \item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size: $\Theta(\sqrt{n})$.
-        \item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
-    \end{itemize}
+\item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
+\item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
+\item \textbf{Random seed:} 42 (fixed for reproducibility)
+\item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
+\item \textbf{Distributions:} We write $X \sim U(a, b)$ to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
+\begin{itemize}
+\item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size: $\Theta(\sqrt{n})$.
+\item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
+\end{itemize}
 \end{itemize}
 
 \subsection{Results}
@@ -526,9 +533,9 @@ To validate numerical stability claims and assess behavior under extreme conditi
 When lines have nearly identical slopes, CHT intersection calculations become numerically unstable. We test with slopes differing by machine epsilon multiples:
 
 \begin{itemize}
-    \item \textbf{Configuration:} $k_i = 1.0 + i \cdot \delta$ for $i \in [1, n]$, with $\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}$ (approaching double precision limits)
-    \item \textbf{Intercepts:} $m_i \sim U(-10^9, 10^9)$
-    \item \textbf{Query points:} $x \sim U(-10^6, 10^6)$
+\item \textbf{Configuration:} $k_i = 1.0 + i \cdot \delta$ for $i \in [1, n]$, with $\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}$ (approaching double precision limits)
+\item \textbf{Intercepts:} $m_i \sim U(-10^9, 10^9)$
+\item \textbf{Query points:} $x \sim U(-10^6, 10^6)$
 \end{itemize}
 
 \begin{table}[h]
@@ -553,8 +560,8 @@ Table~\ref{tab:parallel} shows that as slopes converge, the Dynamic CHT suffers 
 Operations near floating-point overflow limits stress numerical precision:
 
 \begin{itemize}
-    \item \textbf{Configuration:} $k, m \sim U(-10^{300}, 10^{300})$ (near double max $\approx 1.8 \times 10^{308}$)
-    \item \textbf{Query points:} $x \sim U(-10^{150}, 10^{150})$ ensuring $kx + b$ stays representable
+\item \textbf{Configuration:} $k, m \sim U(-10^{300}, 10^{300})$ (near double max $\approx 1.8 \times 10^{308}$)
+\item \textbf{Query points:} $x \sim U(-10^{150}, 10^{150})$ ensuring $kx + b$ stays representable
 \end{itemize}
 
 \begin{table}[h]
@@ -579,8 +586,8 @@ The LICT avoids overflow in intermediate calculations by evaluating $kx + b$ dir
 Real-world data often mixes magnitudes, testing dynamic range handling:
 
 \begin{itemize}
-    \item \textbf{Configuration:} 50\% of lines with $k, m \sim U(-10^9, 10^9)$, 50\% with $k, m \sim U(-10^{-6}, 10^{-6})$
-    \item \textbf{Query points:} $x \sim U(-10^3, 10^3)$
+\item \textbf{Configuration:} 50\% of lines with $k, m \sim U(-10^9, 10^9)$, 50\% with $k, m \sim U(-10^{-6}, 10^{-6})$
+\item \textbf{Query points:} $x \sim U(-10^3, 10^3)$
 \end{itemize}
 
 The LICT correctly handles all query points with relative error bounded by $2\epsilon_m$. The Dynamic CHT exhibits erratic behavior when large and small magnitude lines intersect, as the intersection formula produces subnormal numbers and precision loss.
@@ -605,8 +612,8 @@ The LICT occupies a distinct position in the design space of dynamic line contai
 
 Analysis of our reference implementations yields:
 \begin{itemize}
-    \item \textbf{LICT:} CC = 6 for insertion (3 binary decision points: midpoint comparison, left/mid comparison, child selection), CC = 2 for query (1 binary decision per level)
-    \item \textbf{Dynamic CHT:} CC = 12 for insertion (slope ordering, hull position determination, intersection calculations, multiple edge cases), CC = 4 for query (hull binary search with boundary handling)
+\item \textbf{LICT:} CC = 6 for insertion (3 binary decision points: midpoint comparison, left/mid comparison, child selection), CC = 2 for query (1 binary decision per level)
+\item \textbf{Dynamic CHT:} CC = 12 for insertion (slope ordering, hull position determination, intersection calculations, multiple edge cases), CC = 4 for query (hull binary search with boundary handling)
 \end{itemize}
 
 The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersection point computation $\frac{b_2-b_1}{k_1-k_2}$ with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
@@ -615,9 +622,9 @@ The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersect
 
 \textbf{Theoretical error analysis.} Consider lines with slopes $k_1, k_2$ and intercepts $b_1, b_2$ represented in floating-point with machine epsilon $\epsilon_m$. The intersection computation in CHT involves:
 \begin{enumerate}
-    \item \textbf{Numerator:} $\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1)$, where $|\delta_1| \leq \epsilon_m$
-    \item \textbf{Denominator:} $\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2)$, where $|\delta_2| \leq \epsilon_m$
-    \item \textbf{Division:} $\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3)$, where $|\delta_3| \leq \epsilon_m$
+\item \textbf{Numerator:} $\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1)$, where $|\delta_1| \leq \epsilon_m$
+\item \textbf{Denominator:} $\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2)$, where $|\delta_2| \leq \epsilon_m$
+\item \textbf{Division:} $\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3)$, where $|\delta_3| \leq \epsilon_m$
 \end{enumerate}
 
 When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For $\Delta k = k_1 - k_2$, the condition number of intersection computation is:
