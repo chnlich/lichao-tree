@@ -12,6 +12,7 @@
 \usepackage{natbib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{tikz}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -105,6 +106,47 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 Each node in the tree represents an interval $[\text{left}, \text{right}]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint $\text{mid} = (\text{left}+\text{right})/2$ is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
 \textbf{Key invariant (local optimality).} A line stored at a node achieves the minimum value among all lines routed through that node at the midpoint of the node's interval. Formally, for node with interval $[\text{left}, \text{right}]$ and midpoint $\text{mid} = (\text{left}+\text{right})/2$, the stored line minimizes $kx + b$ at $x = \text{mid}$ among all lines routed to that node.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.0]
+    % Draw axes
+    \draw[->] (0,0) -- (10,0) node[right] {$x$};
+    \draw[->] (0,0) -- (0,5) node[above] {$y$};
+    
+    % Draw interval [left, right] on x-axis
+    \draw[thick] (1,0.1) -- (1,-0.1) node[below] {\text{left}};
+    \draw[thick] (9,0.1) -- (9,-0.1) node[below] {\text{right}};
+    \draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[\text{left}, \text{right}]$};
+    
+    % Draw midpoint
+    \draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$\text{mid}$};
+    \draw[thick] (5,0.1) -- (5,-0.1);
+    
+    % Draw two intersecting lines
+    % Line A: y = 0.3x + 1 (stored at node - lower at midpoint)
+    \draw[thick, blue] (0.5,1.15) -- (9.5,3.85) node[right] {Line $A$ (stored)};
+    % Line B: y = -0.4x + 5 (routed to left child - lower at left)
+    \draw[thick, red, dashed] (0.5,4.8) -- (9.5,1.2) node[right] {Line $B$ (routed)};
+    
+    % Mark intersection point
+    \filldraw[black] (5.714,2.714) circle (2pt);
+    \node[above right] at (5.714,2.714) {\small intersection};
+    
+    % Mark values at midpoint
+    \filldraw[blue] (5,2.5) circle (2pt);
+    \filldraw[red] (5,3.0) circle (2pt);
+    \draw[thick, <->] (5.3,2.5) -- (5.3,3.0);
+    \node[right] at (5.4,2.75) {\small $A(\text{mid}) < B(\text{mid})$};
+    
+    % Mark values at left endpoint
+    \filldraw[blue] (1,1.3) circle (2pt);
+    \filldraw[red] (1,4.6) circle (2pt);
+    \node[left] at (0.9,4.6) {\small $B(\text{left}) < A(\text{left})$};
+\end{tikzpicture}
+\caption{Interval Advantage Line Diagram. The node stores Line $A$ because it achieves the lower value at the midpoint. Line $B$ is routed to the left child where it may be optimal.}
+\label{fig:interval-advantage}
+\end{figure}
 
 Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at $m$, so the stored line is not necessarily globally optimal at that coordinate.
 
@@ -260,7 +302,51 @@ The choice between these approaches involves several trade-offs:
 
 \textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as $\frac{b_2-b_1}{k_1-k_2}$) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
 
-\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion. Persistence via path copying and higher-dimensional generalizations also follow naturally from the recursive structure.
+\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.9, level distance=1.5cm,
+    level 1/.style={sibling distance=6cm},
+    level 2/.style={sibling distance=3cm},
+    level 3/.style={sibling distance=1.5cm}]
+    
+    % Tree structure showing segment decomposition
+    \node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 8]$}
+        child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 4]$}
+            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[0, 2]$}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[0,1]$}}
+                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[1,2]$}}
+            }
+            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[2, 4]$}
+                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[2,3]$}}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[3,4]$}}
+            }
+        }
+        child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[4, 8]$}
+            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[4, 6]$}
+                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[4,5]$}}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[5,6]$}}
+            }
+            child {node[draw, circle, fill=white, minimum size=0.8cm] {$[6, 8]$}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[6,7]$}}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[7,8]$}}
+            }
+        };
+    
+    % Segment bracket above
+    \draw[thick, decorate, decoration={brace, amplitude=8pt}] (0,0.8) -- (5.5,0.8);
+    \node at (2.75, 1.6) {Segment $[x_l, x_r] = [1, 5]$};
+    
+    % Legend
+    \node[draw, circle, fill=blue!20, minimum size=0.5cm] at (-2, -5.5) {};
+    \node[right] at (-1.7, -5.5) {Canonical nodes ($O(\log C)$)};
+    \node[draw, circle, fill=gray!20, minimum size=0.5cm] at (2.5, -5.5) {};
+    \node[right] at (2.8, -5.5) {Visited but not stored};
+\end{tikzpicture}
+\caption{Segment Decomposition Diagram. A segment $[x_l, x_r]$ spanning multiple intervals decomposes into $O(\log C)$ canonical nodes (blue) that completely cover the segment. The insertion visits $O(\log C)$ additional nodes (gray) but skips their subtrees when outside the segment range.}
+\label{fig:segment-decomposition}
+\end{figure} Persistence via path copying and higher-dimensional generalizations also follow naturally from the recursive structure.
 
 \subsection{Trade-off Summary}
 
@@ -597,12 +683,33 @@ The Li-Chao tree represents a distinct point in the design space, trading consta
 
 Since its introduction in 2012, the Li-Chao tree has found widespread adoption in competitive programming and algorithmic education. Its continued relevance demonstrates that optimal asymptotic complexity is not the sole criterion for practical data structure selection; implementation clarity and extensibility play equally important roles in determining utility.
 
-\begin{thebibliography}{5}
+\begin{thebibliography}{9}
 
 \bibitem{overmars1981}
 Overmars, M.H. and van Leeuwen, J.
 \newblock Maintenance of configurations in the plane.
 \newblock \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
+
+\bibitem{imai2014}
+Imai, Y., Iwata, Y., and Seki, T.
+\newblock Segment Tree Beats: Efficient algorithms for range aggregate queries with range chmin/chmax operations.
+\newblock \emph{ACM-ICPC World Finals 2014}, 2014.
+\newblock \url{https://codeforces.com/blog/entry/57319}.
+
+\bibitem{basch1996}
+Basch, J., Guibas, L.J., and Ramkumar, G.D.
+\newblock Kinetic convex hulls.
+\newblock \emph{Proceedings of the 12th Annual ACM Symposium on Computational Geometry (SoCG)}, pp.~50--58, 1996.
+
+\bibitem{basch1997}
+Basch, J., Guibas, L.J., and Hershberger, J.
+\newblock Data structures for mobile data.
+\newblock \emph{Journal of Algorithms}, 31(1):1--28, 1999.
+
+\bibitem{aggarwal1987}
+Aggarwal, A. and Tokuyama, T.
+\newblock Consecutive interval query and dynamic programming on intervals.
+\newblock \emph{Discrete Applied Mathematics}, 20(1):1--11, 1988.
 
 \bibitem{zjoi2012}
 Li Chao.
