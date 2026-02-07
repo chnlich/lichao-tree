@@ -48,12 +48,12 @@
 \maketitle
 
 \begin{abstract}
-The Li-Chao tree (LICT) was informally introduced in a lecture in 2012 and subsequently gained widespread adoption in the competitive programming community for dynamic maintenance of the lower (or upper) envelope of a set of lines. Despite its practical utility, the structure has not been formally documented in the academic literature. This technical report formalizes the LICT and provides a comprehensive analysis of its properties and performance. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
+The Li-Chao tree (LICT), originally emerging from the algorithmic competition community, has gained widespread adoption for dynamic maintenance of the lower (or upper) envelope of a set of lines. Despite its practical utility, the structure has not been formally documented in the academic literature. This paper formalizes the LICT and provides a comprehensive analysis of its properties and performance. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
 \end{abstract}
 
 \section{Introduction}
 
-Dynamic Lower Envelope maintenance is a fundamental problem in computational geometry with extensive applications. This technical report focuses on the Li-Chao tree (LICT), a data structure that maintains a set of linear functions while supporting insertion and query operations. The problem is defined as follows: given a dynamic set of linear functions $y = kx + b$, support efficient insertion of new lines and querying the minimum (or equivalently, maximum) value at arbitrary $x$ coordinates. This report focuses on minimum queries; maximum queries are obtained by negating line parameters.
+Dynamic Lower Envelope maintenance is a fundamental problem in computational geometry with extensive applications. We focus on the Li-Chao tree (LICT), a data structure that maintains a set of linear functions while supporting insertion and query operations. The problem is defined as follows: given a dynamic set of linear functions $y = kx + b$, support efficient insertion of new lines and querying the minimum (or equivalently, maximum) value at arbitrary $x$ coordinates. This report focuses on minimum queries; maximum queries are obtained by negating line parameters.
 
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
@@ -69,7 +69,7 @@ Both operations must execute in logarithmic time for acceptable performance at s
 
 The classical solution to this problem is the Convex Hull Trick (CHT), which maintains the lower envelope of lines explicitly. Existing variants use balanced binary search trees or specialized structures to achieve logarithmic-time operations. While asymptotically optimal, these approaches require complex intersection point calculations and careful handling of numerical precision.
 
-In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. This technical report addresses this gap by providing precise algorithmic specifications, implementation details, and empirical performance analysis of the LICT. We present well-tested reference implementations and conduct systematic performance evaluation with particular attention to extensibility features.
+In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. We address this gap by providing precise algorithmic specifications, implementation details, and empirical performance analysis of the LICT. We present well-tested reference implementations and conduct systematic performance evaluation with particular attention to extensibility features.
 
 \section{Related Work}\label{sec:related}
 
@@ -117,7 +117,7 @@ The Dynamic CHT requires computing intersection points between adjacent lines in
 
 \section{Overview}\label{sec:lichao}
 
-This section presents the Li-Chao tree, the primary contribution of this technical report.
+This section presents the Li-Chao tree.
 
 \subsection{Algorithmic Approach}
 
@@ -697,7 +697,7 @@ Several directions for future research and development remain:
 
 \section{Conclusion}\label{sec:conclusion}
 
-This technical report has presented a comprehensive analysis of the Li-Chao tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
+We have presented a comprehensive analysis of the Li-Chao tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
 
 The Li-Chao tree represents a distinct point in the design space, trading constant factor performance for reduced implementation complexity and enhanced flexibility. For applications requiring persistence, line segment support, or rapid implementation, the LICT offers compelling advantages. For performance-critical applications with bounded hull size, the Dynamic CHT remains preferable.
 
