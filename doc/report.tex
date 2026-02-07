@@ -140,7 +140,72 @@ where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is
 \end{equation*}
 This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
-\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[\text{left}, \text{right}]$ with depth $O(\log C)$ where $C = \frac{\text{right} - \text{left}}{\epsilon}$ and $\epsilon$ is the precision level. During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint using only multiplication and addition ($kx+b$), and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
+\subsection{Theoretical Analysis}
+
+We now present a formal analysis of the LICT's correctness and complexity. Our analysis assumes the Word-RAM model of computation, where arithmetic operations on $O(\log U)$-bit words (where $U$ is the universe size) take constant time.
+
+\begin{definition}[Coordinate Universe]
+Let $U$ denote the coordinate universe size. The LICT operates on a discrete domain $X = \{x_0, x_0 + \epsilon, x_0 + 2\epsilon, \ldots, x_0 + (U-1)\epsilon\}$ where $\epsilon$ is the precision level and $C = U = \frac{\text{coordinate range}}{\text{precision level}}$. The tree depth is $h = \lceil \log_2 C \rceil$.
+\end{definition}
+
+\subsubsection{Correctness}
+
+\begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
+For any node $v$ with interval $[l, r]$ and midpoint $m = \lfloor(l+r)/2\rfloor$, the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
+\end{lemma}
+
+\begin{proof}
+We proceed by induction on the sequence of insertions.
+
+\textbf{Base case:} When the first line is inserted, it is stored at the root and all descendants are null. The invariant holds trivially.
+
+\textbf{Inductive step:} Assume the invariant holds before inserting a new line $L_{\text{new}}$. Consider the insertion path from root to leaf. At each node $v$ along this path:
+\begin{enumerate}
+    \item Let $L_{\text{stored}}$ be the line currently at $v$.
+    \item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$, we keep $L_{\text{stored}}$ and route $L_{\text{new}}$ to a child. The invariant at $v$ remains satisfied.
+    \item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$, we swap the lines, storing $L_{\text{new}}$ and routing $L_{\text{stored}}$ to a child. The invariant at $v$ is now satisfied by $L_{\text{new}}$.
+\end{enumerate}
+The routed line proceeds to exactly one child (determined by the intersection point location), so the inductive hypothesis applies to subtrees. By induction, the invariant holds after all insertions.
+\end{proof}
+
+\begin{lemma}[Query Correctness]\label{lem:query-correct}
+For any query point $x_0 \in X$, the value returned by the query operation equals $\min_{i} \{k_i x_0 + b_i\}$ over all lines in the structure.
+\end{lemma}
+
+\begin{proof}
+Consider any line $L$ in the structure and the query point $x_0$. Let $P$ be the unique root-to-leaf path whose intervals all contain $x_0$. Line $L$ follows exactly one root-to-leaf path $P_L$ during insertion.
+
+We claim $L$ is evaluated at $x_0$ if and only if $x_0$ lies in the interval where $L$ is optimal among lines routed through some node on $P_L$. There are two cases:
+\begin{enumerate}
+    \item If $P_L = P$, then $L$ is stored at some node on $P$ (specifically, at the deepest node where it achieved minimum at the midpoint), and is evaluated during the query.
+    \item If $P_L \neq P$, let $v$ be the deepest node common to both paths. Since $x_0$ is not in the child interval that $L$ was routed to, $x_0$ lies on the opposite side of the midpoint from where $L$ could potentially be better than the stored line. By the single-intersection property of lines, $L$ cannot be optimal at $x_0$.
+\end{enumerate}
+Thus, exactly those lines that could be optimal at $x_0$ are evaluated, and the minimum over evaluated lines equals the global minimum.
+\end{proof}
+
+\subsubsection{Complexity Analysis}
+
+\begin{lemma}[Time Complexity]\label{lem:time-complexity}
+Under the Word-RAM model with $w = \Theta(\log U)$ bits per word, both insertion and query operations require $O(\log C)$ time, where $C = U$ is the coordinate universe size.
+\end{lemma}
+
+\begin{proof}
+The LICT is a binary tree of depth $h = \lceil \log_2 C \rceil = O(\log C)$. 
+
+For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$), requiring constant time on $O(\log U)$-bit values; (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time in the Word-RAM model. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
+
+For query: The traversal follows one root-to-leaf path with $O(1)$ work per node (line evaluation and comparison). Total time is $O(\log C)$.
+\end{proof}
+
+\begin{lemma}[Space Complexity]\label{lem:space-complexity}
+The LICT stores at most $O(n \log C)$ nodes in the worst case, where $n$ is the number of inserted lines.
+\end{lemma}
+
+\begin{proof}
+Each line insertion creates at most one new node per level along its insertion path (when reaching a null child). The path length is $O(\log C)$. With $n$ insertions, the total number of nodes is at most $O(n \log C)$.
+\end{proof}
+
+\textbf{Pseudo-polynomial Nature.} We emphasize that the complexity $O(\log C)$ is pseudo-polynomial: it depends on the coordinate universe size $U$ (equivalently $C$), not solely on the input size $n$. In the Word-RAM model with $w$-bit words, $C \leq 2^w$, so $\log C \leq w$. For inputs with $w = \Theta(\log n)$ (standard assumption), this yields $O(\log n)$ time. However, for large coordinate ranges (e.g., 64-bit coordinates with $C = 2^{64}$), the complexity becomes $O(w) = O(64) = O(1)$ in the Word-RAM model with 64-bit words, but is pseudo-polynomial when measured against the input bit complexity.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
@@ -176,6 +241,16 @@ Implementation Complexity & Higher & Lower \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsubsection{Asymptotic Comparison for $n \ll C$}
+
+A critical distinction between the Dynamic CHT and LICT concerns their dependence on different problem parameters. The Dynamic CHT achieves $O(\log n)$ time complexity, while the LICT achieves $O(\log C)$. When the number of lines $n$ is much smaller than the coordinate universe $C$ (i.e., $n \ll C$), we have:
+\[
+\log n \ll \log C
+\]
+In this regime, which commonly occurs in practice (e.g., $n = 10^3$ lines with $C = 10^9$ coordinate range), the Dynamic CHT's time complexity is asymptotically superior. Specifically, when $n = O(\text{poly}(\log C))$, the Dynamic CHT operates in $O(\log \log C)$ time versus the LICT's $O(\log C)$.
+
+Conversely, when $n = \Omega(C^\epsilon)$ for any constant $\epsilon > 0$, both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
 
 \subsection{Key Trade-offs}
 
@@ -348,7 +423,7 @@ This section analyzes the trade-offs between the Li-Chao tree and alternative ap
 
 The LICT occupies a distinct position in the design space of dynamic line container data structures. Understanding its trade-offs requires examining multiple dimensions: performance, implementation complexity, numerical stability, and extensibility.
 
-\textbf{Time versus space.} The LICT's $O(\log C)$ complexity is independent of the number of lines $n$, while the Dynamic CHT achieves $O(\log n)$ amortized time. When the hull remains small relative to the number of insertions (common in many applications), the Dynamic CHT offers better performance. However, the LICT provides more predictable performance: its query time does not degrade as the hull grows, making it suitable for applications where worst-case guarantees matter more than average-case performance.
+\textbf{Time versus space.} The LICT's $O(\log C)$ complexity is independent of the number of lines $n$, while the Dynamic CHT achieves $O(\log n)$ amortized time. When $n \ll C$ (the common case in practice), the Dynamic CHT offers asymptotically superior performance. However, the LICT provides more predictable performance: its query time does not degrade as the hull grows, making it suitable for applications where worst-case guarantees matter more than average-case performance. The pseudo-polynomial nature of LICT's complexity (depending on universe size $U$ rather than input size $n$) is an important theoretical distinction.
 
 \textbf{Implementation complexity.} The LICT implementation requires approximately half the code of a robust Dynamic CHT implementation (45 lines versus 88 lines in our reference implementations). The LICT eliminates several classes of potential bugs: intersection point calculations, slope ordering maintenance, and edge cases involving parallel lines or numerical overflow in division operations. This reduced complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
 
