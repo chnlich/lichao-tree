@@ -611,6 +611,77 @@ Real-world data often mixes magnitudes, testing dynamic range handling:
 
 The LICT correctly handles all query points with relative error bounded by $2\epsilon_m$. The Dynamic CHT exhibits erratic behavior when large and small magnitude lines intersect, as the intersection formula produces subnormal numbers and precision loss.
 
+\subsection{Parameter-Matched Comparison: The $N = C$ Regime}
+
+The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$.
+
+\begin{itemize}
+\item \textbf{Configuration:} $N = C = 10^5$ and $N = C = 10^6$
+\item \textbf{Lines:} $k, b \sim U(-C/2, C/2)$
+\item \textbf{Query points:} $x \sim U(-C/2, C/2)$
+\item \textbf{Operation mix:} $N/2$ insertions followed by $N/2$ queries
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Performance in $N = C$ Regime (Time in milliseconds)}
+\label{tab:nc-regime}
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+\textbf{N = C} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
+\midrule
+$10^5$ & LICT & 4.47 & 1.92 & 6.39 \\
+$10^5$ & Dynamic CHT & 4.03 & 0.45 & 4.49 \\
+\midrule
+$10^6$ & LICT & 42.82 & 14.65 & 57.47 \\
+$10^6$ & Dynamic CHT & 42.91 & 4.78 & 47.70 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:nc-regime} reveals several important findings. First, insertion times are nearly identical for both structures when $N = C$, confirming that the dominant cost in this regime is tree traversal depth rather than hull maintenance overhead. The LICT and Dynamic CHT show comparable insertion performance because both structures perform $O(\log N)$ or $O(\log C)$ work per insertion when these values are equal.
+
+Second, query times show a consistent pattern where Dynamic CHT achieves faster query performance due to its explicit hull representation enabling binary search with fewer comparisons. The CHT's query advantage persists but narrows as $N$ increases, suggesting that cache effects and memory access patterns become more significant factors at larger scales.
+
+Third, the performance gap between structures is smaller in the $N = C$ regime compared to scenarios where $n \ll C$. When $n$ and $C$ are comparable, the LICT's coordinate-dependent complexity does not represent a significant disadvantage relative to the input-size-dependent complexity of the Dynamic CHT.
+
+\subsection{Floating-Point Performance Comparison}
+
+While the standard implementations use integer coordinates, many practical applications require floating-point arithmetic. We compare performance using both integer and double-precision floating-point values.
+
+\begin{itemize}
+\item \textbf{Integer configuration:} $k, b \sim U(-10^6, 10^6)$ as 64-bit integers
+\item \textbf{Double configuration:} $k, b \sim U(-10^6, 10^6)$ as double-precision floating-point values
+\item \textbf{Query points:} Matching precision to line parameters
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Integer versus Floating-Point Performance (Time in milliseconds)}
+\label{tab:floating-point}
+\begin{tabular}{@{}cccccc@{}}
+\toprule
+\textbf{N} & \textbf{Type} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
+\midrule
+$10^5$ & int & LICT & 4.04 & 1.27 & 5.32 \\
+$10^5$ & int & Dynamic CHT & 4.13 & 0.50 & 4.63 \\
+$10^5$ & double & LICT & 13.80 & 2.26 & 16.06 \\
+$10^5$ & double & Dynamic CHT & 3.12 & 0.56 & 3.68 \\
+\midrule
+$10^6$ & int & LICT & 40.60 & 14.06 & 54.66 \\
+$10^6$ & int & Dynamic CHT & 41.79 & 5.86 & 47.65 \\
+$10^6$ & double & LICT & 138.46 & 23.35 & 161.80 \\
+$10^6$ & double & Dynamic CHT & 32.74 & 5.93 & 38.68 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:floating-point} presents a striking result: the LICT exhibits significantly degraded performance with floating-point coordinates compared to integers, while the Dynamic CHT maintains consistent performance across both types. For $N = 10^6$, the LICT requires 138.46 ms for insertions with doubles versus 40.60 ms with integers, a slowdown factor of approximately 3.4. In contrast, the Dynamic CHT shows only minor variation (32.74 ms for doubles versus 41.79 ms for integers).
+
+The performance difference stems from architectural characteristics. The LICT implementation dynamically allocates tree nodes during insertion, with each node containing floating-point values. The increased memory footprint of double-precision values, combined with pointer-based tree traversal, leads to cache inefficiency. The Dynamic CHT uses a balanced tree structure (std::multiset) that may benefit from better cache locality and memory allocator optimizations for its node structure.
+
+Neither structure exhibited precision issues with randomly distributed floating-point values, confirming that both handle well-conditioned inputs correctly. The LICT maintains its numerical stability advantage for problematic cases such as nearly parallel lines, though these specific scenarios were not tested in the floating-point comparison.
+
 \subsection{Analysis}
 
 The Dynamic CHT demonstrates faster execution on standard random distributions. However, the edge case experiments reveal critical limitations: numerical instability with nearly parallel lines, overflow risks with large coordinates, and precision degradation in mixed-precision scenarios.
