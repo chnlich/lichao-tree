@@ -85,16 +85,6 @@ Their approach uses a balanced binary search tree to explicitly maintain the con
 
 Their work established the theoretical framework for dynamic geometric data structures and demonstrated that logarithmic-time dynamic maintenance of the lower envelope is achievable.
 
-\subsection{Connections to Kinetic Data Structures}
-
-Kinetic data structures, pioneered by Basch, Guibas, and colleagues \cite{basch1996, basch1997}, address dynamic maintenance of geometric configurations under continuous motion. These structures maintain certificates that guarantee the correctness of the current configuration and update efficiently when certificates fail.
-
-The kinetic convex hull problem \cite{basch1996} involves maintaining the convex hull of a set of points moving along trajectories. While the LICT addresses a different problem (static lines rather than moving points), there are conceptual connections. The LICT's implicit maintenance of the lower envelope through interval subdivision parallels the kinetic approach of tracking where the structure could change.
-
-Both approaches avoid computing the complete structure explicitly at each step. Kinetic data structures use event-driven updates based on certificate failures, while the LICT uses recursive interval partitioning based on local comparisons. This suggests potential hybrid approaches that could combine the LICT's simplicity with kinetic techniques for certain dynamic scenarios.
-
-Aggarwal and Tokuyama \cite{aggarwal1987} studied related problems on consecutive interval queries and dynamic programming on intervals, providing theoretical foundations for range-based geometric data structures that inform both kinetic approaches and the LICT analysis.
-
 \subsection{Monotonic Convex Hull Trick}
 
 The monotonic convex hull trick addresses the special case where line slopes are inserted in monotonically increasing or decreasing order.
@@ -701,16 +691,6 @@ Since its introduction in 2012, the Li-Chao tree has found widespread adoption i
 Overmars, M.H. and van Leeuwen, J.
 \newblock Maintenance of configurations in the plane.
 \newblock \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
-
-\bibitem{basch1996}
-Basch, J., Guibas, L.J., and Ramkumar, G.D.
-\newblock Kinetic convex hulls.
-\newblock \emph{Proceedings of the 12th Annual ACM Symposium on Computational Geometry (SoCG)}, pp.~50--58, 1996.
-
-\bibitem{basch1997}
-Basch, J., Guibas, L.J., and Hershberger, J.
-\newblock Data structures for mobile data.
-\newblock \emph{Journal of Algorithms}, 31(1):1--28, 1999.
 
 \bibitem{aggarwal1987}
 Aggarwal, A. and Tokuyama, T.
