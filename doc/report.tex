@@ -100,15 +100,15 @@ This section presents the Li-Chao tree, the primary contribution of this technic
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval midpoint, recursively partitioning the query range.
 
-Each node in the tree represents an interval $[l, r]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint $m = \lfloor(l+r)/2\rfloor$ is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
+Each node in the tree represents an interval $[\text{left}, \text{right}]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint $\text{mid} = (\text{left}+\text{right})/2$ is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
-\textbf{Key invariant (local optimality).} A line stored at a node achieves the minimum value among all lines routed through that node at the midpoint of the node's interval. Formally, for node with interval $[l, r]$ and midpoint $m = \lfloor(l+r)/2\rfloor$, the stored line minimizes $kx + b$ at $x = m$ among all lines routed to that node.
+\textbf{Key invariant (local optimality).} A line stored at a node achieves the minimum value among all lines routed through that node at the midpoint of the node's interval. Formally, for node with interval $[\text{left}, \text{right}]$ and midpoint $\text{mid} = (\text{left}+\text{right})/2$, the stored line minimizes $kx + b$ at $x = \text{mid}$ among all lines routed to that node.
 
 Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at $m$, so the stored line is not necessarily globally optimal at that coordinate.
 
-\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint $m$:
+\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint:
 \begin{itemize}
-    \item If $A$ achieves a lower value than $B$ at $m$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $m$ containing that endpoint (since two lines intersect at most once).
+    \item If $A$ achieves a lower value than $B$ at $\text{mid}$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $\text{mid}$ containing that endpoint (since two lines intersect at most once).
     \item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
 \end{itemize}
 
@@ -125,20 +125,20 @@ Insertion proceeds as follows: if the new line yields a lower value at the midpo
 
 The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define the comparison indicators:
 \begin{align*}
-    L &= \mathbb{I}[f_\text{new}(l) < f_\text{stored}(l)] \\
-    M &= \mathbb{I}[f_\text{new}(m) < f_\text{stored}(m)]
+    L &= \mathbb{I}[f_\text{new}(\text{left}) < f_\text{stored}(\text{left})] \\
+    M &= \mathbb{I}[f_\text{new}(\text{mid}) < f_\text{stored}(\text{mid})]
 \end{align*}
 where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is:
 \begin{equation*}
-    \text{child} = 
+    \text{child} =
     \begin{cases}
         \text{left} & \text{if } L \neq M \\
         \text{right} & \text{if } L = M
     \end{cases}
 \end{equation*}
-This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m+1, r]$.
+This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
-\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[l, r]$ with depth $O(\log C)$ where $C = \frac{r - l}{\epsilon}$ and $\epsilon$ is the precision level (for integer coordinates, $\epsilon = 1$). During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint, and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
+\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[\text{left}, \text{right}]$ with depth $O(\log C)$ where $C = \frac{\text{right} - \text{left}}{\epsilon}$ and $\epsilon$ is the precision level (for integer coordinates, $\epsilon = 1$). During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint, and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
