@@ -201,10 +201,6 @@ Reference implementations are available at \url{https://github.com/chnlich/licha
 
 Reference implementations are available at \url{https://github.com/chnlich/lichao-tree}.
 
-\subsection{Empty Container Behavior}
-
-The implementations differ in their handling of empty container queries. The Dynamic CHT returns 0 when empty, while the LICT returns $\texttt{INF}$ (a sentinel value larger than any valid query result). This difference reflects typical usage patterns: the Dynamic CHT often appears in competitive programming contexts where 0 is a natural default (e.g., maximizing DP transitions), while the LICT's INF return makes explicit that no lines have been inserted. Callers should check \texttt{empty()} or handle the sentinel value appropriately based on application requirements.
-
 \section{Benchmarks}\label{sec:benchmarks}
 
 To validate the theoretical complexity analysis and characterize practical performance differences between the two approaches, we conducted systematic empirical evaluation across varying problem scales and input distributions.
