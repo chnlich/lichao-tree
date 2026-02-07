@@ -148,7 +148,7 @@ This follows from the single-intersection property: if the ordering changes betw
     \item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line value comparisons at integer coordinates.
 \end{itemize}
 
-\textbf{Deletion.} Unlike the Dynamic CHT, which can support deletion of arbitrary lines in $O(\log n)$ amortized time, the standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, alternative approaches include segment tree beats or reconstructing the tree periodically.
+\textbf{Deletion.} Unlike the Dynamic CHT, which can support deletion of arbitrary lines in $O(\log n)$ amortized time, the standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
 
 The LICT's complexity depends on the coordinate range rather than the number of lines. This provides consistent performance regardless of hull size, though it cannot exploit cases where the hull remains small relative to the number of insertions.
 
