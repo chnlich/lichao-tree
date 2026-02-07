@@ -444,17 +444,6 @@ Algorithm~\ref{alg:query} presents the query procedure. The algorithm traverses 
 
 The LICT uses dynamic node allocation: nodes are created only when a line traverses that interval. In the worst case, inserting $n$ lines creates $O(n \log C)$ nodes, but in practice, significant node sharing occurs when lines share common path prefixes.
 
-\textbf{Node reclamation.} The standard LICT does not support deletion, but memory can be reclaimed by destroying the entire tree. A recursive post-order traversal deletes all nodes:
-
-\begin{lstlisting}[language=C++, caption={Tree Destruction}]
-void destroy(Node* node) {
-if (!node) return;
-destroy(node->left);
-destroy(node->right);
-delete node;
-}
-\end{lstlisting}
-
 \subsection{Recursion Depth Handling}
 
 The recursion depth is bounded by $O(\log C)$. For typical coordinate ranges ($C \leq 10^9$), the maximum depth is approximately 30, well within stack limits. For extremely large coordinate ranges ($C > 10^{15}$), the recursion depth may approach 50, which remains safe on modern systems with default stack sizes of several megabytes.
