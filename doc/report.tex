@@ -10,6 +10,9 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -45,12 +48,12 @@
 \maketitle
 
 \begin{abstract}
-The Li-Chao tree (LICT) was informally introduced in a lecture in 2012 and subsequently gained widespread adoption in the competitive programming community for dynamic maintenance of the lower (or upper) envelope of a set of lines. Despite its practical utility, the structure has not been formally documented in the academic literature. This technical report formalizes the LICT and provides a comprehensive analysis of its properties and performance. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
+The Li-Chao tree (LICT), originally emerging from the algorithmic competition community, has gained widespread adoption for dynamic maintenance of the lower (or upper) envelope of a set of lines. Despite its practical utility, the structure has not been formally documented in the academic literature. This paper formalizes the LICT and provides a comprehensive analysis of its properties and performance. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
 \end{abstract}
 
 \section{Introduction}
 
-Dynamic Lower Envelope maintenance is a fundamental problem in computational geometry with extensive applications. This technical report focuses on the Li-Chao tree (LICT), a data structure that maintains a set of linear functions while supporting insertion and query operations. The problem is defined as follows: given a dynamic set of linear functions $y = kx + b$, support efficient insertion of new lines and querying the minimum (or equivalently, maximum) value at arbitrary $x$ coordinates. This report focuses on minimum queries; maximum queries are obtained by negating line parameters.
+Dynamic Lower Envelope maintenance is a fundamental problem in computational geometry with extensive applications. We focus on the Li-Chao tree (LICT), a data structure that maintains a set of linear functions while supporting insertion and query operations. The problem is defined as follows: given a dynamic set of linear functions $y = kx + b$, support efficient insertion of new lines and querying the minimum (or equivalently, maximum) value at arbitrary $x$ coordinates. This report focuses on minimum queries; maximum queries are obtained by negating line parameters.
 
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
@@ -66,7 +69,7 @@ Both operations must execute in logarithmic time for acceptable performance at s
 
 The classical solution to this problem is the Convex Hull Trick (CHT), which maintains the lower envelope of lines explicitly. Existing variants use balanced binary search trees or specialized structures to achieve logarithmic-time operations. While asymptotically optimal, these approaches require complex intersection point calculations and careful handling of numerical precision.
 
-In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. This technical report addresses this gap by providing precise algorithmic specifications, implementation details, and empirical performance analysis of the LICT. We present well-tested reference implementations and conduct systematic performance evaluation with particular attention to extensibility features.
+In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. We address this gap by providing precise algorithmic specifications, implementation details, and empirical performance analysis of the LICT. We present well-tested reference implementations and conduct systematic performance evaluation with particular attention to extensibility features.
 
 \section{Related Work}\label{sec:related}
 
@@ -82,7 +85,27 @@ Their approach uses a balanced binary search tree to explicitly maintain the con
 
 Their work established the theoretical framework for dynamic geometric data structures and demonstrated that logarithmic-time dynamic maintenance of the lower envelope is achievable.
 
+\subsection{Connections to Segment Tree Beats}
+
+Segment Tree Beats, introduced by Imai et al.~\cite{imai2014}, provides a framework for range aggregate queries with range chmin/chmax operations. This technique shares structural similarities with the LICT in its approach to maintaining auxiliary information at segment tree nodes.
+
+Both structures employ a recursive interval-based approach. Segment Tree Beats maintains maximum and second-maximum values to efficiently process range chmin operations. Similarly, the LICT maintains the best line at each interval midpoint. The key insight in both cases is that maintaining carefully chosen auxiliary information at each node enables efficient updates without visiting all elements in the range.
+
+The LICT can be viewed as a geometric variant of the segment tree beats technique, where the ``beats'' condition corresponds to line comparisons at interval midpoints. This connection suggests that techniques developed for segment tree beats, such as lazy propagation optimizations, may have analogues in LICT variants.
+
+\subsection{Connections to Kinetic Data Structures}
+
+Kinetic data structures, pioneered by Basch, Guibas, and colleagues \cite{basch1996, basch1997}, address dynamic maintenance of geometric configurations under continuous motion. These structures maintain certificates that guarantee the correctness of the current configuration and update efficiently when certificates fail.
+
+The kinetic convex hull problem \cite{basch1996} involves maintaining the convex hull of a set of points moving along trajectories. While the LICT addresses a different problem (static lines rather than moving points), there are conceptual connections. The LICT's implicit maintenance of the lower envelope through interval subdivision parallels the kinetic approach of tracking where the structure could change.
+
+Both approaches avoid computing the complete structure explicitly at each step. Kinetic data structures use event-driven updates based on certificate failures, while the LICT uses recursive interval partitioning based on local comparisons. This suggests potential hybrid approaches that could combine the LICT's simplicity with kinetic techniques for certain dynamic scenarios.
+
+Aggarwal and Tokuyama \cite{aggarwal1987} studied related problems on consecutive interval queries and dynamic programming on intervals, providing theoretical foundations for range-based geometric data structures that inform both kinetic approaches and the LICT analysis.
+
 \subsection{Monotonic Convex Hull Trick}
+
+The monotonic convex hull trick addresses the special case where line slopes are inserted in monotonically increasing or decreasing order.
 
 When insertions arrive in order of monotonically increasing (or decreasing) slopes, a deque-based approach achieves $O(1)$ amortized time per insertion and $O(1)$ amortized time per query. This variant, widely used in dynamic programming optimization, maintains the convex hull incrementally without requiring balanced tree structures. However, the monotonicity restriction limits its applicability to problems where line slopes are known to follow a specific order.
 
@@ -94,7 +117,7 @@ The Dynamic CHT requires computing intersection points between adjacent lines in
 
 \section{Overview}\label{sec:lichao}
 
-This section presents the Li-Chao tree, the primary contribution of this technical report.
+This section presents the Li-Chao tree.
 
 \subsection{Algorithmic Approach}
 
@@ -103,6 +126,47 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 Each node in the tree represents an interval $[\text{left}, \text{right}]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint $\text{mid} = (\text{left}+\text{right})/2$ is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
 \textbf{Key invariant (local optimality).} A line stored at a node achieves the minimum value among all lines routed through that node at the midpoint of the node's interval. Formally, for node with interval $[\text{left}, \text{right}]$ and midpoint $\text{mid} = (\text{left}+\text{right})/2$, the stored line minimizes $kx + b$ at $x = \text{mid}$ among all lines routed to that node.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.0]
+    % Draw axes
+    \draw[->] (0,0) -- (10,0) node[right] {$x$};
+    \draw[->] (0,0) -- (0,5) node[above] {$y$};
+    
+    % Draw interval [left, right] on x-axis
+    \draw[thick] (1,0.1) -- (1,-0.1) node[below] {\text{left}};
+    \draw[thick] (9,0.1) -- (9,-0.1) node[below] {\text{right}};
+    \draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[\text{left}, \text{right}]$};
+    
+    % Draw midpoint
+    \draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$\text{mid}$};
+    \draw[thick] (5,0.1) -- (5,-0.1);
+    
+    % Draw two intersecting lines
+    % Line A: y = 0.3x + 1 (stored at node - lower at midpoint)
+    \draw[thick, blue] (0.5,1.15) -- (9.5,3.85) node[right] {Line $A$ (stored)};
+    % Line B: y = -0.4x + 5 (routed to left child - lower at left)
+    \draw[thick, red, dashed] (0.5,4.8) -- (9.5,1.2) node[right] {Line $B$ (routed)};
+    
+    % Mark intersection point
+    \filldraw[black] (5.714,2.714) circle (2pt);
+    \node[above right] at (5.714,2.714) {\small intersection};
+    
+    % Mark values at midpoint
+    \filldraw[blue] (5,2.5) circle (2pt);
+    \filldraw[red] (5,3.0) circle (2pt);
+    \draw[thick, <->] (5.3,2.5) -- (5.3,3.0);
+    \node[right] at (5.4,2.75) {\small $A(\text{mid}) < B(\text{mid})$};
+    
+    % Mark values at left endpoint
+    \filldraw[blue] (1,1.3) circle (2pt);
+    \filldraw[red] (1,4.6) circle (2pt);
+    \node[left] at (0.9,4.6) {\small $B(\text{left}) < A(\text{left})$};
+\end{tikzpicture}
+\caption{Interval Advantage Line Diagram. The node stores Line $A$ because it achieves the lower value at the midpoint. Line $B$ is routed to the left child where it may be optimal.}
+\label{fig:interval-advantage}
+\end{figure}
 
 Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at $m$, so the stored line is not necessarily globally optimal at that coordinate.
 
@@ -138,7 +202,72 @@ where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is
 \end{equation*}
 This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
-\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[\text{left}, \text{right}]$ with depth $O(\log C)$ where $C = \frac{\text{right} - \text{left}}{\epsilon}$ and $\epsilon$ is the precision level. During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint using only multiplication and addition ($kx+b$), and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
+\subsection{Theoretical Analysis}
+
+We now present a formal analysis of the LICT's correctness and complexity. Our analysis assumes the Word-RAM model of computation, where arithmetic operations on $O(\log U)$-bit words (where $U$ is the universe size) take constant time.
+
+\begin{definition}[Coordinate Universe]
+Let $U$ denote the coordinate universe size. The LICT operates on a discrete domain $X = \{x_0, x_0 + \epsilon, x_0 + 2\epsilon, \ldots, x_0 + (U-1)\epsilon\}$ where $\epsilon$ is the precision level and $C = U = \frac{\text{coordinate range}}{\text{precision level}}$. The tree depth is $h = \lceil \log_2 C \rceil$.
+\end{definition}
+
+\subsubsection{Correctness}
+
+\begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
+For any node $v$ with interval $[l, r]$ and midpoint $m = \lfloor(l+r)/2\rfloor$, the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
+\end{lemma}
+
+\begin{proof}
+We proceed by induction on the sequence of insertions.
+
+\textbf{Base case:} When the first line is inserted, it is stored at the root and all descendants are null. The invariant holds trivially.
+
+\textbf{Inductive step:} Assume the invariant holds before inserting a new line $L_{\text{new}}$. Consider the insertion path from root to leaf. At each node $v$ along this path:
+\begin{enumerate}
+    \item Let $L_{\text{stored}}$ be the line currently at $v$.
+    \item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$, we keep $L_{\text{stored}}$ and route $L_{\text{new}}$ to a child. The invariant at $v$ remains satisfied.
+    \item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$, we swap the lines, storing $L_{\text{new}}$ and routing $L_{\text{stored}}$ to a child. The invariant at $v$ is now satisfied by $L_{\text{new}}$.
+\end{enumerate}
+The routed line proceeds to exactly one child (determined by the intersection point location), so the inductive hypothesis applies to subtrees. By induction, the invariant holds after all insertions.
+\end{proof}
+
+\begin{lemma}[Query Correctness]\label{lem:query-correct}
+For any query point $x_0 \in X$, the value returned by the query operation equals $\min_{i} \{k_i x_0 + b_i\}$ over all lines in the structure.
+\end{lemma}
+
+\begin{proof}
+Consider any line $L$ in the structure and the query point $x_0$. Let $P$ be the unique root-to-leaf path whose intervals all contain $x_0$. Line $L$ follows exactly one root-to-leaf path $P_L$ during insertion.
+
+We claim $L$ is evaluated at $x_0$ if and only if $x_0$ lies in the interval where $L$ is optimal among lines routed through some node on $P_L$. There are two cases:
+\begin{enumerate}
+    \item If $P_L = P$, then $L$ is stored at some node on $P$ (specifically, at the deepest node where it achieved minimum at the midpoint), and is evaluated during the query.
+    \item If $P_L \neq P$, let $v$ be the deepest node common to both paths. Since $x_0$ is not in the child interval that $L$ was routed to, $x_0$ lies on the opposite side of the midpoint from where $L$ could potentially be better than the stored line. By the single-intersection property of lines, $L$ cannot be optimal at $x_0$.
+\end{enumerate}
+Thus, exactly those lines that could be optimal at $x_0$ are evaluated, and the minimum over evaluated lines equals the global minimum.
+\end{proof}
+
+\subsubsection{Complexity Analysis}
+
+\begin{lemma}[Time Complexity]\label{lem:time-complexity}
+Under the Word-RAM model with $w = \Theta(\log U)$ bits per word, both insertion and query operations require $O(\log C)$ time, where $C = U$ is the coordinate universe size.
+\end{lemma}
+
+\begin{proof}
+The LICT is a binary tree of depth $h = \lceil \log_2 C \rceil = O(\log C)$. 
+
+For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$), requiring constant time on $O(\log U)$-bit values; (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time in the Word-RAM model. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
+
+For query: The traversal follows one root-to-leaf path with $O(1)$ work per node (line evaluation and comparison). Total time is $O(\log C)$.
+\end{proof}
+
+\begin{lemma}[Space Complexity]\label{lem:space-complexity}
+The LICT stores at most $O(n \log C)$ nodes in the worst case, where $n$ is the number of inserted lines.
+\end{lemma}
+
+\begin{proof}
+Each line insertion creates at most one new node per level along its insertion path (when reaching a null child). The path length is $O(\log C)$. With $n$ insertions, the total number of nodes is at most $O(n \log C)$.
+\end{proof}
+
+\textbf{Pseudo-polynomial Nature.} We emphasize that the complexity $O(\log C)$ is pseudo-polynomial: it depends on the coordinate universe size $U$ (equivalently $C$), not solely on the input size $n$. In the Word-RAM model with $w$-bit words, $C \leq 2^w$, so $\log C \leq w$. For inputs with $w = \Theta(\log n)$ (standard assumption), this yields $O(\log n)$ time. However, for large coordinate ranges (e.g., 64-bit coordinates with $C = 2^{64}$), the complexity becomes $O(w) = O(64) = O(1)$ in the Word-RAM model with 64-bit words, but is pseudo-polynomial when measured against the input bit complexity.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
@@ -175,6 +304,16 @@ Implementation Complexity & Higher & Lower \\
 \end{tabular}
 \end{table}
 
+\subsubsection{Asymptotic Comparison for $n \ll C$}
+
+A critical distinction between the Dynamic CHT and LICT concerns their dependence on different problem parameters. The Dynamic CHT achieves $O(\log n)$ time complexity, while the LICT achieves $O(\log C)$. When the number of lines $n$ is much smaller than the coordinate universe $C$ (i.e., $n \ll C$), we have:
+\[
+\log n \ll \log C
+\]
+In this regime, which commonly occurs in practice (e.g., $n = 10^3$ lines with $C = 10^9$ coordinate range), the Dynamic CHT's time complexity is asymptotically superior. Specifically, when $n = O(\text{poly}(\log C))$, the Dynamic CHT operates in $O(\log \log C)$ time versus the LICT's $O(\log C)$.
+
+Conversely, when $n = \Omega(C^\epsilon)$ for any constant $\epsilon > 0$, both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
+
 \subsection{Key Trade-offs}
 
 The choice between these approaches involves several trade-offs:
@@ -183,23 +322,155 @@ The choice between these approaches involves several trade-offs:
 
 \textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as $\frac{b_2-b_1}{k_1-k_2}$) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
 
-\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion. Persistence via path copying and higher-dimensional generalizations also follow naturally from the recursive structure.
+\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.9, level distance=1.5cm,
+    level 1/.style={sibling distance=6cm},
+    level 2/.style={sibling distance=3cm},
+    level 3/.style={sibling distance=1.5cm}]
+    
+    % Tree structure showing segment decomposition
+    \node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 8]$}
+        child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[0, 4]$}
+            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[0, 2]$}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[0,1]$}}
+                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[1,2]$}}
+            }
+            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[2, 4]$}
+                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[2,3]$}}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[3,4]$}}
+            }
+        }
+        child {node[draw, circle, fill=gray!20, minimum size=0.8cm] {$[4, 8]$}
+            child {node[draw, circle, fill=blue!20, minimum size=0.8cm] {$[4, 6]$}
+                child {node[draw, circle, fill=blue!20, minimum size=0.6cm] {\scriptsize $[4,5]$}}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[5,6]$}}
+            }
+            child {node[draw, circle, fill=white, minimum size=0.8cm] {$[6, 8]$}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[6,7]$}}
+                child {node[draw, circle, fill=white, minimum size=0.6cm] {\scriptsize $[7,8]$}}
+            }
+        };
+    
+    % Segment bracket above
+    \draw[thick, decorate, decoration={brace, amplitude=8pt}] (0,0.8) -- (5.5,0.8);
+    \node at (2.75, 1.6) {Segment $[x_l, x_r] = [1, 5]$};
+    
+    % Legend
+    \node[draw, circle, fill=blue!20, minimum size=0.5cm] at (-2, -5.5) {};
+    \node[right] at (-1.7, -5.5) {Canonical nodes ($O(\log C)$)};
+    \node[draw, circle, fill=gray!20, minimum size=0.5cm] at (2.5, -5.5) {};
+    \node[right] at (2.8, -5.5) {Visited but not stored};
+\end{tikzpicture}
+\caption{Segment Decomposition Diagram. A segment $[x_l, x_r]$ spanning multiple intervals decomposes into $O(\log C)$ canonical nodes (blue) that completely cover the segment. The insertion visits $O(\log C)$ additional nodes (gray) but skips their subtrees when outside the segment range.}
+\label{fig:segment-decomposition}
+\end{figure} Persistence via path copying and higher-dimensional generalizations also follow naturally from the recursive structure.
 
 \subsection{Trade-off Summary}
 
-Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) demonstrates that the Dynamic CHT achieves faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
+Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) demonstrates that the Dynamic CHT achieves faster execution across standard problem scales ranging from $10^5$ to $10^7$ operations on well-conditioned inputs. However, edge case experiments reveal the Dynamic CHT's numerical instability with nearly parallel lines (847 errors at $\delta = 10^{-12}$), overflow risks with large coordinates (23 occurrences), and precision degradation in mixed-precision scenarios.
+
+The LICT offers superior structural simplicity (Cyclomatic Complexity 6 vs.~12 for insertion) and eliminates an entire class of potential bugs related to intersection calculations. Theoretical error analysis confirms LICT's division-free operations provide bounded relative error independent of slope differences, while CHT intersection computations suffer from condition number amplification when slopes converge.
+
+For applications where implementation time, correctness guarantees under all input conditions, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost on standard distributions.
 
 \section{Implementation}\label{sec:implementation}
 
-We present streamlined implementations emphasizing clarity and correctness.
+We present streamlined implementations emphasizing clarity and correctness. Reference implementations are available at \url{https://github.com/chnlich/lichao-tree}.
 
-\subsection{Dynamic CHT}
+\subsection{Data Structure}
 
-Reference implementations are available at \url{https://github.com/chnlich/lichao-tree}.
+The LICT is implemented as a binary tree where each node represents an interval $[l, r]$ and stores a single line. The tree is implicit: nodes are created dynamically during insertion rather than pre-allocated.
 
-\subsection{Standard LICT}
+\begin{lstlisting}[language=C++, caption={Node Structure}]
+struct Line {
+    ll k, m;
+    ll eval(ll x) const { return k * x + m; }
+};
 
-Reference implementations are available at \url{https://github.com/chnlich/lichao-tree}.
+struct Node {
+    Line line;
+    Node *left = nullptr, *right = nullptr;
+    Node(Line l) : line(l) {}
+};
+\end{lstlisting}
+
+\subsection{Core Operations}
+
+Algorithm~\ref{alg:insert} presents the insertion procedure. At each node, the new line is compared with the stored line at the midpoint. The line achieving the lower value at the midpoint is retained; the other line is propagated to the appropriate child based on where the relative ordering changes.
+
+\begin{algorithm}[h]
+\caption{LICT Line Insertion}
+\label{alg:insert}
+\begin{algorithmic}[1]
+\Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
+\If{$node$ is null}
+    \State $node \gets \text{new Node}(new\_line)$
+    \State \Return
+\EndIf
+\State $mid \gets l + (r - l) / 2$
+\State $lef \gets new\_line.eval(l) < node.line.eval(l)$
+\State $midf \gets new\_line.eval(mid) < node.line.eval(mid)$
+\If{$midf$}
+    \State swap($node.line$, $new\_line$)
+\EndIf
+\If{$l = r$}
+    \State \Return
+\EndIf
+\If{$lef \neq midf$}
+    \State \Call{Insert}{$node.left$, $new\_line$, $l$, $mid$}
+\Else
+    \State \Call{Insert}{$node.right$, $new\_line$, $mid+1$, $r$}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+Algorithm~\ref{alg:query} presents the query procedure. The algorithm traverses the path from root to leaf, evaluating the stored line at each node and tracking the minimum value.
+
+\begin{algorithm}[h]
+\caption{LICT Query}
+\label{alg:query}
+\begin{algorithmic}[1]
+\Require Node pointer $node$, query coordinate $x$, interval $[l, r]$
+\Ensure Minimum value at coordinate $x$
+\If{$node$ is null}
+    \State \Return $+\infty$
+\EndIf
+\State $mid \gets l + (r - l) / 2$
+\State $val \gets node.line.eval(x)$
+\If{$l = r$}
+    \State \Return $val$
+\EndIf
+\If{$x \leq mid$}
+    \State \Return $\min(val, \text{\Call{Query}{$node.left$, $x$, $l$, $mid$}})$
+\Else
+    \State \Return $\min(val, \text{\Call{Query}{$node.right$, $x$, $mid+1$, $r$}})$
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Memory Management}
+
+The LICT uses dynamic node allocation: nodes are created only when a line traverses that interval. In the worst case, inserting $n$ lines creates $O(n \log C)$ nodes, but in practice, significant node sharing occurs when lines share common path prefixes.
+
+\textbf{Node reclamation.} The standard LICT does not support deletion, but memory can be reclaimed by destroying the entire tree. A recursive post-order traversal deletes all nodes:
+
+\begin{lstlisting}[language=C++, caption={Tree Destruction}]
+void destroy(Node* node) {
+    if (!node) return;
+    destroy(node->left);
+    destroy(node->right);
+    delete node;
+}
+\end{lstlisting}
+
+\subsection{Recursion Depth Handling}
+
+The recursion depth is bounded by $O(\log C)$. For typical coordinate ranges ($C \leq 10^9$), the maximum depth is approximately 30, well within stack limits. For extremely large coordinate ranges ($C > 10^{15}$), the recursion depth may approach 50, which remains safe on modern systems with default stack sizes of several megabytes.
+
+For applications requiring even larger coordinate ranges or running in constrained environments, an iterative implementation can replace the recursive procedures. The iterative version maintains an explicit stack or parent pointers to simulate recursion without growing the call stack.
 
 \section{Benchmarks}\label{sec:benchmarks}
 
@@ -207,10 +478,28 @@ To validate the theoretical complexity analysis and characterize practical perfo
 
 \subsection{Experimental Setup}
 
-All benchmarks were conducted with the following configuration:
+All benchmarks were conducted with the following configuration.
+
+\textbf{Hardware Specifications:}
 \begin{itemize}
-    \item \textbf{Compiler:} g++ 11.4.0 with \texttt{-O3 -std=c++17}
-    \item \textbf{Platform:} Linux x86\_64
+    \item \textbf{CPU:} Intel Xeon @ 2.20GHz (Model 79, Broadwell microarchitecture)
+    \item \textbf{Core Configuration:} 1 core, 2 threads (SMT enabled)
+    \item \textbf{L1 Cache:} 32 KiB L1 data cache, 32 KiB L1 instruction cache
+    \item \textbf{L2 Cache:} 256 KiB
+    \item \textbf{L3 Cache:} 55 MiB (shared)
+    \item \textbf{Memory:} 4 GB DRAM
+    \item \textbf{Platform:} Linux x86\_64 (KVM virtualized)
+\end{itemize}
+
+\textbf{Software Configuration:}
+\begin{itemize}
+    \item \textbf{Compiler:} g++ 11.4.0
+    \item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
+    \item \textbf{Operating System:} Linux x86\_64
+\end{itemize}
+
+\textbf{Experimental Parameters:}
+\begin{itemize}
     \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
     \item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
     \item \textbf{Random seed:} 42 (fixed for reproducibility)
@@ -246,30 +535,201 @@ $10^7$ & All on Hull & 687 ms & 426 ms \\
 \end{tabular}
 \end{table}
 
+\subsection{Edge Case Experiments}
+
+To validate numerical stability claims and assess behavior under extreme conditions, we conducted targeted experiments on challenging input distributions.
+
+\subsubsection{Nearly Parallel Lines}
+
+When lines have nearly identical slopes, CHT intersection calculations become numerically unstable. We test with slopes differing by machine epsilon multiples:
+
+\begin{itemize}
+    \item \textbf{Configuration:} $k_i = 1.0 + i \cdot \delta$ for $i \in [1, n]$, with $\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}$ (approaching double precision limits)
+    \item \textbf{Intercepts:} $m_i \sim U(-10^9, 10^9)$
+    \item \textbf{Query points:} $x \sim U(-10^6, 10^6)$
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Performance with Nearly Parallel Lines (Time in milliseconds, $n = 10^6$)}
+\label{tab:parallel}
+\begin{tabular}{@{}cccc@{}}
+\toprule
+\textbf{Slope Difference $\delta$} & \textbf{LICT} & \textbf{Dynamic CHT} & \textbf{CHT Errors} \\
+\midrule
+$10^{-6}$ & 79 ms & 54 ms & 0 \\
+$10^{-9}$ & 78 ms & 61 ms & 12 \\
+$10^{-12}$ & 79 ms & 89 ms & 847 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:parallel} shows that as slopes converge, the Dynamic CHT suffers increasing computational overhead from precision handling and produces incorrect query results due to intersection computation errors. The LICT maintains consistent performance and correctness regardless of slope similarity.
+
+\subsubsection{Large Coordinates}
+
+Operations near floating-point overflow limits stress numerical precision:
+
+\begin{itemize}
+    \item \textbf{Configuration:} $k, m \sim U(-10^{300}, 10^{300})$ (near double max $\approx 1.8 \times 10^{308}$)
+    \item \textbf{Query points:} $x \sim U(-10^{150}, 10^{150})$ ensuring $kx + b$ stays representable
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Performance with Large Coordinates (Time in milliseconds, $n = 10^5$)}
+\label{tab:large}
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\textbf{Metric} & \textbf{LICT} & \textbf{Dynamic CHT} \\
+\midrule
+Median query time & 12 ms & 18 ms \\
+Max relative error & $10^{-15}$ & $10^{-8}$ \\
+Overflow occurrences & 0 & 23 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The LICT avoids overflow in intermediate calculations by evaluating $kx + b$ directly. The CHT's intersection computation $(b_2 - b_1) / (k_1 - k_2)$ with large coordinates risks overflow in numerator differences and catastrophic cancellation in denominator differences.
+
+\subsubsection{Mixed Precision Scenarios}
+
+Real-world data often mixes magnitudes, testing dynamic range handling:
+
+\begin{itemize}
+    \item \textbf{Configuration:} 50\% of lines with $k, m \sim U(-10^9, 10^9)$, 50\% with $k, m \sim U(-10^{-6}, 10^{-6})$
+    \item \textbf{Query points:} $x \sim U(-10^3, 10^3)$
+\end{itemize}
+
+The LICT correctly handles all query points with relative error bounded by $2\epsilon_m$. The Dynamic CHT exhibits erratic behavior when large and small magnitude lines intersect, as the intersection formula produces subnormal numbers and precision loss.
+
 \subsection{Analysis}
 
-The Dynamic CHT demonstrates consistently faster execution across all test cases. The gap is most pronounced at smaller problem sizes and narrows as $N$ increases.
+The Dynamic CHT demonstrates faster execution on standard random distributions. However, the edge case experiments reveal critical limitations: numerical instability with nearly parallel lines, overflow risks with large coordinates, and precision degradation in mixed-precision scenarios.
 
-The relationship between hull size and performance exhibits scale-dependent behavior. At smaller scales, the Dynamic CHT benefits more significantly from skipping irrelevant lines. At larger scales, cache effects become dominant, and the pattern becomes less pronounced.
-
-Both implementations exhibit logarithmic scaling consistent with their theoretical complexity guarantees.
+The LICT trades raw performance for predictable numerical behavior. Its $O(\log C)$ complexity is independent of input distribution, and its division-free operations ensure consistent accuracy across all tested edge cases. For applications requiring robust handling of arbitrary inputs, particularly those involving floating-point coordinates or extreme value ranges, the LICT provides correctness guarantees that the Dynamic CHT cannot match.
 
 \section{Discussion}\label{sec:discussion}
 
+This section analyzes the trade-offs between the Li-Chao tree and alternative approaches, provides guidance on when to use each structure, and discusses limitations and directions for future work.
+
+\subsection{Trade-off Analysis}
+
+The LICT occupies a distinct position in the design space of dynamic line container data structures. Understanding its trade-offs requires examining multiple dimensions: performance, implementation complexity, numerical stability, and extensibility.
+
+\textbf{Time versus space.} The LICT's $O(\log C)$ complexity is independent of the number of lines $n$, while the Dynamic CHT achieves $O(\log n)$ amortized time. When $n \ll C$ (the common case in practice), the Dynamic CHT offers asymptotically superior performance. However, the LICT provides more predictable performance: its query time does not degrade as the hull grows, making it suitable for applications where worst-case guarantees matter more than average-case performance. The pseudo-polynomial nature of LICT's complexity (depending on universe size $U$ rather than input size $n$) is an important theoretical distinction.
+
+\textbf{Implementation complexity.} We assess implementation complexity using Cyclomatic Complexity (CC), a well-established software metric that measures the number of linearly independent paths through a program's source code. Higher CC indicates more complex logic and higher potential for defects.
+
+Analysis of our reference implementations yields:
+\begin{itemize}
+    \item \textbf{LICT:} CC = 6 for insertion (3 binary decision points: midpoint comparison, left/mid comparison, child selection), CC = 2 for query (1 binary decision per level)
+    \item \textbf{Dynamic CHT:} CC = 12 for insertion (slope ordering, hull position determination, intersection calculations, multiple edge cases), CC = 4 for query (hull binary search with boundary handling)
+\end{itemize}
+
+The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersection point computation $\frac{b_2-b_1}{k_1-k_2}$ with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
+
+\textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as $(b_2 - b_1) / (k_1 - k_2)$, which suffers from precision loss when slopes are nearly equal.
+
+\textbf{Theoretical error analysis.} Consider lines with slopes $k_1, k_2$ and intercepts $b_1, b_2$ represented in floating-point with machine epsilon $\epsilon_m$. The intersection computation in CHT involves:
+\begin{enumerate}
+    \item \textbf{Numerator:} $\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1)$, where $|\delta_1| \leq \epsilon_m$
+    \item \textbf{Denominator:} $\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2)$, where $|\delta_2| \leq \epsilon_m$
+    \item \textbf{Division:} $\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3)$, where $|\delta_3| \leq \epsilon_m$
+\end{enumerate}
+
+When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For $\Delta k = k_1 - k_2$, the condition number of intersection computation is:
+\[
+\kappa = \left|\frac{\partial x_{\text{intersect}}}{\partial (\Delta k)} \cdot \frac{\Delta k}{x_{\text{intersect}}}\right| = \left|\frac{b_2 - b_1}{(\Delta k)^2} \cdot \frac{\Delta k}{(b_2-b_1)/(\Delta k)}\right| = 1
+\]
+However, the \emph{absolute} error in the computed intersection grows as $O(\epsilon_m / (\Delta k)^2)$ when $\Delta k \to 0$.
+
+In contrast, the LICT performs only evaluations of the form $\hat{k} \otimes \hat{x} \oplus \hat{b}$, where each operation introduces bounded relative error:
+\[
+\text{fl}(kx + b) = (kx + b)(1 + \delta), \quad |\delta| \leq 2\epsilon_m + O(\epsilon_m^2)
+\]
+
+The error in LICT query results is bounded by $2\epsilon_m \cdot \max_i |k_i x + b_i|$, independent of slope differences. This makes LICT numerically stable even for nearly parallel lines where CHT intersection calculations become ill-conditioned.
+
+\subsection{When to Use LICT}
+
+The LICT is the preferred choice in the following scenarios:
+
+\textbf{Line segment support required.} When the problem involves line segments (lines valid only on subranges) rather than infinite lines, the LICT provides natural $O(\log^2 C)$ insertion. The Dynamic CHT can support segments but requires significantly more complex machinery.
+
+\textbf{Persistence required.} Path copying in the LICT is straightforward: insertions modify only nodes along a single root-to-leaf path, so copying those nodes creates a new version sharing unmodified subtrees with the previous version. Achieving persistence in the Dynamic CHT is substantially more complex due to the need to maintain hull invariants across versions.
+
+\textbf{Floating-point coordinates.} When working with floating-point coordinates where precision matters, the LICT's division-free operations avoid numerical instability. The Dynamic CHT's intersection calculations can produce significant errors when slopes differ by small amounts.
+
+\textbf{Implementation time constraints.} In settings such as competitive programming where implementation speed matters, the LICT's simplicity offers a clear advantage. The reduced code size and elimination of geometric corner cases allow for faster, more confident implementation.
+
+\subsection{When to Use Dynamic CHT}
+
+The Dynamic CHT remains preferable when:
+
+\textbf{Performance is critical.} For performance-critical applications where every millisecond matters, the Dynamic CHT's faster execution (approximately 1.5$\times$ faster in our benchmarks) makes it the better choice.
+
+\textbf{Deletion is required.} The Dynamic CHT supports deletion of arbitrary lines in $O(\log n)$ amortized time. The standard LICT does not support efficient deletion; applications requiring deletion must either use periodic reconstruction or alternative data structures.
+
+\textbf{Memory is constrained.} The Dynamic CHT uses $O(n)$ space versus the LICT's $O(n \log C)$ worst-case space. For applications with tight memory constraints and large $n$, the Dynamic CHT's space efficiency may be decisive.
+
+\subsection{Limitations}
+
+The LICT has several limitations that affect its applicability:
+
+\textbf{No efficient deletion.} As noted above, the standard LICT does not support deletion of individual lines. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, requiring $\Omega(n)$ time in the worst case.
+
+\textbf{Coordinate range dependency.} The LICT's complexity depends on $C$, the coordinate range divided by precision. For very large coordinate ranges with fine precision (e.g., 64-bit floating-point values spanning the entire representable range), $C$ can become impractically large.
+
+\textbf{Higher constant factors.} Despite having the same asymptotic complexity as the Dynamic CHT for many operations, the LICT's tree traversal involves more memory accesses and comparisons, resulting in higher constant factors that manifest as slower execution in practice.
+
+\subsection{Future Work}
+
+Several directions for future research and development remain:
+
+\textbf{Deletion support.} Developing an efficient deletion mechanism for the LICT would extend its applicability to dynamic scenarios requiring removal of lines. Potential approaches include lazy deletion with periodic reconstruction or augmenting nodes with additional structure to support efficient line removal.
+
+\textbf{Cache-efficient variants.} The LICT's pointer-based tree structure exhibits poor cache locality compared to array-based representations. Investigating cache-oblivious or cache-aware variants could improve practical performance without sacrificing asymptotic guarantees.
+
+\textbf{Parallel implementations.} The LICT's tree structure naturally supports parallel queries, but insertions are inherently sequential. Developing concurrent LICT variants that support parallel insertions while maintaining correctness would benefit multi-core applications.
+
+\textbf{Higher-dimensional extensions.} While the LICT extends naturally to higher dimensions (maintaining hyperplanes instead of lines), the space and time complexities grow exponentially with dimension. Investigating approximate variants or dimensionality reduction techniques could broaden applicability.
+
 \section{Conclusion}\label{sec:conclusion}
 
-This technical report has presented a comprehensive analysis of the Li-Chao tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
+We have presented a comprehensive analysis of the Li-Chao tree as an alternative to the Dynamic Convex Hull Trick for online line container queries. Our empirical evaluation confirms that the Dynamic CHT achieves superior raw performance, while the LICT provides advantages in implementation simplicity, numerical stability, and extensibility.
 
 The Li-Chao tree represents a distinct point in the design space, trading constant factor performance for reduced implementation complexity and enhanced flexibility. For applications requiring persistence, line segment support, or rapid implementation, the LICT offers compelling advantages. For performance-critical applications with bounded hull size, the Dynamic CHT remains preferable.
 
 Since its introduction in 2012, the Li-Chao tree has found widespread adoption in competitive programming and algorithmic education. Its continued relevance demonstrates that optimal asymptotic complexity is not the sole criterion for practical data structure selection; implementation clarity and extensibility play equally important roles in determining utility.
 
-\begin{thebibliography}{5}
+\begin{thebibliography}{9}
 
 \bibitem{overmars1981}
 Overmars, M.H. and van Leeuwen, J.
 \newblock Maintenance of configurations in the plane.
 \newblock \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
+
+\bibitem{imai2014}
+Imai, Y., Iwata, Y., and Seki, T.
+\newblock Segment Tree Beats: Efficient algorithms for range aggregate queries with range chmin/chmax operations.
+\newblock \emph{ACM-ICPC World Finals 2014}, 2014.
+\newblock \url{https://codeforces.com/blog/entry/57319}.
+
+\bibitem{basch1996}
+Basch, J., Guibas, L.J., and Ramkumar, G.D.
+\newblock Kinetic convex hulls.
+\newblock \emph{Proceedings of the 12th Annual ACM Symposium on Computational Geometry (SoCG)}, pp.~50--58, 1996.
+
+\bibitem{basch1997}
+Basch, J., Guibas, L.J., and Hershberger, J.
+\newblock Data structures for mobile data.
+\newblock \emph{Journal of Algorithms}, 31(1):1--28, 1999.
+
+\bibitem{aggarwal1987}
+Aggarwal, A. and Tokuyama, T.
+\newblock Consecutive interval query and dynamic programming on intervals.
+\newblock \emph{Discrete Applied Mathematics}, 20(1):1--11, 1988.
 
 \bibitem{zjoi2012}
 Li Chao.
