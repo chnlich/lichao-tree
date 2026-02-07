@@ -70,7 +70,15 @@ In 2012, the Li-Chao tree was presented informally in a lecture context.\footnot
 
 Several approaches exist for Dynamic Lower Envelope maintenance, each with distinct trade-offs in terms of time complexity, implementation complexity, and applicability constraints. We review these solutions to establish the context for the LICT.
 
-Dynamic maintenance of geometric configurations has been studied extensively in computational geometry. Overmars and van Leeuwen \cite{overmars1981} presented foundational work on dynamic Convex Hull maintenance, demonstrating that the lower envelope of lines can be maintained efficiently using balanced binary search trees. Their work established the theoretical framework for dynamic geometric data structures.
+Dynamic maintenance of geometric configurations has been studied extensively in computational geometry.
+
+\subsection{Overmars and van Leeuwen (1981)}
+
+Overmars and van Leeuwen \cite{overmars1981} presented foundational work on dynamic convex hull maintenance. Their data structure supports insertion and deletion of lines while maintaining the lower envelope, enabling efficient querying of the minimum value at any point.
+
+Their approach uses a balanced binary search tree to explicitly maintain the convex hull. Each node stores a line, and the tree is ordered by slope. Intersection points between adjacent lines are computed to determine the hull structure. This organization allows $O(\log n)$ amortized time for insertion, deletion, and query operations. The space complexity is $O(n)$, storing each inserted line exactly once.
+
+Their work established the theoretical framework for dynamic geometric data structures and demonstrated that logarithmic-time dynamic maintenance of the lower envelope is achievable.
 
 \subsection{Monotonic Convex Hull Trick}
 
