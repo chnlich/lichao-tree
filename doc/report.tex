@@ -138,14 +138,14 @@ where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is
 \end{equation*}
 This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
-\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[\text{left}, \text{right}]$ with depth $O(\log C)$ where $C = \frac{\text{right} - \text{left}}{\epsilon}$ and $\epsilon$ is the precision level (for integer coordinates, $\epsilon = 1$). During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint, and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
+\textbf{Complexity Proof Sketch.} The LICT is a binary tree over the coordinate range $[\text{left}, \text{right}]$ with depth $O(\log C)$ where $C = \frac{\text{right} - \text{left}}{\epsilon}$ and $\epsilon$ is the precision level. During insertion, the new line follows exactly one root-to-leaf path. At each node along this path, we perform $O(1)$ work: evaluating both lines at the endpoints and midpoint using only multiplication and addition ($kx+b$), and optionally swapping them. Since the path length is $O(\log C)$ and each level requires constant time, insertion takes $O(\log C)$ time. Queries similarly traverse one root-to-leaf path, evaluating the stored line at each node for $O(\log C)$ total time.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
 \begin{itemize}
-    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C = \frac{\text{coordinate range}}{\text{precision level}}$ (typically $C \approx 10^9$ for 32-bit integer coordinates).
+    \item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C = \frac{\text{coordinate range}}{\text{precision level}}$.
     \item \textbf{Space Complexity:} At most $O(n \log C)$ nodes in the worst case when all lines follow disjoint paths through the tree. In practice, heavy node sharing occurs as lines with similar slopes traverse common paths, typically resulting in significantly lower memory usage.
-    \item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line value comparisons at integer coordinates.
+    \item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line evaluations ($kx+b$) at query points. This avoids the division operations ($\frac{b_2-b_1}{k_1-k_2}$) required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
 \end{itemize}
 
 \textbf{Deletion.} Unlike the Dynamic CHT, which can support deletion of arbitrary lines in $O(\log n)$ amortized time, the standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
@@ -181,7 +181,7 @@ The choice between these approaches involves several trade-offs:
 
 \textbf{Performance versus simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull remains small relative to the number of insertions. The LICT provides implementation simplicity and reduced code complexity at the cost of some performance.
 
-\textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points) that require careful numerical handling. The LICT uses only combinatorial operations (line evaluations at integer coordinates), avoiding precision concerns.
+\textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as $\frac{b_2-b_1}{k_1-k_2}$) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
 
 \textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions.
 
@@ -383,7 +383,7 @@ Despite higher computational cost, the LICT offers significant advantages for pr
 
 \textbf{1. Implementation simplicity.} The LICT eliminates complex geometric calculations, reducing implementation time and probability of errors. This is particularly important in competitive programming and rapid prototyping contexts.
 
-\textbf{2. Numerical stability.} The LICT performs only integer addition and multiplication for line evaluation. The Dynamic CHT requires division for intersection calculations, necessitating careful handling of edge cases including parallel lines and overflow conditions.
+\textbf{2. Numerical stability.} The LICT performs only multiplication and addition for line evaluation ($kx+b$). The Dynamic CHT requires division for intersection calculations ($\frac{b_2-b_1}{k_1-k_2}$), necessitating careful handling of edge cases including parallel lines, overflow conditions, and precision loss when slopes are very close.
 
 \textbf{3. Floating-point queries.} For non-integer (floating-point) query coordinates, the LICT requires increased tree depth to achieve the required precision. Specifically, to distinguish coordinates within $\epsilon$ of each other over range $C$, the tree depth becomes $O(\log(C/\epsilon))$. With coordinate range $10^9$ and double precision ($\epsilon \approx 10^{-9}$), the tree depth increases from approximately 30 to 60. In such cases, the Dynamic CHT's $O(\log n)$ complexity (independent of coordinate precision) becomes relatively more attractive. Applications requiring both floating-point coordinates and the LICT's implementation advantages may use coordinate transformation to convert queries to integers (e.g., by scaling and rounding to the smallest representable unit).
 
