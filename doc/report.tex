@@ -187,7 +187,7 @@ The choice between these approaches involves several trade-offs:
 
 \subsection{Trade-off Summary}
 
-Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) demonstrates that the Dynamic CHT achieves approximately 1.45 to 2.00 times faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
+Our empirical evaluation (detailed in Section~\ref{sec:benchmarks}) demonstrates that the Dynamic CHT achieves faster execution across problem scales ranging from $10^5$ to $10^7$ operations. However, the LICT's implementation requires approximately half the code of the Dynamic CHT (45 lines vs.~88 lines in our implementations) and eliminates an entire class of potential bugs related to intersection calculations. For applications where implementation time, correctness guarantees, or extensibility are paramount, the LICT offers a compelling alternative despite its higher computational cost.
 
 \section{Implementation}\label{sec:implementation}
 
@@ -230,25 +230,25 @@ Table~\ref{tab:results} presents the performance comparison.
 \centering
 \caption{Performance Comparison (Time in milliseconds)}
 \label{tab:results}
-\begin{tabular}{@{}ccccc@{}}
+\begin{tabular}{@{}cccc@{}}
 \toprule
-\textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} & \textbf{Ratio} \\
+\textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} \\
 \midrule
-$10^5$ & Random & 10 ms & 5 ms & $2.00\times$ \\
-$10^5$ & All on Hull & 6 ms & 4 ms & $1.50\times$ \\
+$10^5$ & Random & 10 ms & 5 ms \\
+$10^5$ & All on Hull & 6 ms & 4 ms \\
 \midrule
-$10^6$ & Random & 77 ms & 52 ms & $1.48\times$ \\
-$10^6$ & All on Hull & 67 ms & 41 ms & $1.63\times$ \\
+$10^6$ & Random & 77 ms & 52 ms \\
+$10^6$ & All on Hull & 67 ms & 41 ms \\
 \midrule
-$10^7$ & Random & 789 ms & 545 ms & $1.45\times$ \\
-$10^7$ & All on Hull & 687 ms & 426 ms & $1.61\times$ \\
+$10^7$ & Random & 789 ms & 545 ms \\
+$10^7$ & All on Hull & 687 ms & 426 ms \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Analysis}
 
-The Dynamic CHT demonstrates consistently faster execution across all test cases, with performance advantage ranging from 1.45 to 2.00 times. The gap is most pronounced at smaller problem sizes and narrows as $N$ increases.
+The Dynamic CHT demonstrates consistently faster execution across all test cases. The gap is most pronounced at smaller problem sizes and narrows as $N$ increases.
 
 The relationship between hull size and performance exhibits scale-dependent behavior. At smaller scales, the Dynamic CHT benefits more significantly from skipping irrelevant lines. At larger scales, cache effects become dominant, and the pattern becomes less pronounced.
 
