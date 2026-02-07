@@ -372,10 +372,28 @@ To validate the theoretical complexity analysis and characterize practical perfo
 
 \subsection{Experimental Setup}
 
-All benchmarks were conducted with the following configuration:
+All benchmarks were conducted with the following configuration.
+
+\textbf{Hardware Specifications:}
 \begin{itemize}
-    \item \textbf{Compiler:} g++ 11.4.0 with \texttt{-O3 -std=c++17}
-    \item \textbf{Platform:} Linux x86\_64
+    \item \textbf{CPU:} Intel Xeon @ 2.20GHz (Model 79, Broadwell microarchitecture)
+    \item \textbf{Core Configuration:} 1 core, 2 threads (SMT enabled)
+    \item \textbf{L1 Cache:} 32 KiB L1 data cache, 32 KiB L1 instruction cache
+    \item \textbf{L2 Cache:} 256 KiB
+    \item \textbf{L3 Cache:} 55 MiB (shared)
+    \item \textbf{Memory:} 4 GB DRAM
+    \item \textbf{Platform:} Linux x86\_64 (KVM virtualized)
+\end{itemize}
+
+\textbf{Software Configuration:}
+\begin{itemize}
+    \item \textbf{Compiler:} g++ 11.4.0
+    \item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
+    \item \textbf{Operating System:} Linux x86\_64
+\end{itemize}
+
+\textbf{Experimental Parameters:}
+\begin{itemize}
     \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
     \item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
     \item \textbf{Random seed:} 42 (fixed for reproducibility)
