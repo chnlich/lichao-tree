@@ -179,11 +179,11 @@ Implementation Complexity & Higher & Lower \\
 
 The choice between these approaches involves several trade-offs:
 
-\textbf{Performance versus simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull remains small relative to the number of insertions. The LICT provides implementation simplicity and reduced code complexity at the cost of some performance.
+\textbf{Performance versus simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull remains small relative to the number of insertions. The LICT provides implementation simplicity and reduced code complexity at the cost of some performance. The LICT eliminates complex geometric calculations, reducing implementation time and probability of errors. This is particularly important in competitive programming and rapid prototyping contexts.
 
 \textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as $\frac{b_2-b_1}{k_1-k_2}$) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
 
-\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions.
+\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion. Persistence via path copying and higher-dimensional generalizations also follow naturally from the recursive structure.
 
 \subsection{Trade-off Summary}
 
@@ -255,23 +255,6 @@ The relationship between hull size and performance exhibits scale-dependent beha
 Both implementations exhibit logarithmic scaling consistent with their theoretical complexity guarantees.
 
 \section{Discussion}\label{sec:discussion}
-
-\subsection{Advantages of the Li-Chao tree}
-
-Despite higher computational cost, the LICT offers significant advantages for practical applications:
-
-\textbf{1. Implementation simplicity.} The LICT eliminates complex geometric calculations, reducing implementation time and probability of errors. This is particularly important in competitive programming and rapid prototyping contexts.
-
-\textbf{2. Numerical stability.} The LICT performs only multiplication and addition for line evaluation ($kx+b$). The Dynamic CHT requires division for intersection calculations ($\frac{b_2-b_1}{k_1-k_2}$), necessitating careful handling of edge cases including parallel lines, overflow conditions, and precision loss when slopes are very close.
-
-\textbf{3. Floating-point queries.} For non-integer (floating-point) query coordinates, the LICT requires increased tree depth to achieve the required precision. Specifically, to distinguish coordinates within $\epsilon$ of each other over range $C$, the tree depth becomes $O(\log(C/\epsilon))$. With coordinate range $10^9$ and double precision ($\epsilon \approx 10^{-9}$), the tree depth increases from approximately 30 to 60. In such cases, the Dynamic CHT's $O(\log n)$ complexity (independent of coordinate precision) becomes relatively more attractive. Applications requiring both floating-point coordinates and the LICT's implementation advantages may use coordinate transformation to convert queries to integers (e.g., by scaling and rounding to the smallest representable unit).
-
-\textbf{4. Extensibility.} The LICT's structure facilitates extensions that are difficult with the Dynamic CHT:
-\begin{itemize}
-    \item \textbf{Line segments:} Lines valid only on subranges $[l', r']$ integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion.
-    \item \textbf{Persistence:} Path copying for versioned access requires minimal modification.
-    \item \textbf{Higher dimensions:} Generalization to multi-dimensional query spaces follows naturally from the recursive structure.
-\end{itemize}
 
 \section{Conclusion}\label{sec:conclusion}
 
