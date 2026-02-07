@@ -85,14 +85,6 @@ Their approach uses a balanced binary search tree to explicitly maintain the con
 
 Their work established the theoretical framework for dynamic geometric data structures and demonstrated that logarithmic-time dynamic maintenance of the lower envelope is achievable.
 
-\subsection{Connections to Segment Tree Beats}
-
-Segment Tree Beats, introduced by Imai et al.~\cite{imai2014}, provides a framework for range aggregate queries with range chmin/chmax operations. This technique shares structural similarities with the LICT in its approach to maintaining auxiliary information at segment tree nodes.
-
-Both structures employ a recursive interval-based approach. Segment Tree Beats maintains maximum and second-maximum values to efficiently process range chmin operations. Similarly, the LICT maintains the best line at each interval midpoint. The key insight in both cases is that maintaining carefully chosen auxiliary information at each node enables efficient updates without visiting all elements in the range.
-
-The LICT can be viewed as a geometric variant of the segment tree beats technique, where the ``beats'' condition corresponds to line comparisons at interval midpoints. This connection suggests that techniques developed for segment tree beats, such as lazy propagation optimizations, may have analogues in LICT variants.
-
 \subsection{Connections to Kinetic Data Structures}
 
 Kinetic data structures, pioneered by Basch, Guibas, and colleagues \cite{basch1996, basch1997}, address dynamic maintenance of geometric configurations under continuous motion. These structures maintain certificates that guarantee the correctness of the current configuration and update efficiently when certificates fail.
@@ -709,12 +701,6 @@ Since its introduction in 2012, the Li-Chao tree has found widespread adoption i
 Overmars, M.H. and van Leeuwen, J.
 \newblock Maintenance of configurations in the plane.
 \newblock \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
-
-\bibitem{imai2014}
-Imai, Y., Iwata, Y., and Seki, T.
-\newblock Segment Tree Beats: Efficient algorithms for range aggregate queries with range chmin/chmax operations.
-\newblock \emph{ACM-ICPC World Finals 2014}, 2014.
-\newblock \url{https://codeforces.com/blog/entry/57319}.
 
 \bibitem{basch1996}
 Basch, J., Guibas, L.J., and Ramkumar, G.D.
