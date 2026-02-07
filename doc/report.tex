@@ -65,12 +65,20 @@ Dynamic Lower Envelope maintenance is a fundamental problem in computational geo
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
 \item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
-\item \textbf{Query:} Given $x_0$, compute $\min_{i} \{k_i x_0 + b_i\}$ over all lines currently in the structure.
+\item \textbf{Query:} Given $x_0$, compute
+\[
+\min_{i} \{k_i x_0 + b_i\}
+\]
+over all lines currently in the structure.
 \end{enumerate}
 
-The structure also supports line segments (lines defined only on finite intervals $[x_l, x_r]$) in addition to infinite lines.
+The structure also supports line segments (lines defined only on finite intervals \[x_l, x_r\]) in addition to infinite lines.
 
-Both operations must execute in logarithmic time for acceptable performance at scale. The LICT provides $O(\log C)$ time per operation for minimum (or maximum) queries, where $C = \frac{\text{coordinate range}}{\text{precision level}}$ represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
+Both operations must execute in logarithmic time for acceptable performance at scale. The LICT provides $O(\log C)$ time per operation for minimum (or maximum) queries, where
+\[
+C = \frac{\text{coordinate range}}{\text{precision level}}
+\]
+represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
 
 \subsection{Background}
 
@@ -188,8 +196,7 @@ where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is
 \text{left} & \text{if } L \neq M \\
 \text{right} & \text{if } L = M
 \end{cases}
-\end{equation*}
-This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
+\end{equation*} This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
 \subsection{Theoretical Analysis}
 
@@ -270,6 +277,19 @@ Each line insertion creates at most one new node per level along its insertion p
 
 The LICT's complexity depends on the coordinate range rather than the number of lines. This provides consistent performance regardless of hull size, though it cannot exploit cases where the hull remains small relative to the number of insertions.
 
+\begin{itemize}
+\item \textbf{Time Complexity:} $O(\log C)$ per operation, where
+\[
+C = \frac{\text{coordinate range}}{\text{precision level}}.
+\]
+\item \textbf{Space Complexity:} At most $O(n \log C)$ nodes in the worst case when all lines follow disjoint paths through the tree. In practice, heavy node sharing occurs as lines with similar slopes traverse common paths, typically resulting in significantly lower memory usage.
+\item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line evaluations ($kx+b$) at query points. This avoids the division operations
+\[
+\frac{b_2-b_1}{k_1-k_2}
+\]
+required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
+\end{itemize}
+
 \subsection{Comparison with Dynamic CHT}
 
 Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CHT and LICT.
@@ -301,7 +321,11 @@ A critical distinction between the Dynamic CHT and LICT concerns their dependenc
 \]
 In this regime, which commonly occurs in practice (e.g., $n = 10^3$ lines with $C = 10^9$ coordinate range), the Dynamic CHT's time complexity is asymptotically superior. Specifically, when $n = O(\text{poly}(\log C))$, the Dynamic CHT operates in $O(\log \log C)$ time versus the LICT's $O(\log C)$.
 
-Conversely, when $n = \Omega(C^\epsilon)$ for any constant $\epsilon > 0$, both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
+Conversely, when
+\[
+n = \Omega(C^\epsilon) \quad \text{for any constant} \quad \epsilon > 0,
+\]
+both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
 
 \subsection{Key Trade-offs}
 
@@ -311,7 +335,11 @@ The choice between these approaches involves several trade-offs:
 
 \textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as $\frac{b_2-b_1}{k_1-k_2}$) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
 
-\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding $O(\log^2 C)$ total time for line segment insertion.
+\textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding
+\[
+O(\log^2 C)
+\]
+total time for line segment insertion.
 
 \begin{figure}[h]
 \centering
@@ -476,7 +504,11 @@ All benchmarks were conducted with the following configuration.
 \item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
 \item \textbf{Random seed:} 42 (fixed for reproducibility)
 \item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
-\item \textbf{Distributions:} We write $X \sim U(a, b)$ to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
+\item \textbf{Distributions:} We write
+\[
+X \sim U(a, b)
+\]
+to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
 \begin{itemize}
 \item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size: $\Theta(\sqrt{n})$.
 \item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
@@ -516,7 +548,11 @@ To validate numerical stability claims and assess behavior under extreme conditi
 When lines have nearly identical slopes, CHT intersection calculations become numerically unstable. We test with slopes differing by machine epsilon multiples:
 
 \begin{itemize}
-\item \textbf{Configuration:} $k_i = 1.0 + i \cdot \delta$ for $i \in [1, n]$, with $\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}$ (approaching double precision limits)
+\item \textbf{Configuration:}
+\[
+k_i = 1.0 + i \cdot \delta \quad \text{for} \quad i \in [1, n],
+\]
+with $\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}$ (approaching double precision limits)
 \item \textbf{Intercepts:} $m_i \sim U(-10^9, 10^9)$
 \item \textbf{Query points:} $x \sim U(-10^6, 10^6)$
 \end{itemize}
@@ -599,29 +635,49 @@ Analysis of our reference implementations yields:
 \item \textbf{Dynamic CHT:} CC = 12 for insertion (slope ordering, hull position determination, intersection calculations, multiple edge cases), CC = 4 for query (hull binary search with boundary handling)
 \end{itemize}
 
-The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersection point computation $\frac{b_2-b_1}{k_1-k_2}$ with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
+The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersection point computation
+\[
+\frac{b_2-b_1}{k_1-k_2}
+\]
+with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
 
 \textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as $(b_2 - b_1) / (k_1 - k_2)$, which suffers from precision loss when slopes are nearly equal.
 
 \textbf{Theoretical error analysis.} Consider lines with slopes $k_1, k_2$ and intercepts $b_1, b_2$ represented in floating-point with machine epsilon $\epsilon_m$. The intersection computation in CHT involves:
 \begin{enumerate}
-\item \textbf{Numerator:} $\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1)$, where $|\delta_1| \leq \epsilon_m$
-\item \textbf{Denominator:} $\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2)$, where $|\delta_2| \leq \epsilon_m$
-\item \textbf{Division:} $\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3)$, where $|\delta_3| \leq \epsilon_m$
+\item \textbf{Numerator:}
+\[
+\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1), \quad |\delta_1| \leq \epsilon_m
+\]
+\item \textbf{Denominator:}
+\[
+\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2), \quad |\delta_2| \leq \epsilon_m
+\]
+\item \textbf{Division:}
+\[
+\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3), \quad |\delta_3| \leq \epsilon_m
+\]
 \end{enumerate}
 
 When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For $\Delta k = k_1 - k_2$, the condition number of intersection computation is:
 \[
 \kappa = \left|\frac{\partial x_{\text{intersect}}}{\partial (\Delta k)} \cdot \frac{\Delta k}{x_{\text{intersect}}}\right| = \left|\frac{b_2 - b_1}{(\Delta k)^2} \cdot \frac{\Delta k}{(b_2-b_1)/(\Delta k)}\right| = 1
 \]
-However, the \emph{absolute} error in the computed intersection grows as $O(\epsilon_m / (\Delta k)^2)$ when $\Delta k \to 0$.
+However, the \emph{absolute} error in the computed intersection grows as
+\[
+O(\epsilon_m / (\Delta k)^2) \quad \text{when} \quad \Delta k \to 0.
+\]
 
 In contrast, the LICT performs only evaluations of the form $\hat{k} \otimes \hat{x} \oplus \hat{b}$, where each operation introduces bounded relative error:
 \[
 \text{fl}(kx + b) = (kx + b)(1 + \delta), \quad |\delta| \leq 2\epsilon_m + O(\epsilon_m^2)
 \]
 
-The error in LICT query results is bounded by $2\epsilon_m \cdot \max_i |k_i x + b_i|$, independent of slope differences. This makes LICT numerically stable even for nearly parallel lines where CHT intersection calculations become ill-conditioned.
+The error in LICT query results is bounded by
+\[
+2\epsilon_m \cdot \max_i |k_i x + b_i|,
+\]
+independent of slope differences. This makes LICT numerically stable even for nearly parallel lines where CHT intersection calculations become ill-conditioned.
 
 \subsection{When to Use LICT}
 
