@@ -532,32 +532,6 @@ $10^{-12}$ & 79 ms & 89 ms & 847 \\
 
 Table~\ref{tab:parallel} shows that as slopes converge, the Dynamic CHT suffers increasing computational overhead from precision handling and produces incorrect query results due to intersection computation errors. The LICT maintains consistent performance and correctness regardless of slope similarity.
 
-\subsubsection{Large Coordinates}
-
-Operations near floating-point overflow limits stress numerical precision:
-
-\begin{itemize}
-\item \textbf{Configuration:} $k, m \sim U(-10^{300}, 10^{300})$ (near double max $\approx 1.8 \times 10^{308}$)
-\item \textbf{Query points:} $x \sim U(-10^{150}, 10^{150})$ ensuring $kx + b$ stays representable
-\end{itemize}
-
-\begin{table}[h]
-\centering
-\caption{Performance with Large Coordinates (Time in milliseconds, $n = 10^5$)}
-\label{tab:large}
-\begin{tabular}{@{}ccc@{}}
-\toprule
-\textbf{Metric} & \textbf{LICT} & \textbf{Dynamic CHT} \\
-\midrule
-Median query time & 12 ms & 18 ms \\
-Max relative error & $10^{-15}$ & $10^{-8}$ \\
-Overflow occurrences & 0 & 23 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The LICT avoids overflow in intermediate calculations by evaluating $kx + b$ directly. The CHT's intersection computation $(b_2 - b_1) / (k_1 - k_2)$ with large coordinates risks overflow in numerator differences and catastrophic cancellation in denominator differences.
-
 \subsubsection{Mixed Precision Scenarios}
 
 Real-world data often mixes magnitudes, testing dynamic range handling:
