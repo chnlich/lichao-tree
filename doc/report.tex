@@ -163,7 +163,7 @@ Each node in the tree represents an interval $[\text{left}, \text{right}]$ and s
 \label{fig:interval-advantage}
 \end{figure}
 
-Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at $m$, so the stored line is not necessarily globally optimal at that coordinate.
+Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at the midpoint, so the stored line is not necessarily globally optimal at that coordinate.
 
 \textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint:
 \begin{itemize}
@@ -171,23 +171,16 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
 \end{itemize}
 
-At query time, we traverse the path to $x_0$ and take the minimum over all stored lines on that path. For any line $L$ and query point $x_0$:
-\begin{enumerate}
-\item Line $L$ is routed down exactly one root-to-leaf path.
-\item The query for $x_0$ traverses exactly this path (the unique path whose intervals all contain $x_0$).
-\item Line $L$ is stored at some node on this path if and only if $L$ achieved the minimum value at that node's midpoint.
-\item Therefore, all lines that could potentially be optimal at $x_0$ are evaluated.
-\end{enumerate}
-The minimum among stored lines on the path equals the global lower envelope at $x_0$.
+At query time, we traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
 
 Insertion proceeds as follows: if the new line yields a lower value at the midpoint, the lines are swapped and the suboptimal line continues down. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line yields a higher value at the midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both. This property guarantees that the suboptimal line need only be propagated down a single child path.
 
-The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define the comparison indicators:
+The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define boolean comparison values:
 \begin{align*}
-L &= \mathbb{I}[f_\text{new}(\text{left}) < f_\text{stored}(\text{left})] \\
-M &= \mathbb{I}[f_\text{new}(\text{mid}) < f_\text{stored}(\text{mid})]
+L &= [f_\text{new}(\text{left}) < f_\text{stored}(\text{left})] \\
+M &= [f_\text{new}(\text{mid}) < f_\text{stored}(\text{mid})]
 \end{align*}
-where $\mathbb{I}[\cdot]$ is the indicator function. The child selection rule is:
+where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
 \begin{equation*}
 \text{child} =
 \begin{cases}
