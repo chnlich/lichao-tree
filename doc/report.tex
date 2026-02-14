@@ -285,43 +285,6 @@ C = \frac{\text{coordinate range}}{\text{precision level}}.
 required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
 \end{itemize}
 
-\subsection{Comparison with Dynamic CHT}
-
-Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CHT and LICT.
-
-\begin{table}[h]
-\centering
-\caption{Comparison of Dynamic CHT and Li-Chao tree}
-\label{tab:comparison}
-\begin{tabular}{@{}lcc@{}}
-\toprule
-\textbf{Characteristic} & \textbf{Dynamic CHT} & \textbf{LICT} \\
-\midrule
-Time Complexity & $O(\log n)$ amortized & $O(\log C)$~\footnote{Line segment insertion requires $O(\log^2 C)$ time; see Section~\ref{sec:discussion}.} \\
-Space Complexity & $O(n)$ & $O(n \log C)$ worst case \\
-Intersection Calculations & Required & None \\
-Numerical Precision & Care required & Straightforward \\
-Line Segment Extension & Complex & Natural \\
-Persistence Support & Difficult & Straightforward \\
-Implementation Complexity & Higher & Lower \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Asymptotic Comparison for $n \ll C$}
-
-A critical distinction between the Dynamic CHT and LICT concerns their dependence on different problem parameters. The Dynamic CHT achieves $O(\log n)$ time complexity, while the LICT achieves $O(\log C)$. When the number of lines $n$ is much smaller than the coordinate universe $C$ (i.e., $n \ll C$), we have:
-\[
-\log n \ll \log C
-\]
-In this regime, which commonly occurs in practice (e.g., $n = 10^3$ lines with $C = 10^9$ coordinate range), the Dynamic CHT's time complexity is asymptotically superior. Specifically, when $n = O(\text{poly}(\log C))$, the Dynamic CHT operates in $O(\log \log C)$ time versus the LICT's $O(\log C)$.
-
-Conversely, when
-\[
-n = \Omega(C^\epsilon) \quad \text{for any constant} \quad \epsilon > 0,
-\]
-both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
-
 \subsection{Key Trade-offs}
 
 The choice between these approaches involves several trade-offs:
@@ -675,6 +638,43 @@ Table~\ref{tab:floating-point} presents the performance comparison when using do
 When using integer query coordinates with double-precision line coefficients, both structures maintain their relative performance characteristics. The LICT's tree traversal and line evaluation operations involve double-precision multiplication and addition, which incur slightly higher computational cost than integer operations but remain efficient. The Dynamic CHT's balanced tree structure handles the mixed-type configuration naturally, with intersection computations performed in double precision.
 
 Neither structure exhibited precision issues with randomly distributed floating-point values, confirming that both handle well-conditioned inputs correctly. The LICT maintains its numerical stability advantage for problematic cases such as nearly parallel lines, where its division-free operations avoid the precision degradation that affects CHT intersection calculations.
+
+\subsection{Comparison with Dynamic CHT}
+
+Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CHT and LICT.
+
+\begin{table}[h]
+\centering
+\caption{Comparison of Dynamic CHT and Li-Chao tree}
+\label{tab:comparison}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Characteristic} & \textbf{Dynamic CHT} & \textbf{LICT} \\
+\midrule
+Time Complexity & $O(\log n)$ amortized & $O(\log C)$~\footnote{Line segment insertion requires $O(\log^2 C)$ time; see Section~\ref{sec:discussion}.} \\
+Space Complexity & $O(n)$ & $O(n \log C)$ worst case \\
+Intersection Calculations & Required & None \\
+Numerical Precision & Care required & Straightforward \\
+Line Segment Extension & Complex & Natural \\
+Persistence Support & Difficult & Straightforward \\
+Implementation Complexity & Higher & Lower \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Asymptotic Comparison for $n \ll C$}
+
+A critical distinction between the Dynamic CHT and LICT concerns their dependence on different problem parameters. The Dynamic CHT achieves $O(\log n)$ time complexity, while the LICT achieves $O(\log C)$. When the number of lines $n$ is much smaller than the coordinate universe $C$ (i.e., $n \ll C$), we have:
+\[
+\log n \ll \log C
+\]
+In this regime, which commonly occurs in practice (e.g., $n = 10^3$ lines with $C = 10^9$ coordinate range), the Dynamic CHT's time complexity is asymptotically superior. Specifically, when $n = O(\text{poly}(\log C))$, the Dynamic CHT operates in $O(\log \log C)$ time versus the LICT's $O(\log C)$.
+
+Conversely, when
+\[
+n = \Omega(C^\epsilon) \quad \text{for any constant} \quad \epsilon > 0,
+\]
+both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
 
 \subsection{Analysis}
 
