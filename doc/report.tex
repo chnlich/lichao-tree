@@ -165,15 +165,9 @@ Each node in the tree represents an interval $[\text{left}, \text{right}]$ and s
 
 Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at the midpoint, so the stored line is not necessarily globally optimal at that coordinate.
 
-\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint:
-\begin{itemize}
-\item If $A$ achieves a lower value than $B$ at $\text{mid}$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $\text{mid}$ containing that endpoint (since two lines intersect at most once).
-\item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
-\end{itemize}
-
 At query time, we traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
 
-Insertion proceeds as follows: if the new line yields a lower value at the midpoint, the lines are swapped and the suboptimal line continues down. The key geometric insight is that two distinct lines intersect at most once. Therefore, if a line yields a higher value at the midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both. This property guarantees that the suboptimal line need only be propagated down a single child path.
+Insertion proceeds as follows: if the new line yields a lower value at the midpoint, the lines are swapped and the suboptimal line continues down.
 
 The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define boolean comparison values:
 \begin{align*}
@@ -191,13 +185,23 @@ where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
 
 \subsection{Theoretical Analysis}
 
-We now present a formal analysis of the LICT's correctness and complexity. Our analysis assumes the Word-RAM model of computation, where arithmetic operations on $O(\log U)$-bit words (where $U$ is the universe size) take constant time.
+We now present a formal analysis of the LICT's correctness and complexity.
 
 \begin{definition}[Coordinate Universe]
-Let $U$ denote the coordinate universe size. The LICT operates on a discrete domain $X = \{x_0, x_0 + \epsilon, x_0 + 2\epsilon, \ldots, x_0 + (U-1)\epsilon\}$ where $\epsilon$ is the precision level and $C = U = \frac{\text{coordinate range}}{\text{precision level}}$. The tree depth is $h = \lceil \log_2 C \rceil$.
+The LICT operates on a discrete domain where $C = \frac{\text{coordinate range}}{\text{precision level}}$. The tree depth is $h = \lceil \log_2 C \rceil$.
 \end{definition}
 
 \subsubsection{Correctness}
+
+We first establish the geometric intuition underlying the LICT's correctness. The key insight is that two distinct lines intersect at most once. This fundamental property of linear functions ensures that if a line yields a higher value at a midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both.
+
+\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint:
+\begin{itemize}
+\item If $A$ achieves a lower value than $B$ at $\text{mid}$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $\text{mid}$ containing that endpoint (since two lines intersect at most once).
+\item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
+\end{itemize}
+
+This property guarantees that the suboptimal line need only be propagated down a single child path.
 
 \begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
 For any node $v$ with interval $[l, r]$ and midpoint $m = \lfloor(l+r)/2\rfloor$, the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
@@ -235,13 +239,13 @@ Thus, exactly those lines that could be optimal at $x_0$ are evaluated, and the 
 \subsubsection{Complexity Analysis}
 
 \begin{lemma}[Time Complexity]\label{lem:time-complexity}
-Under the Word-RAM model with $w = \Theta(\log U)$ bits per word, both insertion and query operations require $O(\log C)$ time, where $C = U$ is the coordinate universe size.
+Both insertion and query operations require $O(\log C)$ time.
 \end{lemma}
 
 \begin{proof}
-The LICT is a binary tree of depth $h = \lceil \log_2 C \rceil = O(\log C)$. 
+The LICT is a binary tree of depth $h = \lceil \log_2 C \rceil = O(\log C)$.
 
-For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$), requiring constant time on $O(\log U)$-bit values; (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time in the Word-RAM model. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
+For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$); (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
 
 For query: The traversal follows one root-to-leaf path with $O(1)$ work per node (line evaluation and comparison). Total time is $O(\log C)$.
 \end{proof}
@@ -254,7 +258,7 @@ The LICT stores at most $O(n \log C)$ nodes in the worst case, where $n$ is the 
 Each line insertion creates at most one new node per level along its insertion path (when reaching a null child). The path length is $O(\log C)$. With $n$ insertions, the total number of nodes is at most $O(n \log C)$.
 \end{proof}
 
-\textbf{Pseudo-polynomial Nature.} We emphasize that the complexity $O(\log C)$ is pseudo-polynomial: it depends on the coordinate universe size $U$ (equivalently $C$), not solely on the input size $n$. In the Word-RAM model with $w$-bit words, $C \leq 2^w$, so $\log C \leq w$. For inputs with $w = \Theta(\log n)$ (standard assumption), this yields $O(\log n)$ time. However, for large coordinate ranges (e.g., 64-bit coordinates with $C = 2^{64}$), the complexity becomes $O(w) = O(64) = O(1)$ in the Word-RAM model with 64-bit words, but is pseudo-polynomial when measured against the input bit complexity.
+\textbf{Pseudo-polynomial Nature.} We emphasize that the complexity $O(\log C)$ is pseudo-polynomial: it depends on the coordinate range parameter $C$, not solely on the input size $n$. For $w$-bit coordinates, $C \leq 2^w$, so $\log C \leq w$. When $w = O(\log n)$, this yields $O(\log n)$ time. However, for large coordinate ranges (e.g., 64-bit coordinates), the complexity is effectively $O(w) = O(1)$ relative to the coordinate bit width, though still pseudo-polynomial when measured against input bit complexity.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
