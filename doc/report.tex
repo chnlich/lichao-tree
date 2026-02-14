@@ -55,7 +55,7 @@ tabsize=2
 \maketitle
 
 \begin{abstract}
-The Li-Chao tree (LICT), originally emerging from the algorithmic competition community, has gained widespread adoption for dynamic maintenance of the lower (or upper) envelope of a set of lines. Despite its practical utility, the structure has not been formally documented in the academic literature. This paper formalizes the LICT and provides a comprehensive analysis of its properties and performance. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
+The Li-Chao tree (LICT) was presented informally in a 2012 lecture context and has since gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. This paper addresses that gap by providing precise algorithmic specifications, implementation details, and empirical performance analysis of the LICT. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
 \end{abstract}
 
 \section{Introduction}
@@ -82,9 +82,7 @@ represents the ratio of the coordinate range to the precision level. For integer
 
 \subsection{Background}
 
-The classical solution to this problem is the Convex Hull Trick (CHT), which maintains the lower envelope of lines explicitly. Existing variants use balanced binary search trees or specialized structures to achieve logarithmic-time operations. While asymptotically optimal, these approaches require complex intersection point calculations and careful handling of numerical precision.
-
-In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. Despite over a decade of practical use and its inclusion in standard algorithm libraries, the structure has not been formally documented in the academic literature. We address this gap by providing precise algorithmic specifications, implementation details, and empirical performance analysis of the LICT. We present well-tested reference implementations and conduct systematic performance evaluation with particular attention to extensibility features.
+In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. This paper formalizes the LICT and provides a comprehensive analysis of its properties and performance, with particular attention to extensibility features.
 
 \section{Related Work}\label{sec:related}
 
