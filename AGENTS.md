@@ -133,13 +133,7 @@ This is preferred over explicit individual headers for simplicity and faster com
 - Use proper mathematical notation: `$1.5$ to $2.0\times$`
 - This is a strict rule - check for `--` before every commit
 
-### Content Structure
-- **Introduction**: Keep benchmark details (sizes, specific numbers) out of the introduction
-- **Abstract**: Frame LICT as a viable alternative with distinct advantages (simplicity, persistency, extensibility)
-- **Comparison**: Highlight persistency, line segment support, and implementation advantages as key differentiators
-- **Conclusion**: Emphasize LICT's unique position in the design space, not as second-best
-
-**Additional rules:**
+### Additional rules
 - **No speed comparisons in abstract** - Only describe what LICT achieves, not relative performance vs CHT
 - **No "Selection Guidelines" subsection** - Remove selection guidance from abstract and delete from Discussion
 - **Simplify complexity statements** - State only LICT's $O(\log C)$ without comparing to CHT's $O(\log n)$
