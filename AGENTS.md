@@ -139,6 +139,26 @@ This is preferred over explicit individual headers for simplicity and faster com
 - **Comparison**: Highlight persistency, line segment support, and implementation advantages as key differentiators
 - **Conclusion**: Emphasize LICT's unique position in the design space, not as second-best
 
+**Additional rules:**
+- **No speed comparisons in abstract** - Only describe what LICT achieves, not relative performance vs CHT
+- **No "Selection Guidelines" subsection** - Remove selection guidance from abstract and delete from Discussion
+- **Simplify complexity statements** - State only LICT's $O(\log C)$ without comparing to CHT's $O(\log n)$
+- **Do NOT mention specific competing solutions in Introduction** - No CHT framing in Intro, comparison belongs in Related Work
+- **$C$ is a precision parameter** - $C = \frac{\text{coordinate range}}{\text{precision level}}$
+- **Line segment complexity is $O(\log^2 C)$** - Not $O(\log C)$ (segment decomposes into $O(\log C)$ intervals)
+- **LICT uses only $kx+b$ evaluations** - Emphasize avoidance of division precision issues
+- **Don't claim unverified applications** - Only state "extensive applications" without listing specific domains
+- **No performance ratios** - Don't state "X times faster"; use neutral descriptions ("faster execution")
+- **Merge related sections** - Consolidate sections to avoid redundancy
+- **Don't mention Segment Tree Beats** - Unrelated to Li-Chao tree
+- **Don't mention Kinetic Data Structures** - Unrelated to Li-Chao tree
+- **Remove obvious sections** - Don't include trivial implementation details (Empty Container Behavior, Node reclamation, etc.)
+
+### Math Expression Formatting
+- **Displayed equations**: Each complex math expression should occupy its own line using `\[` and `\]` (not inline `$...$`)
+- **Simple expressions**: Simple inline math like `$O(\log C)$`, `$k_i$`, `$x$` can remain inline
+- **Consistency**: Use consistent symbols throughout: `l, r, m` (not `left, right, mid`)
+
 ### Paper Organization
 Papers should follow this structure:
 1. **Abstract** - Summary of contributions and key findings
