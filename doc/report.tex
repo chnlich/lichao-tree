@@ -191,6 +191,56 @@ where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
 \end{cases}
 \end{equation*} This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
 
+Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
+
+\begin{algorithm}[h]
+\caption{LICT Line Insertion}
+\label{alg:insert}
+\begin{algorithmic}[1]
+\Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
+\If{$node$ is null}
+\State $node \gets \text{new Node}(new\_line)$
+\State \Return
+\EndIf
+\State $mid \gets l + (r - l) / 2$
+\State $lef \gets new\_line.eval(l) < node.line.eval(l)$
+\State $midf \gets new\_line.eval(mid) < node.line.eval(mid)$
+\If{$midf$}
+\State swap($node.line$, $new\_line$)
+\EndIf
+\If{$l = r$}
+\State \Return
+\EndIf
+\If{$lef \neq midf$}
+\State \Call{Insert}{$node.left$, $new\_line$, $l$, $mid$}
+\Else
+\State \Call{Insert}{$node.right$, $new\_line$, $mid+1$, $r$}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+\caption{LICT Query}
+\label{alg:query}
+\begin{algorithmic}[1]
+\Require Node pointer $node$, query coordinate $x$, interval $[l, r]$
+\Ensure Minimum value at coordinate $x$
+\If{$node$ is null}
+\State \Return $+\infty$
+\EndIf
+\State $mid \gets l + (r - l) / 2$
+\State $val \gets node.line.eval(x)$
+\If{$l = r$}
+\State \Return $val$
+\EndIf
+\If{$x \leq mid$}
+\State \Return $\min(val, \text{\Call{Query}{$node.left$, $x$, $l$, $mid$}})$
+\Else
+\State \Return $\min(val, \text{\Call{Query}{$node.right$, $x$, $mid+1$, $r$}})$
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
 \subsection{Theoretical Analysis}
 
 We now present a formal analysis of the LICT's correctness and complexity.
@@ -379,64 +429,6 @@ Node *left = nullptr, *right = nullptr;
 Node(Line l) : line(l) {}
 };
 \end{lstlisting}
-
-\subsection{Core Operations}
-
-Algorithm~\ref{alg:insert} presents the insertion procedure. At each node, the new line is compared with the stored line at the midpoint. The line achieving the lower value at the midpoint is retained; the other line is propagated to the appropriate child based on where the relative ordering changes.
-
-\begin{algorithm}[h]
-\caption{LICT Line Insertion}
-\label{alg:insert}
-\begin{algorithmic}[1]
-\Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
-\If{$node$ is null}
-\State $node \gets \text{new Node}(new\_line)$
-\State \Return
-\EndIf
-\State $mid \gets l + (r - l) / 2$
-\State $lef \gets new\_line.eval(l) < node.line.eval(l)$
-\State $midf \gets new\_line.eval(mid) < node.line.eval(mid)$
-\If{$midf$}
-\State swap($node.line$, $new\_line$)
-\EndIf
-\If{$l = r$}
-\State \Return
-\EndIf
-\If{$lef \neq midf$}
-\State \Call{Insert}{$node.left$, $new\_line$, $l$, $mid$}
-\Else
-\State \Call{Insert}{$node.right$, $new\_line$, $mid+1$, $r$}
-\EndIf
-\end{algorithmic}
-\end{algorithm}
-
-Algorithm~\ref{alg:query} presents the query procedure. The algorithm traverses the path from root to leaf, evaluating the stored line at each node and tracking the minimum value.
-
-\begin{algorithm}[h]
-\caption{LICT Query}
-\label{alg:query}
-\begin{algorithmic}[1]
-\Require Node pointer $node$, query coordinate $x$, interval $[l, r]$
-\Ensure Minimum value at coordinate $x$
-\If{$node$ is null}
-\State \Return $+\infty$
-\EndIf
-\State $mid \gets l + (r - l) / 2$
-\State $val \gets node.line.eval(x)$
-\If{$l = r$}
-\State \Return $val$
-\EndIf
-\If{$x \leq mid$}
-\State \Return $\min(val, \text{\Call{Query}{$node.left$, $x$, $l$, $mid$}})$
-\Else
-\State \Return $\min(val, \text{\Call{Query}{$node.right$, $x$, $mid+1$, $r$}})$
-\EndIf
-\end{algorithmic}
-\end{algorithm}
-
-\subsection{Memory Management}
-
-The LICT uses dynamic node allocation: nodes are created only when a line traverses that interval. In the worst case, inserting $n$ lines creates $O(n \log C)$ nodes, but in practice, significant node sharing occurs when lines share common path prefixes.
 
 \section{Benchmarks}\label{sec:benchmarks}
 
