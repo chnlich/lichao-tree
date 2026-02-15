@@ -82,18 +82,6 @@ C = \frac{\text{coordinate range}}{\text{precision level}}
 \]
 represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
 
-\subsection{Background}
-
-In 2012, the Li-Chao tree was presented informally in a lecture context.\footnote{The data structure is conventionally referred to as the ``Li-Chao tree'' in the literature and competitive programming community.} It subsequently gained widespread adoption within the competitive programming community. This paper formalizes the LICT and provides a comprehensive analysis of its properties and performance, with particular attention to extensibility features.
-
-\subsection{Historical Note}
-
-The Li-Chao tree originated in 2012, when the author first presented the structure in lecture materials for the Zhejiang Provincial Olympiad in Informatics (ZJOI). The algorithm emerged from the need for a data structure that could efficiently handle online line container problems while remaining simple enough to implement under competitive programming time constraints.
-
-Following its introduction, the structure underwent significant evolution within the Competitive Programming community. Early implementations were shared informally through online forums and regional contest materials. By 2015, the algorithm had appeared in major competitive programming platforms, with practitioners developing various optimizations and extensions. The 2017 publication of a tutorial on Codeforces marked a turning point, establishing standardized terminology and implementation patterns.
-
-Today, the Li-Chao tree is included in major competitive programming libraries including KACTL (KTH Algorithm Library) and CP-Algorithms, and has been applied in thousands of contest problems. Its sustained relevance over more than a decade demonstrates the structure's practical utility and the community's continued investment in its development.
-
 \section{Related Work}\label{sec:related}
 
 Several approaches exist for Dynamic Lower Envelope maintenance, each with distinct trade-offs in terms of time complexity, implementation complexity, and applicability constraints. We review these solutions to establish the context for the LICT.
