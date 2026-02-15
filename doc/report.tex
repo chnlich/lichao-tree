@@ -122,12 +122,17 @@ This section presents the Li-Chao tree.
 
 \subsection{Core Insight}
 
-The Li-Chao tree is built upon a fundamental observation about line dominance over intervals. Consider two lines $f_1(x) = k_1x + b_1$ and $f_2(x) = k_2x + b_2$ defined over an interval $[l, r]$. Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
+The Li-Chao tree is built upon a fundamental observation about line dominance over intervals. Consider two lines defined over an interval $[l, r]$:
+\[
+f_1(x) = k_1x + b_1 \quad \text{and} \quad f_2(x) = k_2x + b_2.
+\]
+Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
 
 Without loss of generality, assume $f_1$ dominates (achieves the lower value) on the majority subinterval $[m, r]$ where
 \[
 m = \frac{l+r}{2}.
-\] We designate $f_1$ as the \emph{representative} line for $[l, r]$\textemdash it is the optimal answer for any query $x \in [m, r]$.
+\]
+We designate $f_1$ as the \emph{representative} line for $[l, r]$, serving as the optimal answer for any query $x \in [m, r]$.
 
 The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
 
