@@ -80,7 +80,11 @@ Both operations must execute in logarithmic time for acceptable performance at s
 \[
 C = \frac{\text{coordinate range}}{\text{precision level}}
 \]
-represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
+represents the ratio of the coordinate range to the precision level.
+\[
+C = \frac{\text{coordinate range}}{\text{precision level}}
+\]
+For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
 
 \section{Related Work}\label{sec:related}
 
@@ -106,7 +110,11 @@ When insertions arrive in order of monotonically increasing (or decreasing) slop
 
 For arbitrary insertion sequences without monotonicity constraints, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log n)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
 
-The Dynamic CHT requires computing intersection points between adjacent lines in the hull as $x_{\text{intersect}} = \frac{b_2 - b_1}{k_1 - k_2}$, necessitating careful handling of division by zero (parallel lines), integer overflow, and sign conventions for floored division.
+The Dynamic CHT requires computing intersection points between adjacent lines in the hull as
+\[
+x_{\text{intersect}} = \frac{b_2 - b_1}{k_1 - k_2},
+\]
+necessitating careful handling of division by zero (parallel lines), integer overflow, and sign conventions for floored division.
 
 \section{Overview}\label{sec:lichao}
 
@@ -116,7 +124,10 @@ This section presents the Li-Chao tree.
 
 The Li-Chao tree is built upon a fundamental observation about line dominance over intervals. Consider two lines $f_1(x) = k_1x + b_1$ and $f_2(x) = k_2x + b_2$ defined over an interval $[l, r]$. Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
 
-Without loss of generality, assume $f_1$ dominates (achieves the lower value) on the majority subinterval $[m, r]$ where $m = (l+r)/2$. We designate $f_1$ as the \emph{representative} line for $[l, r]$\textemdash it is the optimal answer for any query $x \in [m, r]$.
+Without loss of generality, assume $f_1$ dominates (achieves the lower value) on the majority subinterval $[m, r]$ where
+\[
+m = \frac{l+r}{2}.
+\] We designate $f_1$ as the \emph{representative} line for $[l, r]$\textemdash it is the optimal answer for any query $x \in [m, r]$.
 
 The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
 
@@ -126,9 +137,13 @@ This interval-halving property yields the logarithmic query time and forms the b
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval midpoint, recursively partitioning the query range.
 
-Each node in the tree represents an interval $[\text{left}, \text{right}]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint $\text{mid} = (\text{left}+\text{right})/2$ is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
+Each node in the tree represents an interval $[l, r]$ and stores one line. During insertion, a line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
+\[
+m = \frac{l+r}{2}
+\]
+is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
-\textbf{Key invariant (local optimality).} A line stored at a node achieves the minimum value among all lines routed through that node at the midpoint of the node's interval. Formally, for node with interval $[\text{left}, \text{right}]$ and midpoint $\text{mid} = (\text{left}+\text{right})/2$, the stored line minimizes $kx + b$ at $x = \text{mid}$ among all lines routed to that node.
+\textbf{Key invariant (local optimality).} A line stored at a node achieves the minimum value among all lines routed through that node at the midpoint of the node's interval. Formally, for node with interval $[l, r]$ and midpoint $m = (l+r)/2$, the stored line minimizes $kx + b$ at $x = m$ among all lines routed to that node.
 
 \begin{figure}[h]
 \centering
@@ -137,13 +152,13 @@ Each node in the tree represents an interval $[\text{left}, \text{right}]$ and s
 \draw[->] (0,0) -- (10,0) node[right] {$x$};
 \draw[->] (0,0) -- (0,5) node[above] {$y$};
 
-% Draw interval [left, right] on x-axis
-\draw[thick] (1,0.1) -- (1,-0.1) node[below] {\text{left}};
-\draw[thick] (9,0.1) -- (9,-0.1) node[below] {\text{right}};
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[\text{left}, \text{right}]$};
+% Draw interval [l, r] on x-axis
+\draw[thick] (1,0.1) -- (1,-0.1) node[below] {$l$};
+\draw[thick] (9,0.1) -- (9,-0.1) node[below] {$r$};
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[l, r]$};
 
 % Draw midpoint
-\draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$\text{mid}$};
+\draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$m$};
 \draw[thick] (5,0.1) -- (5,-0.1);
 
 % Draw two intersecting lines
@@ -160,12 +175,12 @@ Each node in the tree represents an interval $[\text{left}, \text{right}]$ and s
 \filldraw[blue] (5,2.0) circle (2pt);
 \filldraw[red] (5,3.0) circle (2pt);
 \draw[thick, <->] (5.3,2.0) -- (5.3,3.0);
-\node[right] at (5.4,2.5) {\small $A(\text{mid}) < B(\text{mid})$};
+\node[right] at (5.4,2.5) {\small $A(m) < B(m)$};
 
 % Mark values at left endpoint (x = 1)
 \filldraw[blue] (1,3.6) circle (2pt);
 \filldraw[red] (1,1.4) circle (2pt);
-\node[left] at (0.9,1.4) {\small $B(\text{left}) < A(\text{left})$};
+\node[left] at (0.9,1.4) {\small $B(l) < A(l)$};
 \end{tikzpicture}
 \caption{Interval Advantage Line Diagram. The node stores Line $A$ because it achieves the lower value at the midpoint. Line $B$ is routed to the left child where it may be optimal.}
 \label{fig:interval-advantage}
@@ -179,8 +194,8 @@ Insertion proceeds as follows: if the new line yields a lower value at the midpo
 
 The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define boolean comparison values:
 \begin{align*}
-L &= [f_\text{new}(\text{left}) < f_\text{stored}(\text{left})] \\
-M &= [f_\text{new}(\text{mid}) < f_\text{stored}(\text{mid})]
+L &= [f_\text{new}(l) < f_\text{stored}(l)] \\
+M &= [f_\text{new}(m) < f_\text{stored}(m)]
 \end{align*}
 where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
 \begin{equation*}
@@ -189,7 +204,8 @@ where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
 \text{left} & \text{if } L \neq M \\
 \text{right} & \text{if } L = M
 \end{cases}
-\end{equation*} This follows from the single-intersection property: if the ordering changes between $\text{left}$ and $\text{mid}$, the intersection point lies in $[\text{left}, \text{mid}]$; otherwise, it lies in $[\text{mid}, \text{right}]$.
+\end{equation*}
+This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
 
 Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
@@ -246,23 +262,31 @@ Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query 
 We now present a formal analysis of the LICT's correctness and complexity.
 
 \begin{definition}[Coordinate Universe]
-The LICT operates on a discrete domain where $C = \frac{\text{coordinate range}}{\text{precision level}}$. The tree depth is $h = \lceil \log_2 C \rceil$.
+The LICT operates on a discrete domain where
+\[
+C = \frac{\text{coordinate range}}{\text{precision level}}.
+\]
+The tree depth is $h = \lceil \log_2 C \rceil$.
 \end{definition}
 
 \subsubsection{Correctness}
 
 We first establish the geometric intuition underlying the LICT's correctness. The key insight is that two distinct lines intersect at most once. This fundamental property of linear functions ensures that if a line yields a higher value at a midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both.
 
-\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint:
+\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint $m$:
 \begin{itemize}
-\item If $A$ achieves a lower value than $B$ at $\text{mid}$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $\text{mid}$ containing that endpoint (since two lines intersect at most once).
+\item If $A$ achieves a lower value than $B$ at $m$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $m$ containing that endpoint (since two lines intersect at most once).
 \item Therefore, $B$ is routed to exactly one child---the side where it might achieve a lower value.
 \end{itemize}
 
 This property guarantees that the suboptimal line need only be propagated down a single child path.
 
 \begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
-For any node $v$ with interval $[l, r]$ and midpoint $m = \lfloor(l+r)/2\rfloor$, the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
+For any node $v$ with interval $[l, r]$ and midpoint
+\[
+m = \left\lfloor\frac{l+r}{2}\right\rfloor,
+\]
+the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
 \end{lemma}
 
 \begin{proof}
@@ -301,7 +325,10 @@ Both insertion and query operations require $O(\log C)$ time.
 \end{lemma}
 
 \begin{proof}
-The LICT is a binary tree of depth $h = \lceil \log_2 C \rceil = O(\log C)$.
+The LICT is a binary tree of depth
+\[
+h = \lceil \log_2 C \rceil = O(\log C).
+\]
 
 For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$); (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
 
@@ -313,17 +340,32 @@ The LICT stores at most $O(n \log C)$ nodes in the worst case, where $n$ is the 
 \end{lemma}
 
 \begin{proof}
-Each line insertion creates at most one new node per level along its insertion path (when reaching a null child). The path length is $O(\log C)$. With $n$ insertions, the total number of nodes is at most $O(n \log C)$.
+Each line insertion creates at most one new node per level along its insertion path (when reaching a null child). The path length is
+\[
+O(\log C).
+\]
+With $n$ insertions, the total number of nodes is at most $O(n \log C)$.
 \end{proof}
 
-\textbf{Pseudo-polynomial Nature.} We emphasize that the complexity $O(\log C)$ is pseudo-polynomial: it depends on the coordinate range parameter $C$, not solely on the input size $n$. For $w$-bit coordinates, $C \leq 2^w$, so $\log C \leq w$. When $w = O(\log n)$, this yields $O(\log n)$ time. However, for large coordinate ranges (e.g., 64-bit coordinates), the complexity is effectively $O(w) = O(1)$ relative to the coordinate bit width, though still pseudo-polynomial when measured against input bit complexity.
+\textbf{Pseudo-polynomial Nature.} We emphasize that the complexity $O(\log C)$ is pseudo-polynomial: it depends on the coordinate range parameter $C$, not solely on the input size $n$. For $w$-bit coordinates, $C \leq 2^w$, so $\log C \leq w$. When $w = O(\log n)$, this yields $O(\log n)$ time. However, for large coordinate ranges (e.g., 64-bit coordinates), the complexity is effectively
+\[
+O(w) = O(1)
+\]
+relative to the coordinate bit width, though still pseudo-polynomial when measured against input bit complexity.
 
 \textbf{Querying.} To query the minimum value at a coordinate $x_0$, we traverse the tree from root to leaf, following the path corresponding to the interval containing $x_0$. At each node, we evaluate the stored line at $x_0$ and keep track of the minimum value seen. The traversal proceeds to the left child if $x_0$ is in the left half of the current interval, or to the right child otherwise. When reaching a leaf (or a null child), we return the minimum value accumulated along the path. This traversal visits at most one node per tree level, yielding $O(\log C)$ query time.
 
 \begin{itemize}
-\item \textbf{Time Complexity:} $O(\log C)$ per operation, where $C = \frac{\text{coordinate range}}{\text{precision level}}$.
+\item \textbf{Time Complexity:} $O(\log C)$ per operation, where
+\[
+C = \frac{\text{coordinate range}}{\text{precision level}}.
+\]
 \item \textbf{Space Complexity:} At most $O(n \log C)$ nodes in the worst case when all lines follow disjoint paths through the tree. In practice, heavy node sharing occurs as lines with similar slopes traverse common paths, typically resulting in significantly lower memory usage.
-\item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line evaluations ($kx+b$) at query points. This avoids the division operations ($\frac{b_2-b_1}{k_1-k_2}$) required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
+\item \textbf{Key Characteristics:} No intersection calculations required; all decisions based on direct line evaluations ($kx+b$) at query points. This avoids the division operations
+\[
+\frac{b_2-b_1}{k_1-k_2}
+\]
+required by CHT for computing intersection points, which can suffer from precision issues when slopes are very close.
 \end{itemize}
 
 \textbf{Deletion.} Unlike the Dynamic CHT, which can support deletion of arbitrary lines in $O(\log n)$ amortized time, the standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
@@ -349,7 +391,11 @@ The choice between these approaches involves several trade-offs:
 
 \textbf{Performance versus simplicity.} The Dynamic CHT achieves faster query and insertion times, particularly when the hull remains small relative to the number of insertions. The LICT provides implementation simplicity and reduced code complexity at the cost of some performance. The LICT eliminates complex geometric calculations, reducing implementation time and probability of errors. This is particularly important in competitive programming and rapid prototyping contexts.
 
-\textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as $\frac{b_2-b_1}{k_1-k_2}$) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
+\textbf{Geometric versus combinatorial.} The Dynamic CHT relies on geometric calculations (intersection points as
+\[
+\frac{b_2-b_1}{k_1-k_2}
+\]
+) that require careful numerical handling, particularly when slopes are nearly equal. The LICT uses only basic arithmetic operations (multiplication and addition for $kx+b$ evaluations at query points), completely avoiding division and its associated precision concerns.
 
 \textbf{Static versus extensible.} The Dynamic CHT's explicit hull structure makes extensions such as persistence and line segments difficult. The LICT's recursive tree structure naturally accommodates these extensions. Line segments (lines valid only on subranges $[l', r']$) integrate naturally. During insertion, when the current node interval $[l, r]$ lies entirely outside $[l', r']$, we skip that subtree. When $[l, r]$ lies entirely inside, we proceed normally. Otherwise, we recurse into both children. This limits the line's influence to its valid range without modifying the core algorithm. A segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals; each interval requires a standard $O(\log C)$ line insertion, yielding
 \[
@@ -459,7 +505,11 @@ All benchmarks were conducted with the following configuration.
 \textbf{Experimental Parameters:}
 \begin{itemize}
 \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
-\item \textbf{Coordinate range:} $C = 10^9$ (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
+\item \textbf{Coordinate range:}
+\[
+C = 10^9
+\]
+(assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
 \item \textbf{Random seed:} 42 (fixed for reproducibility)
 \item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
 \item \textbf{Distributions:} We write
@@ -468,7 +518,10 @@ X \sim U(a, b)
 \]
 to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
 \begin{itemize}
-\item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size: $\Theta(\sqrt{n})$.
+\item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size:
+\[
+\Theta(\sqrt{n}).
+\]
 \item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
 \end{itemize}
 \end{itemize}
@@ -510,9 +563,19 @@ When lines have nearly identical slopes, CHT intersection calculations become nu
 \[
 k_i = 1.0 + i \cdot \delta \quad \text{for} \quad i \in [1, n],
 \]
-with $\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}$ (approaching double precision limits)
-\item \textbf{Intercepts:} $m_i \sim U(-10^9, 10^9)$
-\item \textbf{Query points:} $x \sim U(-10^6, 10^6)$
+with
+\[
+\delta \in \{10^{-6}, 10^{-9}, 10^{-12}\}
+\]
+(approaching double precision limits)
+\item \textbf{Intercepts:}
+\[
+m_i \sim U(-10^9, 10^9)
+\]
+\item \textbf{Query points:}
+\[
+x \sim U(-10^6, 10^6)
+\]
 \end{itemize}
 
 \begin{table}[h]
@@ -537,8 +600,18 @@ Table~\ref{tab:parallel} shows that as slopes converge, the Dynamic CHT suffers 
 Real-world data often mixes magnitudes, testing dynamic range handling:
 
 \begin{itemize}
-\item \textbf{Configuration:} 50\% of lines with $k, m \sim U(-10^9, 10^9)$, 50\% with $k, m \sim U(-10^{-6}, 10^{-6})$
-\item \textbf{Query points:} $x \sim U(-10^3, 10^3)$
+\item \textbf{Configuration:} 50\% of lines with
+\[
+k, m \sim U(-10^9, 10^9),
+\]
+50\% with
+\[
+k, m \sim U(-10^{-6}, 10^{-6})
+\]
+\item \textbf{Query points:}
+\[
+x \sim U(-10^3, 10^3)
+\]
 \end{itemize}
 
 The LICT correctly handles all query points with relative error bounded by $2\epsilon_m$. The Dynamic CHT exhibits erratic behavior when large and small magnitude lines intersect, as the intersection formula produces subnormal numbers and precision loss.
@@ -644,11 +717,7 @@ A critical distinction between the Dynamic CHT and LICT concerns their dependenc
 \]
 In this regime, which commonly occurs in practice (e.g., $n = 10^3$ lines with $C = 10^9$ coordinate range), the Dynamic CHT's time complexity is asymptotically superior. Specifically, when $n = O(\text{poly}(\log C))$, the Dynamic CHT operates in $O(\log \log C)$ time versus the LICT's $O(\log C)$.
 
-Conversely, when
-\[
-n = \Omega(C^\epsilon) \quad \text{for any constant} \quad \epsilon > 0,
-\]
-both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
+Conversely, when $n = \Omega(C^\epsilon)$ for any constant $\epsilon > 0$, both structures achieve comparable asymptotic performance. The LICT provides more predictable performance in the worst case, as its complexity is independent of the hull size, whereas the Dynamic CHT's amortized bounds depend on the insertion sequence.
 
 \subsection{Analysis}
 
@@ -680,7 +749,11 @@ The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersect
 \]
 with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
 
-\textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as $(b_2 - b_1) / (k_1 - k_2)$, which suffers from precision loss when slopes are nearly equal.
+\textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as
+\[
+\frac{b_2 - b_1}{k_1 - k_2},
+\]
+which suffers from precision loss when slopes are nearly equal.
 
 \textbf{Theoretical error analysis.} Consider lines with slopes $k_1, k_2$ and intercepts $b_1, b_2$ represented in floating-point with machine epsilon $\epsilon_m$. The intersection computation in CHT involves:
 \begin{enumerate}
@@ -698,7 +771,11 @@ with division-by-zero checks, (3) hull position determination (beginning, middle
 \]
 \end{enumerate}
 
-When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For $\Delta k = k_1 - k_2$, the condition number of intersection computation is:
+When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For
+\[
+\Delta k = k_1 - k_2,
+\]
+the condition number of intersection computation is:
 \[
 \kappa = \left|\frac{\partial x_{\text{intersect}}}{\partial (\Delta k)} \cdot \frac{\Delta k}{x_{\text{intersect}}}\right| = \left|\frac{b_2 - b_1}{(\Delta k)^2} \cdot \frac{\Delta k}{(b_2-b_1)/(\Delta k)}\right| = 1
 \]
