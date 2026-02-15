@@ -112,6 +112,16 @@ The Dynamic CHT requires computing intersection points between adjacent lines in
 
 This section presents the Li-Chao tree.
 
+\subsection{Core Insight}
+
+The Li-Chao tree is built upon a fundamental observation about line dominance over intervals. Consider two lines $f_1(x) = k_1x + b_1$ and $f_2(x) = k_2x + b_2$ defined over an interval $[l, r]$. Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
+
+Without loss of generality, assume $f_1$ dominates (achieves the lower value) on the majority subinterval $[m, r]$ where $m = (l+r)/2$. We designate $f_1$ as the \emph{representative} line for $[l, r]$\textemdash it is the optimal answer for any query $x \in [m, r]$.
+
+The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
+
+This interval-halving property yields the logarithmic query time and forms the basis of the tree structure.
+
 \subsection{Algorithmic Approach}
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval midpoint, recursively partitioning the query range.
