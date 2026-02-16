@@ -1,5 +1,5 @@
-#include <bits/stdc++.h>
 #include "../implementation/lichao.hpp"
+#include "../implementation/lichao_zkw.hpp"
 #include "../implementation/cht.hpp"
 
 using namespace std;
@@ -112,6 +112,34 @@ NCResult run_nc_lichao(const vector<pair<llint,llint>>& inserts, const vector<ll
     return res;
 }
 
+NCResult run_nc_zkw(const vector<pair<llint,llint>>& inserts, const vector<llint>& queries, llint max_range) {
+    NCResult res;
+    LC_ZKW::LiChaoTree lict(-max_range - 1, max_range + 1);
+    
+    // Time insertions
+    auto start = high_resolution_clock::now();
+    for (const auto& ins : inserts) {
+        lict.add_line(ins.first, ins.second);
+    }
+    auto mid = high_resolution_clock::now();
+    
+    // Time queries
+    long long sum = 0;
+    for (llint x : queries) {
+        llint val = lict.query(x);
+        if (val < 4e18) sum += val;
+    }
+    auto end = high_resolution_clock::now();
+    
+    res.algorithm = "ZKW LICT";
+    res.insert_time_ms = duration_cast<microseconds>(mid - start).count() / 1000.0;
+    res.query_time_ms = duration_cast<microseconds>(end - mid).count() / 1000.0;
+    res.total_time_ms = duration_cast<microseconds>(end - start).count() / 1000.0;
+    res.checksum = sum;
+    
+    return res;
+}
+
 NCResult run_nc_cht(const vector<pair<llint,llint>>& inserts, const vector<llint>& queries, llint c) {
     NCResult res;
     CHT::DynamicCHT cht;
@@ -178,10 +206,21 @@ vector<NCResult> experiment1_nc_regime() {
             res_cht.distribution = dist;
             results.push_back(res_cht);
             
+            // Run ZKW LICT
+            auto res_zkw = run_nc_zkw(inserts, queries, max_range);
+            res_zkw.n = n;
+            res_zkw.c = c;
+            res_zkw.distribution = dist;
+            results.push_back(res_zkw);
+            
             // Verify checksums match
             if (res_lichao.checksum != res_cht.checksum) {
                 cerr << "WARNING: Checksum mismatch! LICT: " << res_lichao.checksum 
                      << " CHT: " << res_cht.checksum << endl;
+            }
+            if (res_lichao.checksum != res_zkw.checksum) {
+                cerr << "WARNING: Checksum mismatch! LICT: " << res_lichao.checksum
+                     << " ZKW: " << res_zkw.checksum << endl;
             }
         }
     }
