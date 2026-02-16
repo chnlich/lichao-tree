@@ -138,6 +138,7 @@ This is preferred over explicit individual headers for simplicity and faster com
 - **No "Selection Guidelines" subsection** - Remove selection guidance from abstract and delete from Discussion
 - **Simplify complexity statements** - State only LICT's $O(\log C)$ without comparing to CHT's $O(\log n)$
 - **Do NOT mention specific competing solutions in Introduction** - No CHT framing in Intro, comparison belongs in Related Work
+- **$N$ is the query size** - using uppercase N instead of n in the paper.
 - **$C$ is a precision parameter** - $C = \frac{\text{coordinate range}}{\text{precision level}}$
 - **Line segment complexity is $O(\log^2 C)$** - Not $O(\log C)$ (segment decomposes into $O(\log C)$ intervals)
 - **LICT uses only $kx+b$ evaluations** - Emphasize avoidance of division precision issues
