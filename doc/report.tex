@@ -458,26 +458,26 @@ The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)
 \toprule
 \textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & Random & LICT & 2.19 & 0.95 & 3.14 \\
-$10^5$ & Random & Dynamic CHT & 2.19 & 0.39 & 2.58 \\
-$10^5$ & Random & ZKW LICT & 2.40 & 2.42 & 4.81 \\
-$10^5$ & All on Hull & LICT & 8.23 & 5.71 & 13.94 \\
-$10^5$ & All on Hull & Dynamic CHT & 8.85 & 7.18 & 16.03 \\
-$10^5$ & All on Hull & ZKW LICT & 6.32 & 1.47 & 7.79 \\
+$10^5$ & Random & LICT & 2.21 & 0.94 & 3.16 \\
+$10^5$ & Random & Dynamic CHT & 2.23 & 0.35 & 2.58 \\
+$10^5$ & Random & ZKW LICT & 2.34 & 0.59 & 2.93 \\
+$10^5$ & All on Hull & LICT & 7.82 & 5.77 & 13.59 \\
+$10^5$ & All on Hull & Dynamic CHT & 8.99 & 6.92 & 15.92 \\
+$10^5$ & All on Hull & ZKW LICT & 5.19 & 1.90 & 7.09 \\
 \midrule
-$10^6$ & Random & LICT & 27.12 & 9.53 & 36.66 \\
-$10^6$ & Random & Dynamic CHT & 24.00 & 3.49 & 27.49 \\
-$10^6$ & Random & ZKW LICT & 27.49 & 85.36 & 112.85 \\
-$10^6$ & All on Hull & LICT & 172.03 & 214.18 & 386.21 \\
-$10^6$ & All on Hull & Dynamic CHT & 289.25 & 324.14 & 613.39 \\
-$10^6$ & All on Hull & ZKW LICT & 144.42 & 86.29 & 230.71 \\
+$10^6$ & Random & LICT & 27.20 & 9.63 & 36.83 \\
+$10^6$ & Random & Dynamic CHT & 23.47 & 3.60 & 27.08 \\
+$10^6$ & Random & ZKW LICT & 27.15 & 6.39 & 33.55 \\
+$10^6$ & All on Hull & LICT & 160.01 & 252.91 & 412.92 \\
+$10^6$ & All on Hull & Dynamic CHT & 325.13 & 320.79 & 645.92 \\
+$10^6$ & All on Hull & ZKW LICT & 78.52 & 55.21 & 133.74 \\
 \midrule
-$10^7$ & Random & LICT & 315.94 & 100.15 & 416.09 \\
-$10^7$ & Random & Dynamic CHT & 231.65 & 43.77 & 275.43 \\
-$10^7$ & Random & ZKW LICT & 318.39 & 1359.40 & 1677.79 \\
-$10^7$ & All on Hull & LICT & 4557.96 & 5475.32 & 10033.28 \\
-$10^7$ & All on Hull & Dynamic CHT & 7003.07 & 6616.61 & 13619.68 \\
-$10^7$ & All on Hull & ZKW LICT & 2327.35 & 1355.73 & 3683.08 \\
+$10^7$ & Random & LICT & 314.74 & 100.01 & 414.74 \\
+$10^7$ & Random & Dynamic CHT & 229.47 & 45.58 & 275.06 \\
+$10^7$ & Random & ZKW LICT & 322.09 & 77.96 & 400.05 \\
+$10^7$ & All on Hull & LICT & 4720.22 & 5632.03 & 10352.25 \\
+$10^7$ & All on Hull & Dynamic CHT & 7024.19 & 7008.35 & 14032.54 \\
+$10^7$ & All on Hull & ZKW LICT & 1802.21 & 1598.80 & 3401.01 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -486,11 +486,10 @@ $10^7$ & All on Hull & ZKW LICT & 2327.35 & 1355.73 & 3683.08 \\
 We introduced an iterative, array-based Li Chao Tree (ZKW style) to compare against the dynamic pointer-based implementation. The results reveal a significant trade-off based on tree density:
 
 \begin{itemize}
-    \item \textbf{Dense Cases (All on Hull):} The ZKW implementation is \textbf{2.6x faster} than standard LICT ($N=10^7$). This massive speedup stems from better cache locality (contiguous memory), elimination of pointer-chasing overhead, and zero memory allocation during insertion. Since the "All on Hull" case forces the tree to be fully populated, the dynamic implementation's sparsity optimization provides no benefit, making the raw efficiency of the array-based approach superior.
-    \item \textbf{Sparse Cases (Random):} Conversely, the ZKW implementation is \textbf{4x slower} than standard LICT. Our analysis shows that for random inputs, the standard dynamic tree remains extremely sparse, effectively terminating queries near the root (depth $\sim$1) due to the random lines quickly dominating the range. In contrast, the ZKW implementation's power-of-two padding shifts the tree structure, causing relevant data to cluster in deeper subtrees. Debugging revealed that even with early exit optimizations, ZKW queries visit an average of \textbf{5.2 nodes} per query, which is significantly more than the standard implementation, leading to the observed performance gap.
+    \item \textbf{Sparse Cases (Random):} Initially, we hypothesized ZKW would be slower for sparse data. However, after optimizing the implementation to stop immediately upon encountering empty nodes (sentinel values), \textbf{ZKW LICT outperforms Standard LICT} even for sparse random inputs ($N=10^7$: 400ms vs 415ms total). The contiguous memory layout and lack of pointer-chasing overhead outweigh the theoretical benefits of the dynamic tree's minimal node creation. 
 \end{itemize}
 
-This suggests that ZKW LICT is the optimal choice when the coordinate range is small or the tree is expected to be dense, while the dynamic implementation is robust for large ranges with sparse data.
+In conclusion, the \textbf{ZKW Li Chao Tree is the superior implementation across all tested regimes}, offering robust performance for both sparse and dense data distributions. The iterative structure combined with careful sentinel handling eliminates the traditional weaknesses of array-based trees.
 
 \subsection{Comparison with Dynamic CHT}
 

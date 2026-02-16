@@ -173,7 +173,12 @@ vector<NCResult> experiment1_nc_regime() {
     
     vector<NCResult> results;
     
-    vector<pair<int, llint>> test_cases = {{100000, 100000}, {1000000, 1000000}, {10000000, 10000000}};
+    vector<pair<int, llint>> test_cases = {
+        {100000, 100000}, 
+        {1000000, 1000000}, 
+        {10000000, 10000000},
+        {8388608, 8388608} // 2^23, testing perfect power-of-two alignment
+    };
     vector<string> distributions = {"Random", "All on Hull"};
     
     for (const auto& tc : test_cases) {
