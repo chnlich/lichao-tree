@@ -9,7 +9,7 @@ lichao-tree/
 ├── Makefile                  # Root makefile (delegates to benchmark/)
 ├── .gitignore               # Excludes binaries and generated files
 ├── implementation/          # Core data structure implementations
-│   ├── lichao.hpp         # Standard LICT (pointer-based segment tree)
+│   ├── lict.hpp         # Standard LICT (pointer-based segment tree)
 │   └── cht.hpp            # Dynamic CHT (balanced BST-based)
 ├── generator/               # Test data generation
 │   └── generator.hpp      # Two test distributions only

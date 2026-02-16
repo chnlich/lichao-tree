@@ -3,8 +3,10 @@
 
 # Benchmark binary (in benchmark/ folder)
 benchmark/benchmark_runner
+benchmark/
 
 # Generated benchmark results
 benchmark/benchmark_results.csv
 
-# Generated PDF (build from source)
+# Doc related files
+doc/report.log
