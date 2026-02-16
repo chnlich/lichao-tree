@@ -134,6 +134,7 @@ This is preferred over explicit individual headers for simplicity and faster com
 - This is a strict rule - check for `--` before every commit
 
 ### Additional rules
+- **NEVER FAKE DATA** - All benchmark results, experimental data, and performance metrics must come from actual code execution. Do not invent or estimate timing data. If benchmarks haven't been run, leave a TODO or omit the results rather than fabricate them.
 - **No speed comparisons in abstract** - Only describe what LICT achieves, not relative performance vs CHT
 - **No "Selection Guidelines" subsection** - Remove selection guidance from abstract and delete from Discussion
 - **Simplify complexity statements** - State only LICT's $O(\log C)$ without comparing to CHT's $O(\log n)$
