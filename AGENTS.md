@@ -150,8 +150,16 @@ This is preferred over explicit individual headers for simplicity and faster com
 
 ### Math Expression Formatting
 - **Displayed equations**: Each complex math expression should occupy its own line using `\[` and `\]` (not inline `$...$`)
+- **Function definitions**: When introducing multiple related functions (e.g., $f_1$, $f_2$), group them in a single displayed equation with `\quad \text{and} \quad` separator, not inline
 - **Simple expressions**: Simple inline math like `$O(\log C)$`, `$k_i$`, `$x$` can remain inline
-- **Consistency**: Use consistent symbols throughout: `l, r, m` (not `left, right, mid`)
+- **Consistency**: Use consistent symbols throughout: `l, r, m` (not `left, right`, `mid`)
+- **Spacing after equations**: Always start a new line after the closing `\]` before continuing text
+
+### Typography Details
+- **NO DASHES ALLOWED**: This includes `\textemdash`. Replace with comma + rephrasing:
+  - ❌ Wrong: `\textemdash it is the optimal`
+  - ✅ Correct: `, serving as the optimal`
+- Check for all dash variants (`--`, `---`, `\textemdash`, `\emdash`) before committing
 
 ### Paper Organization
 Papers should follow this structure:
