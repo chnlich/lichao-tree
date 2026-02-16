@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "lichao.hpp"
+#include "lict.hpp"
 #include "cht.hpp"
 #include "generator.hpp"
 

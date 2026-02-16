@@ -1,5 +1,5 @@
-#ifndef LICHAO_HPP
-#define LICHAO_HPP
+#ifndef LICT_HPP
+#define LICT_HPP
 
 #include <bits/stdc++.h>
 

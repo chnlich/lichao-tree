@@ -14,10 +14,10 @@ INCLUDES = -I../implementation -I../generator
 
 all: $(BIN) $(EXP_BIN)
 
-$(BIN): $(SRC) ../implementation/lichao.hpp ../implementation/cht.hpp ../generator/generator.hpp
+$(BIN): $(SRC) ../implementation/lict.hpp ../implementation/cht.hpp ../generator/generator.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(BIN) $(SRC)
 
-$(EXP_BIN): $(EXP_SRC) ../implementation/lichao.hpp ../implementation/cht.hpp
+$(EXP_BIN): $(EXP_SRC) ../implementation/lict.hpp ../implementation/cht.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(EXP_BIN) $(EXP_SRC)
 
 clean:

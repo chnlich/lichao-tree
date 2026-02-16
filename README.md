@@ -10,7 +10,7 @@ This repository provides optimized implementations for maintaining the lower env
 
 | Implementation | Header File | Description | Time Complexity |
 |---------------|-------------|-------------|-----------------|
-| **LICT (Standard)** | `lichao.hpp` | Classic pointer-based segment tree implementation | $O(\log C)$ insertion/query |
+| **LICT (Standard)** | `lict.hpp` | Classic pointer-based segment tree implementation | $O(\log C)$ insertion/query |
 | **Dynamic CHT** | `cht.hpp` | Classic Convex Hull Trick with balanced BST | $O(\log n)$ insertion/query |
 
 ## Structure
@@ -21,7 +21,7 @@ lichao-tree/
 ├── Makefile                     - Root makefile (delegates to benchmark/)
 ├── .gitignore                   - Git ignore rules
 ├── implementation/
-│   ├── lichao.hpp               - Standard Li-Chao Tree
+│   ├── lict.hpp               - Standard Li-Chao Tree
 │   └── cht.hpp                  - Dynamic CHT implementation
 ├── generator/
 │   └── generator.hpp            - Test data generator
@@ -59,7 +59,7 @@ make
 ### Using LICT (Standard)
 
 ```cpp
-#include "implementation/lichao.hpp"  // Or copy lichao.hpp to your project
+#include "implementation/lict.hpp"  // Or copy lict.hpp to your project
 
 LC::LiChaoTree lict(-1e9, 1e9);  // Create with coordinate range
 lict.add_line(2, 3);  // Add line y = 2x + 3

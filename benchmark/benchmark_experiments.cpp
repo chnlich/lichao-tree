@@ -1,5 +1,5 @@
-#include "../implementation/lichao.hpp"
-#include "../implementation/lichao_zkw.hpp"
+#include "../implementation/lict.hpp"
+#include "../implementation/zkw_lict.hpp"
 #include "../implementation/cht.hpp"
 
 using namespace std;
