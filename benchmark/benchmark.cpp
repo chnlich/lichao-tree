@@ -42,22 +42,39 @@ long long run_cht(const vector<Operation>& ops) {
     return sum;
 }
 
-void benchmark(int n, string dist_name, vector<Operation> ops, vector<Result>& results) {
-    cerr << "Running benchmark: N=" << n << ", Dist=" << dist_name << endl;
+const int NUM_RUNS = 10;
 
-    // Run Li Chao (Standard)
-    auto start = high_resolution_clock::now();
-    long long sum_lc = run_lichao(ops);
-    auto end = high_resolution_clock::now();
-    double time_lc = duration_cast<milliseconds>(end - start).count();
-    results.push_back({"LICT (Standard)", n, dist_name, time_lc, sum_lc});
+double median_time(vector<double>& times) {
+    sort(times.begin(), times.end());
+    int n = times.size();
+    if (n % 2 == 0) return (times[n/2 - 1] + times[n/2]) / 2.0;
+    return times[n/2];
+}
 
-    // Run Dynamic CHT
-    start = high_resolution_clock::now();
-    long long sum_cht = run_cht(ops);
-    end = high_resolution_clock::now();
-    double time_cht = duration_cast<milliseconds>(end - start).count();
-    results.push_back({"Dynamic CHT", n, dist_name, time_cht, sum_cht});
+void benchmark(int n, string dist_name, const vector<Operation>& ops, vector<Result>& results) {
+    cerr << "Running benchmark: N=" << n << ", Dist=" << dist_name << " (" << NUM_RUNS << " runs, median)" << endl;
+
+    // Run Li Chao (Standard) - NUM_RUNS times, take median
+    vector<double> lc_times;
+    long long sum_lc = 0;
+    for (int r = 0; r < NUM_RUNS; ++r) {
+        auto start = high_resolution_clock::now();
+        sum_lc = run_lichao(ops);
+        auto end = high_resolution_clock::now();
+        lc_times.push_back(duration_cast<milliseconds>(end - start).count());
+    }
+    results.push_back({"LICT", n, dist_name, median_time(lc_times), sum_lc});
+
+    // Run Dynamic CHT - NUM_RUNS times, take median
+    vector<double> cht_times;
+    long long sum_cht = 0;
+    for (int r = 0; r < NUM_RUNS; ++r) {
+        auto start = high_resolution_clock::now();
+        sum_cht = run_cht(ops);
+        auto end = high_resolution_clock::now();
+        cht_times.push_back(duration_cast<milliseconds>(end - start).count());
+    }
+    results.push_back({"Dynamic CHT", n, dist_name, median_time(cht_times), sum_cht});
 
     if (sum_lc != sum_cht) {
         cerr << "WARNING: Checksum mismatch! LICT: " << sum_lc << " CHT: " << sum_cht << endl;
@@ -75,7 +92,7 @@ int main() {
     }
 
     // Output Markdown Table to stdout
-    cout << "\n# Benchmark Results\n\n";
+    cout << "\n# Benchmark Results (Median of " << NUM_RUNS << " runs)\n\n";
     cout << "| N | Distribution | Algorithm | Time (ms) | Checksum |\n";
     cout << "|---|---|---|---|---|\n";
     for (const auto& res : results) {

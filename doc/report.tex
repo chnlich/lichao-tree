@@ -426,14 +426,14 @@ Table~\ref{tab:results} presents the performance comparison.
 \toprule
 \textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} \\
 \midrule
-$10^5$ & Random & 10 ms & 5 ms \\
-$10^5$ & All on Hull & 6 ms & 4 ms \\
+$10^5$ & Random & 5 ms & 2 ms \\
+$10^5$ & All on Hull & 17 ms & 15 ms \\
 \midrule
-$10^6$ & Random & 77 ms & 52 ms \\
-$10^6$ & All on Hull & 67 ms & 41 ms \\
+$10^6$ & Random & 53 ms & 29 ms \\
+$10^6$ & All on Hull & 516 ms & 654 ms \\
 \midrule
-$10^7$ & Random & 789 ms & 545 ms \\
-$10^7$ & All on Hull & 687 ms & 426 ms \\
+$10^7$ & Random & 545 ms & 292 ms \\
+$10^7$ & All on Hull & 13475 ms & 15296 ms \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -523,21 +523,12 @@ The LICT trades raw performance for predictable numerical behavior. Its division
 
 \subsection{Trade-off Analysis}
 
-% TODO(chnlich): is there a better way to describe Implementation complexity?
+\textbf{Implementation complexity.} We assess implementation complexity by the number of \emph{corner cases} requiring careful handling, the primary source of bugs under contest time pressure.
 
-\textbf{Implementation complexity.} We assess implementation complexity using Cyclomatic Complexity (CC), a well-established software metric that measures the number of linearly independent paths through a program's source code. Higher CC indicates more complex logic and higher potential for defects.
-
-Analysis of our reference implementations yields:
 \begin{itemize}
-\item \textbf{LICT:} CC = 6 for insertion (3 binary decision points: midpoint comparison, left/mid comparison, child selection), CC = 2 for query (1 binary decision per level)
-\item \textbf{Dynamic CHT:} CC = 12 for insertion (slope ordering, hull position determination, intersection calculations, multiple edge cases), CC = 4 for query (hull binary search with boundary handling)
+\item \textbf{Dynamic CHT:} Despite compact code via \texttt{std::multiset}, the implementation must correctly handle: (1)~equal-slope (collinear) lines, (2)~cascading hull invalidation in both directions after insertion and (3)~boundary conditions at the hull endpoints. Each case is a potential source of subtle bugs.
+\item \textbf{LICT:} The insertion logic reduces to two comparisons. No division, no intersection computation, no boundary cases.
 \end{itemize}
-
-The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersection point computation
-\[
-\frac{b_2-b_1}{k_1-k_2}
-\]
-with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
 
 \textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as
 \[
