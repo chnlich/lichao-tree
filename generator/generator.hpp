@@ -41,8 +41,8 @@ public:
         return ops;
     }
 
-    // All lines on hull: O(N) lines on hull (worst case)
-    // Lines: y = i*x - i^2, all tangent to parabola y = x^2/4
+    // All lines on hull: y = -i*x + i^2, all tangent to parabola y = -x^2/4
+    // For minimum queries, all N lines contribute to the lower envelope.
     vector<Operation> generate_all_on_hull(int n, double query_ratio = 0.5) {
         vector<Operation> ops;
         ops.reserve(n);
@@ -52,8 +52,8 @@ public:
                 llint x = random(max_coord / 4, max_coord / 2);
                 ops.push_back({QUERY, x, 0});
             } else {
-                llint k = i + 1;
-                llint m = -(llint)(i + 1) * (i + 1);
+                llint k = -(i + 1);
+                llint m = (llint)(i + 1) * (i + 1);
                 ops.push_back({ADD, k, m});
             }
         }

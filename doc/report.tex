@@ -137,7 +137,10 @@ This interval-halving property yields the logarithmic query time and forms the b
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval, recursively partitioning the query range.
 
-% TODO: consider the case that all queried x are integers first, and provide a note to explain we can further split into the required precision range if the query is not an integer
+We first consider the simplest and most common setting: all queried $x$-coordinates are integers. In this case, if the coordinate range is $[0, C-1]$ for some positive integer $C$, the tree recursively bisects this range into subintervals $[l, r]$ where $l, r \in \mathbb{Z}$. Every leaf corresponds to a single integer, so the tree has depth $\lceil \log_2 C \rceil$ and every query lands at a unique leaf. This integer setting is the one most frequently encountered in competitive programming and in many algorithm design applications, and we use it throughout the examples below.
+
+\textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
+
 % TODO: Insert two pictures, one demonstrates how a new line is inserted, another one demonstrates what to do when a query comes. The example can be shown in integer queries cases
 
 Each node in the tree represents an interval $[l, r]$ and stores one line. 
@@ -371,20 +374,20 @@ All benchmarks were conducted with the following configuration.
 
 \textbf{Hardware Specifications:}
 \begin{itemize}
-\item \textbf{CPU:} Intel Xeon @ 2.20GHz (Model 79, Broadwell microarchitecture)
-\item \textbf{Core Configuration:} 1 core, 2 threads (SMT enabled)
-\item \textbf{L1 Cache:} 32 KiB L1 data cache, 32 KiB L1 instruction cache
-\item \textbf{L2 Cache:} 256 KiB
-\item \textbf{L3 Cache:} 55 MiB (shared)
-\item \textbf{Memory:} 4 GB DRAM
-\item \textbf{Platform:} Linux x86\_64 (KVM virtualized)
+\item \textbf{CPU:} AMD Ryzen 9 3950X 16-Core Processor @ 3.50GHz (Zen 2 microarchitecture)
+\item \textbf{Core Configuration:} 16 cores, 32 threads (SMT enabled)
+\item \textbf{L1 Cache:} 512 KiB L1 data cache, 512 KiB L1 instruction cache
+\item \textbf{L2 Cache:} 8 MiB
+\item \textbf{L3 Cache:} 16 MiB (shared)
+\item \textbf{Memory:} 64 GB DRAM
+\item \textbf{Platform:} Linux x86\_64 (WSL2 virtualized)
 \end{itemize}
 
 \textbf{Software Configuration:}
 \begin{itemize}
 \item \textbf{Compiler:} g++ 11.4.0
 \item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
-\item \textbf{Operating System:} Linux x86\_64
+\item \textbf{Operating System:} Ubuntu 22.04.5 LTS (WSL2, kernel 6.6.87)
 \end{itemize}
 
 \textbf{Experimental Parameters:}
@@ -440,28 +443,35 @@ $10^7$ & All on Hull & 687 ms & 426 ms \\
 The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$.
 
 \begin{itemize}
-% TODO: add a case $N = $C = 10^7
-\item \textbf{Configuration:} $N = C = 10^5$ and $N = C = 10^6$
+\item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
 \item \textbf{Lines:} $k, b \sim U(-C/2, C/2)$
 \item \textbf{Query points:} $x \sim U(-C/2, C/2)$
 \item \textbf{Operation mix:} $N/2$ insertions followed by $N/2$ queries
 \end{itemize}
 
-% TODO: add case All on Hull & Random
 
 \begin{table}[h]
 \centering
 \caption{Performance in $N = C$ Regime (Time in milliseconds)}
 \label{tab:nc-regime}
-\begin{tabular}{@{}ccccc@{}}
+\begin{tabular}{@{}cccccc@{}}
 \toprule
-\textbf{N = C} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
+\textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & LICT & 4.92 & 1.93 & 6.86 \\
-$10^5$ & Dynamic CHT & 6.55 & 0.58 & 7.13 \\
+$10^5$ & Random & LICT & 2.20 & 0.96 & 3.17 \\
+$10^5$ & Random & Dynamic CHT & 2.13 & 0.36 & 2.49 \\
+$10^5$ & All on Hull & LICT & 8.95 & 8.48 & 17.43 \\
+$10^5$ & All on Hull & Dynamic CHT & 10.16 & 9.66 & 19.81 \\
 \midrule
-$10^6$ & LICT & 40.51 & 16.43 & 56.94 \\
-$10^6$ & Dynamic CHT & 43.79 & 5.62 & 49.41 \\
+$10^6$ & Random & LICT & 26.99 & 9.83 & 36.81 \\
+$10^6$ & Random & Dynamic CHT & 23.06 & 3.70 & 26.76 \\
+$10^6$ & All on Hull & LICT & 229.77 & 336.03 & 565.80 \\
+$10^6$ & All on Hull & Dynamic CHT & 419.88 & 436.48 & 856.36 \\
+\midrule
+$10^7$ & Random & LICT & 321.00 & 101.45 & 422.45 \\
+$10^7$ & Random & Dynamic CHT & 220.71 & 44.74 & 265.45 \\
+$10^7$ & All on Hull & LICT & 5735.24 & 7180.61 & 12915.85 \\
+$10^7$ & All on Hull & Dynamic CHT & 8728.99 & 8651.92 & 17380.92 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -584,6 +594,8 @@ The LICT has several limitations that affect its applicability:
 \textbf{Coordinate range dependency.} The LICT's complexity depends on $C$, the coordinate range divided by precision. For very large coordinate ranges with fine precision (e.g., 64-bit floating-point values spanning the entire representable range), $C$ can become impractically large.
 
 \textbf{Higher constant factors.} Despite having the same asymptotic complexity as the Dynamic CHT for many operations, the LICT's tree traversal involves more memory accesses and comparisons, resulting in higher constant factors that manifest as slower execution in practice.
+
+% TODO: add use cases e.g., DP optimization.
 
 \subsection{Future Work}
 

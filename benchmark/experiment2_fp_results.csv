@@ -1,9 +1,0 @@
-N,Type,Algorithm,Insert_Time_ms,Query_Time_ms,Total_Time_ms,Precision_Issues
-100000,int,LICT,3.962,1.231,5.193,0
-100000,int,Dynamic CHT,4.153,0.564,4.718,0
-100000,double,LICT,5.954,1.636,7.591,0
-100000,double,Dynamic CHT,3.064,0.663,3.727,0
-1000000,int,LICT,40.668,14.11,54.778,0
-1000000,int,Dynamic CHT,42.4,6.507,48.907,0
-1000000,double,LICT,60.953,16.514,77.468,0
-1000000,double,Dynamic CHT,32.806,6.55,39.357,0
