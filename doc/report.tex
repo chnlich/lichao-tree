@@ -488,31 +488,6 @@ $10^7$ & All on Hull & Dynamic CHT & 7024.19 & 7008.35 & 14032.54 \\
 \end{tabular}
 \end{table}
 
-\subsection{Comparison with Dynamic CHT}
-
-Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CHT and LICT.
-
-\begin{table}[h]
-\centering
-\caption{Comparison Summary}
-\label{tab:comparison}
-\begin{tabular}{@{}lcc@{}}
-\toprule
-\textbf{Characteristic} & \textbf{Dynamic CHT} & \textbf{LICT} \\
-\midrule
-Time Complexity & $O(\log n)$ amortized & $O(\log C)$~\footnote{Line segment insertion requires $O(\log^2 C)$ time; see Section~\ref{sec:discussion}.} \\
-Space Complexity & $O(n)$ & $O(n \log C)$ worst case \\
-Random Distribution & Faster & Slower \\
-All on Hull Distribution & Slower & Faster \\
-Intersection Calculations & Required & None \\
-Numerical Precision & Care required & Straightforward \\
-Line Segment Extension & Complex & Natural \\
-Persistence Support & Difficult & Straightforward \\
-Implementation Complexity & Higher & Lower \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \subsection{Analysis}
 
 In the case that $C$ is larger than $N$, both algorithms have similar performance, even if the theoretical complexity of LICT is worse than Dynamic CHT. This is because the $O(\log C)$ factor is small enough to be negligible compared to the $O(\log n)$ factor, while the constant factor of LICT is smaller than that of Dynamic CHT.

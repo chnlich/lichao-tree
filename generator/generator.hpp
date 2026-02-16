@@ -56,8 +56,7 @@ public:
             if (uniform_real_distribution<>(0, 1)(rng) < query_ratio && i > 0) {
                 num_queries++;
             } else {
-                llint k = -(num_inserts + 1);
-                llint m = (llint)(num_inserts + 1) * (num_inserts + 1);
+                auto [k, m] = get_parabola_line(num_inserts);
                 lines.push_back({k, m});
                 num_inserts++;
             }
@@ -89,6 +88,49 @@ public:
         }
         return ops;
     }
+    // Generate random operations with N lines and C coordinate range
+    // Returns pair of (insert_ops, query_ops) for separate timing within experiments
+    pair<vector<pair<llint,llint>>, vector<llint>> generate_nc(int n, llint c) {
+        return _generate_nc_from_ops(n, c, false);
+    }
+    
+    pair<vector<pair<llint,llint>>, vector<llint>> generate_nc_all_on_hull(int n, llint c) {
+         return _generate_nc_from_ops(n, c, true);
+    }
+
+private:
+    pair<llint, llint> get_parabola_line(int i) {
+        llint k = -(i + 1);
+        llint m = (llint)(i + 1) * (i + 1);
+        return {k, m};
+    }
+    
+    pair<vector<pair<llint,llint>>, vector<llint>> _generate_nc_from_ops(int n, llint c, bool all_on_hull) {
+        vector<pair<llint,llint>> inserts;
+        vector<llint> queries;
+        inserts.reserve(n/2);
+        queries.reserve(n/2);
+        
+        if (all_on_hull) {
+           for (int i = 0; i < n / 2; ++i) {
+               inserts.push_back(get_parabola_line(i));
+           }
+           shuffle(inserts.begin(), inserts.end(), rng);
+           for (int i = 0; i < n / 2; ++i) {
+               queries.push_back(random(0, (llint)n));
+           }
+        } else {
+           llint half_c = c / 2;
+           for (int i = 0; i < n / 2; ++i) {
+               inserts.push_back({random(-half_c, half_c), random(-half_c, half_c)});
+           }
+           for (int i = 0; i < n / 2; ++i) {
+               queries.push_back(random(-half_c, half_c));
+           }
+        }
+        return {inserts, queries};
+    }
+
 };
 
 #endif
