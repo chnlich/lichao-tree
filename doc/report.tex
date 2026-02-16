@@ -399,7 +399,7 @@ C = 10^9
 \]
 (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
 \item \textbf{Random seed:} 42
-\item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
+\item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the average. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
 \item \textbf{Distributions:} We write
 \[
 X \sim U(a, b)
@@ -426,14 +426,14 @@ Table~\ref{tab:results} presents the performance comparison.
 \toprule
 \textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} \\
 \midrule
-$10^5$ & Random & 5 ms & 2 ms \\
-$10^5$ & All on Hull & 17 ms & 15 ms \\
+$10^5$ & Random & 5.0 ms & 3.0 ms \\
+$10^5$ & All on Hull & 16.9 ms & 16.0 ms \\
 \midrule
-$10^6$ & Random & 53 ms & 29 ms \\
-$10^6$ & All on Hull & 516 ms & 654 ms \\
+$10^6$ & Random & 52.9 ms & 31.3 ms \\
+$10^6$ & All on Hull & 693.3 ms & 882.2 ms \\
 \midrule
-$10^7$ & Random & 545 ms & 292 ms \\
-$10^7$ & All on Hull & 13475 ms & 15296 ms \\
+$10^7$ & Random & 548.8 ms & 326.9 ms \\
+$10^7$ & All on Hull & 14702.5 ms & 16249.0 ms \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -464,26 +464,26 @@ In this static universe setting, an iterative segment tree implementation (often
 \toprule
 \textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & Random & LICT & 2.21 & 0.94 & 3.16 \\
-$10^5$ & Random & ZKW LICT & 2.34 & 0.59 & 2.93 \\
-$10^5$ & Random & Dynamic CHT & 2.23 & 0.35 & 2.58 \\
-$10^5$ & All on Hull & LICT & 7.82 & 5.77 & 13.59 \\
-$10^5$ & All on Hull & ZKW LICT & 5.19 & 1.90 & 7.09 \\
-$10^5$ & All on Hull & Dynamic CHT & 8.99 & 6.92 & 15.92 \\
+$10^5$ & Random & LICT & 2.23 & 1.00 & 3.22 \\
+$10^5$ & Random & ZKW LICT & 2.39 & 0.59 & 2.98 \\
+$10^5$ & Random & Dynamic CHT & 2.15 & 0.36 & 2.51 \\
+$10^5$ & All on Hull & LICT & 8.05 & 5.73 & 13.78 \\
+$10^5$ & All on Hull & ZKW LICT & 5.41 & 1.93 & 7.34 \\
+$10^5$ & All on Hull & Dynamic CHT & 8.86 & 7.69 & 16.54 \\
 \midrule
-$10^6$ & Random & LICT & 27.20 & 9.63 & 36.83 \\
-$10^6$ & Random & ZKW LICT & 27.15 & 6.39 & 33.55 \\
-$10^6$ & Random & Dynamic CHT & 23.47 & 3.60 & 27.08 \\
-$10^6$ & All on Hull & LICT & 160.01 & 252.91 & 412.92 \\
-$10^6$ & All on Hull & ZKW LICT & 78.52 & 55.21 & 133.74 \\
-$10^6$ & All on Hull & Dynamic CHT & 325.13 & 320.79 & 645.92 \\
+$10^6$ & Random & LICT & 26.77 & 9.89 & 36.65 \\
+$10^6$ & Random & ZKW LICT & 27.50 & 6.60 & 34.10 \\
+$10^6$ & Random & Dynamic CHT & 23.49 & 3.61 & 27.10 \\
+$10^6$ & All on Hull & LICT & 174.34 & 246.87 & 421.20 \\
+$10^6$ & All on Hull & ZKW LICT & 83.63 & 66.59 & 150.22 \\
+$10^6$ & All on Hull & Dynamic CHT & 259.19 & 346.92 & 606.11 \\
 \midrule
-$10^7$ & Random & LICT & 314.74 & 100.01 & 414.74 \\
-$10^7$ & Random & ZKW LICT & 322.09 & 77.96 & 400.05 \\
-$10^7$ & Random & Dynamic CHT & 229.47 & 45.58 & 275.06 \\
-$10^7$ & All on Hull & LICT & 4720.22 & 5632.03 & 10352.25 \\
-$10^7$ & All on Hull & ZKW LICT & 1802.21 & 1598.80 & 3401.01 \\
-$10^7$ & All on Hull & Dynamic CHT & 7024.19 & 7008.35 & 14032.54 \\
+$10^7$ & Random & LICT & 314.03 & 104.11 & 418.13 \\
+$10^7$ & Random & ZKW LICT & 328.50 & 80.27 & 408.77 \\
+$10^7$ & Random & Dynamic CHT & 230.87 & 45.14 & 276.01 \\
+$10^7$ & All on Hull & LICT & 4683.66 & 5762.05 & 10445.72 \\
+$10^7$ & All on Hull & ZKW LICT & 1724.87 & 1435.00 & 3159.87 \\
+$10^7$ & All on Hull & Dynamic CHT & 6738.87 & 7096.22 & 13835.08 \\
 \bottomrule
 \end{tabular}
 \end{table}

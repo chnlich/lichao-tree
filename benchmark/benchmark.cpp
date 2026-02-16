@@ -49,17 +49,16 @@ long long run_cht(const vector<Operation>& ops) {
 
 const int NUM_RUNS = 10;
 
-double median_time(vector<double>& times) {
-    sort(times.begin(), times.end());
-    int n = times.size();
-    if (n % 2 == 0) return (times[n/2 - 1] + times[n/2]) / 2.0;
-    return times[n/2];
+double average_time(const vector<double>& times) {
+    double sum = 0;
+    for (double t : times) sum += t;
+    return sum / times.size();
 }
 
 void benchmark(int n, string dist_name, const vector<Operation>& ops, vector<Result>& results) {
-    cerr << "Running benchmark: N=" << n << ", Dist=" << dist_name << " (" << NUM_RUNS << " runs, median)" << endl;
+    cerr << "Running benchmark: N=" << n << ", Dist=" << dist_name << " (" << NUM_RUNS << " runs, average)" << endl;
 
-    // Run Li Chao (Standard) - NUM_RUNS times, take median
+    // Run Li Chao (Standard) - NUM_RUNS times, take average
     vector<double> lc_times;
     long long sum_lc = 0;
     for (int r = 0; r < NUM_RUNS; ++r) {
@@ -68,9 +67,9 @@ void benchmark(int n, string dist_name, const vector<Operation>& ops, vector<Res
         auto end = high_resolution_clock::now();
         lc_times.push_back(duration_cast<milliseconds>(end - start).count());
     }
-    results.push_back({"LICT", n, dist_name, median_time(lc_times), sum_lc});
+    results.push_back({"LICT", n, dist_name, average_time(lc_times), sum_lc});
 
-    // Run Dynamic CHT - NUM_RUNS times, take median
+    // Run Dynamic CHT - NUM_RUNS times, take average
     vector<double> cht_times;
     long long sum_cht = 0;
     for (int r = 0; r < NUM_RUNS; ++r) {
@@ -79,7 +78,7 @@ void benchmark(int n, string dist_name, const vector<Operation>& ops, vector<Res
         auto end = high_resolution_clock::now();
         cht_times.push_back(duration_cast<milliseconds>(end - start).count());
     }
-    results.push_back({"Dynamic CHT", n, dist_name, median_time(cht_times), sum_cht});
+    results.push_back({"Dynamic CHT", n, dist_name, average_time(cht_times), sum_cht});
 
     if (sum_lc != sum_cht) {
         cerr << "WARNING: Checksum mismatch! LICT: " << sum_lc << " CHT: " << sum_cht << endl;
@@ -101,7 +100,7 @@ void run_n_smaller_than_c() {
     }
 
     // Output Markdown Table to stdout
-    cout << "\n# Benchmark Results (Median of " << NUM_RUNS << " runs)\n\n";
+    cout << "\n# Benchmark Results (Average of " << NUM_RUNS << " runs)\n\n";
     cout << "| N | Distribution | Algorithm | Time (ms) | Checksum |\n";
     cout << "|---|---|---|---|---|\n";
     for (const auto& res : results) {
