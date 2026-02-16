@@ -168,14 +168,13 @@ This follows from the single-intersection property: if the ordering changes betw
 
 Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
-% TODO: drop the line if node reaches maximum depth (or log C), as at this time it resolves all x for the given required precision 
+When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
 
 \begin{algorithm}[h]
 \caption{LICT Line Insertion}
 \label{alg:insert}
 \begin{algorithmic}[1]
 \Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
-% add condition that depth too deep
 \If{$node$ is null}
 \State $node \gets \text{new Node}(new\_line)$
 \State \Return
@@ -186,7 +185,7 @@ Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query 
 \If{$midf$}
 \State swap($node.line$, $new\_line$)
 \EndIf
-\If{$l = r$}
+\If{$r - l < \epsilon$} \Comment{Max depth reached; drop the losing line}
 \State \Return
 \EndIf
 \If{$lef \neq midf$}
@@ -253,7 +252,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \EndIf
 \State $m \gets l + (r - l) / 2$
 \State $val \gets node.line.eval(x)$
-\If{$l = r$}
+\If{$r - l < \epsilon$}
 \State \Return $val$
 \EndIf
 \If{$x \leq m$}
