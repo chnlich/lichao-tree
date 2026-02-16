@@ -440,7 +440,13 @@ $10^7$ & All on Hull & 13475 ms & 15296 ms \\
 
 \subsection{Parameter-Matched Comparison: The $N = C$ Regime}
 
-The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$.
+The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$. This configuration mirrors dynamic programming optimizations common in competitive programming, where the state recurrence takes the form:
+\[
+dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
+\]
+Here, $\text{cost}(j, i)$ represents a linear function of $i$. Since the queries (indices $i$) are within a fixed range $[0, N]$, the coordinate universe size $C$ effectively equals $N$.
+
+In this static universe setting, an iterative segment tree implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
 
 \begin{itemize}
 \item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
@@ -459,38 +465,28 @@ The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)
 \textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
 $10^5$ & Random & LICT & 2.21 & 0.94 & 3.16 \\
-$10^5$ & Random & Dynamic CHT & 2.23 & 0.35 & 2.58 \\
 $10^5$ & Random & ZKW LICT & 2.34 & 0.59 & 2.93 \\
+$10^5$ & Random & Dynamic CHT & 2.23 & 0.35 & 2.58 \\
 $10^5$ & All on Hull & LICT & 7.82 & 5.77 & 13.59 \\
-$10^5$ & All on Hull & Dynamic CHT & 8.99 & 6.92 & 15.92 \\
 $10^5$ & All on Hull & ZKW LICT & 5.19 & 1.90 & 7.09 \\
+$10^5$ & All on Hull & Dynamic CHT & 8.99 & 6.92 & 15.92 \\
 \midrule
 $10^6$ & Random & LICT & 27.20 & 9.63 & 36.83 \\
-$10^6$ & Random & Dynamic CHT & 23.47 & 3.60 & 27.08 \\
 $10^6$ & Random & ZKW LICT & 27.15 & 6.39 & 33.55 \\
+$10^6$ & Random & Dynamic CHT & 23.47 & 3.60 & 27.08 \\
 $10^6$ & All on Hull & LICT & 160.01 & 252.91 & 412.92 \\
-$10^6$ & All on Hull & Dynamic CHT & 325.13 & 320.79 & 645.92 \\
 $10^6$ & All on Hull & ZKW LICT & 78.52 & 55.21 & 133.74 \\
+$10^6$ & All on Hull & Dynamic CHT & 325.13 & 320.79 & 645.92 \\
 \midrule
 $10^7$ & Random & LICT & 314.74 & 100.01 & 414.74 \\
-$10^7$ & Random & Dynamic CHT & 229.47 & 45.58 & 275.06 \\
 $10^7$ & Random & ZKW LICT & 322.09 & 77.96 & 400.05 \\
+$10^7$ & Random & Dynamic CHT & 229.47 & 45.58 & 275.06 \\
 $10^7$ & All on Hull & LICT & 4720.22 & 5632.03 & 10352.25 \\
-$10^7$ & All on Hull & Dynamic CHT & 7024.19 & 7008.35 & 14032.54 \\
 $10^7$ & All on Hull & ZKW LICT & 1802.21 & 1598.80 & 3401.01 \\
+$10^7$ & All on Hull & Dynamic CHT & 7024.19 & 7008.35 & 14032.54 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\subsubsection{Analysis of ZKW Implementation}
-% TODO(chnlich): fix this.
-We introduced an iterative, array-based Li Chao Tree (ZKW style) to compare against the dynamic pointer-based implementation. The results reveal a significant trade-off based on tree density:
-
-\begin{itemize}
-    \item \textbf{Sparse Cases (Random):} Initially, we hypothesized ZKW would be slower for sparse data. However, after optimizing the implementation to stop immediately upon encountering empty nodes (sentinel values), \textbf{ZKW LICT outperforms Standard LICT} even for sparse random inputs ($N=10^7$: 400ms vs 415ms total). The contiguous memory layout and lack of pointer-chasing overhead outweigh the theoretical benefits of the dynamic tree's minimal node creation. 
-\end{itemize}
-
-In conclusion, the \textbf{ZKW Li Chao Tree is the superior implementation across all tested regimes}, offering robust performance for both sparse and dense data distributions. The iterative structure combined with careful sentinel handling eliminates the traditional weaknesses of array-based trees.
 
 \subsection{Comparison with Dynamic CHT}
 
@@ -498,7 +494,7 @@ Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CH
 
 \begin{table}[h]
 \centering
-\caption{Comparison of Dynamic CHT and Li-Chao tree}
+\caption{Comparison Summary}
 \label{tab:comparison}
 \begin{tabular}{@{}lcc@{}}
 \toprule
@@ -506,6 +502,8 @@ Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CH
 \midrule
 Time Complexity & $O(\log n)$ amortized & $O(\log C)$~\footnote{Line segment insertion requires $O(\log^2 C)$ time; see Section~\ref{sec:discussion}.} \\
 Space Complexity & $O(n)$ & $O(n \log C)$ worst case \\
+Random Distribution & Faster & Slower \\
+All on Hull Distribution & Slower & Faster \\
 Intersection Calculations & Required & None \\
 Numerical Precision & Care required & Straightforward \\
 Line Segment Extension & Complex & Natural \\
@@ -517,64 +515,11 @@ Implementation Complexity & Higher & Lower \\
 
 \subsection{Analysis}
 
-The Dynamic CHT demonstrates faster execution on standard random distributions. However, the edge case experiments reveal critical limitations: numerical instability with nearly parallel lines, overflow risks with large coordinates, and precision degradation in mixed-precision scenarios.
+In the case that $C$ is larger than $N$, both algorithms have similar performance, even if the theoretical complexity of LICT is worse than Dynamic CHT. This is because the $O(\log C)$ factor is small enough to be negligible compared to the $O(\log n)$ factor, while the constant factor of LICT is smaller than that of Dynamic CHT.
 
-The LICT trades raw performance for predictable numerical behavior. Its division-free operations ensure consistent accuracy across all tested edge cases. For applications requiring robust handling of arbitrary inputs, particularly those involving floating-point coordinates or extreme value ranges, the LICT provides correctness guarantees that the Dynamic CHT cannot match.
+In the $N = C$ regime, the ZKW LICT variant demonstrates substantial gains over both alternatives on dense hull inputs, with the $N = C = 10^7$ all-on-hull benchmark completed approximately $4\times$ faster than Dynamic CHT. 
 
-\subsection{Trade-off Analysis}
-
-\textbf{Implementation complexity.} We assess implementation complexity by the number of \emph{corner cases} requiring careful handling, the primary source of bugs under contest time pressure.
-
-\begin{itemize}
-\item \textbf{Dynamic CHT:} Despite compact code via \texttt{std::multiset}, the implementation must correctly handle: (1)~equal-slope (collinear) lines, (2)~cascading hull invalidation in both directions after insertion and (3)~boundary conditions at the hull endpoints. Each case is a potential source of subtle bugs.
-\item \textbf{LICT:} The insertion logic reduces to two comparisons. No division, no intersection computation, no boundary cases.
-\end{itemize}
-
-\textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as
-\[
-\frac{b_2 - b_1}{k_1 - k_2},
-\]
-which suffers from precision loss when slopes are nearly equal.
-
-\textbf{Theoretical error analysis.} Consider lines with slopes $k_1, k_2$ and intercepts $b_1, b_2$ represented in floating-point with machine epsilon $\epsilon_m$. The intersection computation in CHT involves:
-\begin{enumerate}
-\item \textbf{Numerator:}
-\[
-\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1), \quad |\delta_1| \leq \epsilon_m
-\]
-\item \textbf{Denominator:}
-\[
-\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2), \quad |\delta_2| \leq \epsilon_m
-\]
-\item \textbf{Division:}
-\[
-\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3), \quad |\delta_3| \leq \epsilon_m
-\]
-\end{enumerate}
-
-When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For
-\[
-\Delta k = k_1 - k_2,
-\]
-the condition number of intersection computation is:
-\[
-\kappa = \left|\frac{\partial x_{\text{intersect}}}{\partial (\Delta k)} \cdot \frac{\Delta k}{x_{\text{intersect}}}\right| = \left|\frac{b_2 - b_1}{(\Delta k)^2} \cdot \frac{\Delta k}{(b_2-b_1)/(\Delta k)}\right| = 1
-\]
-However, the \emph{absolute} error in the computed intersection grows as
-\[
-O(\epsilon_m / (\Delta k)^2) \quad \text{when} \quad \Delta k \to 0.
-\]
-
-In contrast, the LICT performs only evaluations of the form $\hat{k} \otimes \hat{x} \oplus \hat{b}$, where each operation introduces bounded relative error:
-\[
-\text{fl}(kx + b) = (kx + b)(1 + \delta), \quad |\delta| \leq 2\epsilon_m + O(\epsilon_m^2)
-\]
-
-The error in LICT query results is bounded by
-\[
-2\epsilon_m \cdot \max_i |k_i x + b_i|,
-\]
-independent of slope differences. This makes LICT numerically stable even for nearly parallel lines where CHT intersection calculations become ill-conditioned.
+The LICT's division-free operations ensure consistent numerical accuracy across all inputs. For applications involving floating-point coordinates or extreme value ranges, the LICT provides robustness guarantees that the Dynamic CHT by avoiding intersection point computation.
 
 \section{Conclusion}\label{sec:discussion}
 
@@ -586,7 +531,7 @@ The LICT is the preferred choice in the following scenarios:
 
 \textbf{Persistence required.} Path copying in the LICT is straightforward: insertions modify only nodes along a single root-to-leaf path, so copying those nodes creates a new version sharing unmodified subtrees with the previous version. Achieving persistence in the Dynamic CHT is substantially more complex due to the need to maintain hull invariants across versions.
 
-\textbf{Floating-point coordinates.} When working with floating-point coordinates where precision matters, the LICT's division-free operations avoid numerical instability. The Dynamic CHT's intersection calculations can produce significant errors when slopes differ by small amounts.
+\textbf{Near parallel lines.} When working on lines with subtle slope differences, the LICT's division-free operations avoid numerical instability.
 
 \textbf{Implementation time constraints.} In settings such as competitive programming where implementation speed matters, the LICT's simplicity offers a clear advantage. The reduced code size and elimination of geometric corner cases allow for faster, more confident implementation.
 
@@ -597,10 +542,6 @@ The LICT has several limitations that affect its applicability:
 \textbf{No efficient deletion.} As noted above, the standard LICT does not support deletion of individual lines. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, requiring $\Omega(n)$ time in the worst case.
 
 \textbf{Coordinate range dependency.} The LICT's complexity depends on $C$, the coordinate range divided by precision. For very large coordinate ranges with fine precision (e.g., 64-bit floating-point values spanning the entire representable range), $C$ can become impractically large.
-
-\textbf{Higher constant factors.} Despite having the same asymptotic complexity as the Dynamic CHT for many operations, the LICT's tree traversal involves more memory accesses and comparisons, resulting in higher constant factors that manifest as slower execution in practice.
-
-% TODO: add use cases e.g., DP optimization.
 
 \subsection{Future Work}
 

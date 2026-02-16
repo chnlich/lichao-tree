@@ -204,19 +204,19 @@ vector<NCResult> experiment1_nc_regime() {
             res_lichao.distribution = dist;
             results.push_back(res_lichao);
             
-            // Run CHT
-            auto res_cht = run_nc_cht(inserts, queries, c);
-            res_cht.n = n;
-            res_cht.c = c;
-            res_cht.distribution = dist;
-            results.push_back(res_cht);
-            
             // Run ZKW LICT
             auto res_zkw = run_nc_zkw(inserts, queries, max_range);
             res_zkw.n = n;
             res_zkw.c = c;
             res_zkw.distribution = dist;
             results.push_back(res_zkw);
+            
+            // Run CHT
+            auto res_cht = run_nc_cht(inserts, queries, c);
+            res_cht.n = n;
+            res_cht.c = c;
+            res_cht.distribution = dist;
+            results.push_back(res_cht);
             
             // Verify checksums match
             if (res_lichao.checksum != res_cht.checksum) {
