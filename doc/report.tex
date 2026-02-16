@@ -141,169 +141,7 @@ We first consider the simplest and most common setting: all queried $x$-coordina
 
 \textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
 
-Figures~\ref{fig:insertion-example} and~\ref{fig:query-example} illustrate the insertion and query operations with concrete integer examples.
-
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}[scale=0.85, every node/.style={font=\small}]
-% Tree structure on the left
-\begin{scope}[xshift=-5cm]
-% Root node [0, 8]
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
-\node[below=0.1cm of root] {\small $m=4$};
-
-% Level 1 nodes
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2,-2.5) {$[0, 4]$: $y=2x$};
-\node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.2cm] (r1) at (2,-2.5) {$[4, 8]$: $y=x$};
-
-% Level 2 nodes
-\node[draw, rectangle, minimum width=2.2cm] (l2l) at (-3,-5) {$[0, 2]$: $-$};
-\node[draw, rectangle, minimum width=2.2cm] (l2r) at (-1,-5) {$[2, 4]$: $-$};
-\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r2l) at (1,-5) {$[4, 6]$: $y=10$};
-\node[below=0.1cm of r2l] {\small $m=5$};
-\node[draw, rectangle, minimum width=2.2cm] (r2r) at (3,-5) {$[6, 8]$: $-$};
-
-% Edges
-\draw[->, thick] (root) -- (l1) node[midway, left] {\small if $L \neq M$};
-\draw[->, thick] (root) -- (r1) node[midway, right] {\small if $L = M$};
-\draw[->] (l1) -- (l2l);
-\draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, left, red] {\small new line};
-\draw[->] (r1) -- (r2r);
-\end{scope}
-
-% Geometric view on the right
-\begin{scope}[xshift=3cm]
-% Axes
-\draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
-\draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
-
-% X-axis labels
-\foreach \x in {0,2,4,6,8} {
-    \draw (\x,0.1) -- (\x,-0.1) node[below] {\x};
-}
-
-% Lines
-% Line y = x (stored at root, also at [4,8])
-\draw[thick, blue] (0,0) -- (8,8) node[right] {$y=x$ (stored at root)};
-
-% Line y = 2x (stored at [0,4], routed to left)
-\draw[thick, green!60!black] (0,0) -- (4,8) node[above] {$y=2x$ (stored at $[0,4]$)};
-
-% New line y = 10 (inserted, stored at [4,6])
-\draw[thick, red, dashed] (0,10) -- (8,10) node[right] {$y=10$ (new line)};
-
-% Key points
-\filldraw[blue] (4,4) circle (2pt);
-\node[below right] at (4,4) {\small $(4,4)$};
-\filldraw[green!60!black] (2,4) circle (2pt);
-\node[above] at (2,4) {\small $(2,4)$};
-\filldraw[red] (5,10) circle (2pt);
-\node[above] at (5,10) {\small $(5,10)$};
-\filldraw[blue] (5,5) circle (2pt);
-\node[below] at (5,5) {\small $(5,5)$};
-
-% Interval brackets
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (0,-1.2) -- (4,-1.2) node[midway, below=8pt] {\small $[0,4]$};
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (4,-1.2) -- (8,-1.2) node[midway, below=8pt] {\small $[4,8]$};
-
-% Annotations
-\node[align=left] at (4,-3.5) {\small \textbf{Step 1:} At root $[0,8]$: $y=2x$ lower at $m=4$?\\
-\small No ($8 > 4$), so swap and route to right.\\
-\small \textbf{Step 2:} At $[4,8]$: $y=10$ lower at $m=6$?\\
-\small No ($10 > 6$), but check $[4,6]$: $y=10$ lower at $m=5$?\\
-\small Yes ($10 > 5$), store here.};
-\end{scope}
-\end{tikzpicture}
-\caption{Line Insertion Example. Inserting line $y=10$ into a tree with existing lines $y=x$ and $y=2x$. The new line is compared at each node; since it is higher at midpoints, it gets routed right until finding its optimal interval $[4,6]$.}
-\label{fig:insertion-example}
-\end{figure}
-
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}[scale=0.85, every node/.style={font=\small}]
-% Tree structure on the left
-\begin{scope}[xshift=-5cm]
-% Root node [0, 8]
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
-\node[below=0.1cm of root] {\small $m=4$};
-
-% Level 1 nodes
-\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-2,-2.5) {$[0, 4]$: $y=2x$};
-\node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.2cm] (r1) at (2,-2.5) {$[4, 8]$: $y=x$};
-
-% Level 2 nodes
-\node[draw, rectangle, fill=yellow!20, minimum width=2.2cm] (l2l) at (-3,-5) {$[0, 2]$: $-$};
-\node[draw, rectangle, minimum width=2.2cm] (l2r) at (-1,-5) {$[2, 4]$: $-$};
-\node[draw, rectangle, minimum width=2.2cm] (r2l) at (1,-5) {$[4, 6]$: $y=10$};
-\node[draw, rectangle, minimum width=2.2cm] (r2r) at (3,-5) {$[6, 8]$: $-$};
-
-% Query path highlighted
-\draw[->, very thick, blue] (root) -- (l1);
-\draw[->, very thick, blue] (l1) -- (l2l);
-
-% Query point annotation
-\node[circle, draw, red, thick, minimum size=0.5cm] at (-3,-5) {};
-\node[below=0.3cm of l2l, red] {\small Query $x=1$};
-
-% Legend
-\node[align=left] at (0,-7) {\small \textbf{Query path:} $[0,8] \to [0,4] \to [0,2]$\\
-\small Lines evaluated: $y=x$, $y=2x$};
-\end{scope}
-
-% Geometric view on the right
-\begin{scope}[xshift=3cm]
-% Axes
-\draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
-\draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
-
-% X-axis labels
-\foreach \x in {0,2,4,6,8} {
-    \draw (\x,0.1) -- (\x,-0.1) node[below] {\x};
-}
-
-% Query line at x=1
-\draw[thick, red, dashed] (1,-0.5) -- (1,10) node[above] {Query $x=1$};
-
-% Lines
-% Line y = x (stored at root)
-\draw[thick, blue] (0,0) -- (8,8) node[right] {$y=x$};
-
-% Line y = 2x (stored at [0,4])
-\draw[thick, green!60!black] (0,0) -- (4,8) node[above] {$y=2x$};
-
-% Line y = 10 (stored at [4,6])
-\draw[thick, orange] (4,10) -- (6,10);
-
-% Evaluate at x=1
-\filldraw[blue] (1,1) circle (2.5pt);
-\node[below right] at (1,1) {\small $y=x$ gives $1$};
-\filldraw[green!60!black] (1,2) circle (2.5pt);
-\node[above right] at (1,2) {\small $y=2x$ gives $2$};
-
-% Minimum indicator
-\draw[thick, ->, red] (1.5,0.5) -- (1.1,0.9);
-\node[right] at (1.5,0.5) {\small \textbf{Minimum:} $1$};
-
-% Evaluation table
-\node[draw, rectangle, fill=white] at (4,-2.5) {
-\begin{tabular}{l|c}
-\textbf{Line} & \textbf{Value at $x=1$} \\
-\hline
-$y=x$ & $1$ \\
-$y=2x$ & $2$ \\
-$y=10$ & $10$ (not on path) \\
-\hline
-\textbf{Result} & $\min = 1$
-\end{tabular}
-};
-\end{scope}
-\end{tikzpicture}
-\caption{Query Example. Querying at $x=1$ traverses the path $[0,8] \to [0,4] \to [0,2]$, evaluating stored lines $y=x$ and $y=2x$. The minimum value $1$ is returned. Line $y=10$ is not evaluated because it is stored in a disjoint subtree.}
-\label{fig:query-example}
-\end{figure}
+% TODO: Insert two pictures, one demonstrates how a new line is inserted, another one demonstrates what to do when a query comes. The example can be shown in integer queries cases
 
 Each node in the tree represents an interval $[l, r]$ and stores one line. 
 
@@ -330,14 +168,13 @@ This follows from the single-intersection property: if the ordering changes betw
 
 Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
-% TODO: drop the line if node reaches maximum depth (or log C), as at this time it resolves all x for the given required precision 
+When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
 
 \begin{algorithm}[h]
 \caption{LICT Line Insertion}
 \label{alg:insert}
 \begin{algorithmic}[1]
 \Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
-% add condition that depth too deep
 \If{$node$ is null}
 \State $node \gets \text{new Node}(new\_line)$
 \State \Return
@@ -348,7 +185,7 @@ Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query 
 \If{$midf$}
 \State swap($node.line$, $new\_line$)
 \EndIf
-\If{$l = r$}
+\If{$r - l < \epsilon$} \Comment{Max depth reached; drop the losing line}
 \State \Return
 \EndIf
 \If{$lef \neq midf$}
@@ -415,7 +252,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \EndIf
 \State $m \gets l + (r - l) / 2$
 \State $val \gets node.line.eval(x)$
-\If{$l = r$}
+\If{$r - l < \epsilon$}
 \State \Return $val$
 \EndIf
 \If{$x \leq m$}
@@ -536,20 +373,20 @@ All benchmarks were conducted with the following configuration.
 
 \textbf{Hardware Specifications:}
 \begin{itemize}
-\item \textbf{CPU:} Intel Xeon @ 2.20GHz (Model 79, Broadwell microarchitecture)
-\item \textbf{Core Configuration:} 1 core, 2 threads (SMT enabled)
-\item \textbf{L1 Cache:} 32 KiB L1 data cache, 32 KiB L1 instruction cache
-\item \textbf{L2 Cache:} 256 KiB
-\item \textbf{L3 Cache:} 55 MiB (shared)
-\item \textbf{Memory:} 4 GB DRAM
-\item \textbf{Platform:} Linux x86\_64 (KVM virtualized)
+\item \textbf{CPU:} AMD Ryzen 9 3950X 16-Core Processor @ 3.50GHz (Zen 2 microarchitecture)
+\item \textbf{Core Configuration:} 16 cores, 32 threads (SMT enabled)
+\item \textbf{L1 Cache:} 512 KiB L1 data cache, 512 KiB L1 instruction cache
+\item \textbf{L2 Cache:} 8 MiB
+\item \textbf{L3 Cache:} 16 MiB (shared)
+\item \textbf{Memory:} 64 GB DRAM
+\item \textbf{Platform:} Linux x86\_64 (WSL2 virtualized)
 \end{itemize}
 
 \textbf{Software Configuration:}
 \begin{itemize}
 \item \textbf{Compiler:} g++ 11.4.0
 \item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
-\item \textbf{Operating System:} Linux x86\_64
+\item \textbf{Operating System:} Ubuntu 22.04.5 LTS (WSL2, kernel 6.6.87)
 \end{itemize}
 
 \textbf{Experimental Parameters:}
@@ -561,7 +398,7 @@ C = 10^9
 \]
 (assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
 \item \textbf{Random seed:} 42
-\item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the median. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
+\item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the average. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
 \item \textbf{Distributions:} We write
 \[
 X \sim U(a, b)
@@ -588,143 +425,75 @@ Table~\ref{tab:results} presents the performance comparison.
 \toprule
 \textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} \\
 \midrule
-$10^5$ & Random & 10 ms & 5 ms \\
-$10^5$ & All on Hull & 6 ms & 4 ms \\
+$10^5$ & Random & 5.0 ms & 3.0 ms \\
+$10^5$ & All on Hull & 16.9 ms & 16.0 ms \\
 \midrule
-$10^6$ & Random & 77 ms & 52 ms \\
-$10^6$ & All on Hull & 67 ms & 41 ms \\
+$10^6$ & Random & 52.9 ms & 31.3 ms \\
+$10^6$ & All on Hull & 693.3 ms & 882.2 ms \\
 \midrule
-$10^7$ & Random & 789 ms & 545 ms \\
-$10^7$ & All on Hull & 687 ms & 426 ms \\
+$10^7$ & Random & 548.8 ms & 326.9 ms \\
+$10^7$ & All on Hull & 14702.5 ms & 16249.0 ms \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Parameter-Matched Comparison: The $N = C$ Regime}
 
-The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$.
+The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$. This configuration mirrors dynamic programming optimizations common in competitive programming, where the state recurrence takes the form:
+\[
+dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
+\]
+Here, $\text{cost}(j, i)$ represents a linear function of $i$. Since the queries (indices $i$) are within a fixed range $[0, N]$, the coordinate universe size $C$ effectively equals $N$.
+
+In this static universe setting, an iterative segment tree implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
 
 \begin{itemize}
-% TODO: add a case $N = $C = 10^7
-\item \textbf{Configuration:} $N = C = 10^5$ and $N = C = 10^6$
+\item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
 \item \textbf{Lines:} $k, b \sim U(-C/2, C/2)$
 \item \textbf{Query points:} $x \sim U(-C/2, C/2)$
 \item \textbf{Operation mix:} $N/2$ insertions followed by $N/2$ queries
 \end{itemize}
 
-% TODO: add case All on Hull & Random
 
 \begin{table}[h]
 \centering
 \caption{Performance in $N = C$ Regime (Time in milliseconds)}
 \label{tab:nc-regime}
-\begin{tabular}{@{}ccccc@{}}
+\begin{tabular}{@{}cccccc@{}}
 \toprule
-\textbf{N = C} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
+\textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & LICT & 4.92 & 1.93 & 6.86 \\
-$10^5$ & Dynamic CHT & 6.55 & 0.58 & 7.13 \\
+$10^5$ & Random & LICT & 2.23 & 1.00 & 3.22 \\
+$10^5$ & Random & ZKW LICT & 2.39 & 0.59 & 2.98 \\
+$10^5$ & Random & Dynamic CHT & 2.15 & 0.36 & 2.51 \\
+$10^5$ & All on Hull & LICT & 8.05 & 5.73 & 13.78 \\
+$10^5$ & All on Hull & ZKW LICT & 5.41 & 1.93 & 7.34 \\
+$10^5$ & All on Hull & Dynamic CHT & 8.86 & 7.69 & 16.54 \\
 \midrule
-$10^6$ & LICT & 40.51 & 16.43 & 56.94 \\
-$10^6$ & Dynamic CHT & 43.79 & 5.62 & 49.41 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% TODO: write summary after getting metrics
-
-\subsection{Comparison with Dynamic CHT}
-
-Table~\ref{tab:comparison} summarizes the key differences between the Dynamic CHT and LICT.
-
-\begin{table}[h]
-\centering
-\caption{Comparison of Dynamic CHT and Li-Chao tree}
-\label{tab:comparison}
-\begin{tabular}{@{}lcc@{}}
-\toprule
-\textbf{Characteristic} & \textbf{Dynamic CHT} & \textbf{LICT} \\
+$10^6$ & Random & LICT & 26.77 & 9.89 & 36.65 \\
+$10^6$ & Random & ZKW LICT & 27.50 & 6.60 & 34.10 \\
+$10^6$ & Random & Dynamic CHT & 23.49 & 3.61 & 27.10 \\
+$10^6$ & All on Hull & LICT & 174.34 & 246.87 & 421.20 \\
+$10^6$ & All on Hull & ZKW LICT & 83.63 & 66.59 & 150.22 \\
+$10^6$ & All on Hull & Dynamic CHT & 259.19 & 346.92 & 606.11 \\
 \midrule
-Time Complexity & $O(\log n)$ amortized & $O(\log C)$~\footnote{Line segment insertion requires $O(\log^2 C)$ time; see Section~\ref{sec:discussion}.} \\
-Space Complexity & $O(n)$ & $O(n \log C)$ worst case \\
-Intersection Calculations & Required & None \\
-Numerical Precision & Care required & Straightforward \\
-Line Segment Extension & Complex & Natural \\
-Persistence Support & Difficult & Straightforward \\
-Implementation Complexity & Higher & Lower \\
+$10^7$ & Random & LICT & 314.03 & 104.11 & 418.13 \\
+$10^7$ & Random & ZKW LICT & 328.50 & 80.27 & 408.77 \\
+$10^7$ & Random & Dynamic CHT & 230.87 & 45.14 & 276.01 \\
+$10^7$ & All on Hull & LICT & 4683.66 & 5762.05 & 10445.72 \\
+$10^7$ & All on Hull & ZKW LICT & 1724.87 & 1435.00 & 3159.87 \\
+$10^7$ & All on Hull & Dynamic CHT & 6738.87 & 7096.22 & 13835.08 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Analysis}
 
-The Dynamic CHT demonstrates faster execution on standard random distributions. However, the edge case experiments reveal critical limitations: numerical instability with nearly parallel lines, overflow risks with large coordinates, and precision degradation in mixed-precision scenarios.
+In the case that $C$ is larger than $N$, both algorithms have similar performance, even if the theoretical complexity of LICT is worse than Dynamic CHT. This is because the $O(\log C)$ factor is small enough to be negligible compared to the $O(\log n)$ factor, while the constant factor of LICT is smaller than that of Dynamic CHT.
 
-The LICT trades raw performance for predictable numerical behavior. Its division-free operations ensure consistent accuracy across all tested edge cases. For applications requiring robust handling of arbitrary inputs, particularly those involving floating-point coordinates or extreme value ranges, the LICT provides correctness guarantees that the Dynamic CHT cannot match.
+In the $N = C$ regime, the ZKW LICT variant demonstrates substantial gains over both alternatives on dense hull inputs, with the $N = C = 10^7$ all-on-hull benchmark completed approximately $4\times$ faster than Dynamic CHT. 
 
-\subsection{Trade-off Analysis}
-
-% TODO(chnlich): is there a better way to describe Implementation complexity?
-
-\textbf{Implementation complexity.} We assess implementation complexity using Cyclomatic Complexity (CC), a well-established software metric that measures the number of linearly independent paths through a program's source code. Higher CC indicates more complex logic and higher potential for defects.
-
-Analysis of our reference implementations yields:
-\begin{itemize}
-\item \textbf{LICT:} CC = 6 for insertion (3 binary decision points: midpoint comparison, left/mid comparison, child selection), CC = 2 for query (1 binary decision per level)
-\item \textbf{Dynamic CHT:} CC = 12 for insertion (slope ordering, hull position determination, intersection calculations, multiple edge cases), CC = 4 for query (hull binary search with boundary handling)
-\end{itemize}
-
-The Dynamic CHT requires handling: (1) slope ordering maintenance, (2) intersection point computation
-\[
-\frac{b_2-b_1}{k_1-k_2}
-\]
-with division-by-zero checks, (3) hull position determination (beginning, middle, end), (4) collinear line handling, and (5) floored division sign conventions. The LICT requires only: (1) midpoint line comparison, (2) child selection via inequality check, eliminating entire categories of geometric corner cases. This reduced structural complexity translates to faster development time and higher confidence in correctness, particularly valuable in competitive programming and rapid prototyping contexts.
-
-\textbf{Numerical stability.} The LICT evaluates lines using only multiplication and addition ($kx + b$), avoiding division entirely. The Dynamic CHT requires computing intersection points as
-\[
-\frac{b_2 - b_1}{k_1 - k_2},
-\]
-which suffers from precision loss when slopes are nearly equal.
-
-\textbf{Theoretical error analysis.} Consider lines with slopes $k_1, k_2$ and intercepts $b_1, b_2$ represented in floating-point with machine epsilon $\epsilon_m$. The intersection computation in CHT involves:
-\begin{enumerate}
-\item \textbf{Numerator:}
-\[
-\hat{b}_2 - \hat{b}_1 = (b_2 - b_1)(1 + \delta_1), \quad |\delta_1| \leq \epsilon_m
-\]
-\item \textbf{Denominator:}
-\[
-\hat{k}_1 - \hat{k}_2 = (k_1 - k_2)(1 + \delta_2), \quad |\delta_2| \leq \epsilon_m
-\]
-\item \textbf{Division:}
-\[
-\hat{x}_{\text{intersect}} = \frac{(b_2 - b_1)(1 + \delta_1)}{(k_1 - k_2)(1 + \delta_2)}(1 + \delta_3), \quad |\delta_3| \leq \epsilon_m
-\]
-\end{enumerate}
-
-When slopes are nearly parallel ($|k_1 - k_2| \ll |k|$), the relative error in the denominator amplifies through division. For
-\[
-\Delta k = k_1 - k_2,
-\]
-the condition number of intersection computation is:
-\[
-\kappa = \left|\frac{\partial x_{\text{intersect}}}{\partial (\Delta k)} \cdot \frac{\Delta k}{x_{\text{intersect}}}\right| = \left|\frac{b_2 - b_1}{(\Delta k)^2} \cdot \frac{\Delta k}{(b_2-b_1)/(\Delta k)}\right| = 1
-\]
-However, the \emph{absolute} error in the computed intersection grows as
-\[
-O(\epsilon_m / (\Delta k)^2) \quad \text{when} \quad \Delta k \to 0.
-\]
-
-In contrast, the LICT performs only evaluations of the form $\hat{k} \otimes \hat{x} \oplus \hat{b}$, where each operation introduces bounded relative error:
-\[
-\text{fl}(kx + b) = (kx + b)(1 + \delta), \quad |\delta| \leq 2\epsilon_m + O(\epsilon_m^2)
-\]
-
-The error in LICT query results is bounded by
-\[
-2\epsilon_m \cdot \max_i |k_i x + b_i|,
-\]
-independent of slope differences. This makes LICT numerically stable even for nearly parallel lines where CHT intersection calculations become ill-conditioned.
+The LICT's division-free operations ensure consistent numerical accuracy across all inputs. For applications involving floating-point coordinates or extreme value ranges, the LICT provides robustness guarantees that the Dynamic CHT by avoiding intersection point computation.
 
 \section{Conclusion}\label{sec:discussion}
 
@@ -736,7 +505,7 @@ The LICT is the preferred choice in the following scenarios:
 
 \textbf{Persistence required.} Path copying in the LICT is straightforward: insertions modify only nodes along a single root-to-leaf path, so copying those nodes creates a new version sharing unmodified subtrees with the previous version. Achieving persistence in the Dynamic CHT is substantially more complex due to the need to maintain hull invariants across versions.
 
-\textbf{Floating-point coordinates.} When working with floating-point coordinates where precision matters, the LICT's division-free operations avoid numerical instability. The Dynamic CHT's intersection calculations can produce significant errors when slopes differ by small amounts.
+\textbf{Near parallel lines.} When working on lines with subtle slope differences, the LICT's division-free operations avoid numerical instability.
 
 \textbf{Implementation time constraints.} In settings such as competitive programming where implementation speed matters, the LICT's simplicity offers a clear advantage. The reduced code size and elimination of geometric corner cases allow for faster, more confident implementation.
 
@@ -747,8 +516,6 @@ The LICT has several limitations that affect its applicability:
 \textbf{No efficient deletion.} As noted above, the standard LICT does not support deletion of individual lines. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, requiring $\Omega(n)$ time in the worst case.
 
 \textbf{Coordinate range dependency.} The LICT's complexity depends on $C$, the coordinate range divided by precision. For very large coordinate ranges with fine precision (e.g., 64-bit floating-point values spanning the entire representable range), $C$ can become impractically large.
-
-\textbf{Higher constant factors.} Despite having the same asymptotic complexity as the Dynamic CHT for many operations, the LICT's tree traversal involves more memory accesses and comparisons, resulting in higher constant factors that manifest as slower execution in practice.
 
 \subsection{Future Work}
 
