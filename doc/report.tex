@@ -141,7 +141,169 @@ We first consider the simplest and most common setting: all queried $x$-coordina
 
 \textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
 
-% TODO: Insert two pictures, one demonstrates how a new line is inserted, another one demonstrates what to do when a query comes. The example can be shown in integer queries cases
+Figures~\ref{fig:insertion-example} and~\ref{fig:query-example} illustrate the insertion and query operations with concrete integer examples.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.85, every node/.style={font=\small}]
+% Tree structure on the left
+\begin{scope}[xshift=-5cm]
+% Root node [0, 8]
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
+\node[below=0.1cm of root] {\small $m=4$};
+
+% Level 1 nodes
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2,-2.5) {$[0, 4]$: $y=2x$};
+\node[below=0.1cm of l1] {\small $m=2$};
+\node[draw, rectangle, minimum width=2.2cm] (r1) at (2,-2.5) {$[4, 8]$: $y=x$};
+
+% Level 2 nodes
+\node[draw, rectangle, minimum width=2.2cm] (l2l) at (-3,-5) {$[0, 2]$: $-$};
+\node[draw, rectangle, minimum width=2.2cm] (l2r) at (-1,-5) {$[2, 4]$: $-$};
+\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r2l) at (1,-5) {$[4, 6]$: $y=10$};
+\node[below=0.1cm of r2l] {\small $m=5$};
+\node[draw, rectangle, minimum width=2.2cm] (r2r) at (3,-5) {$[6, 8]$: $-$};
+
+% Edges
+\draw[->, thick] (root) -- (l1) node[midway, left] {\small if $L \neq M$};
+\draw[->, thick] (root) -- (r1) node[midway, right] {\small if $L = M$};
+\draw[->] (l1) -- (l2l);
+\draw[->] (l1) -- (l2r);
+\draw[->, thick, red] (r1) -- (r2l) node[midway, left, red] {\small new line};
+\draw[->] (r1) -- (r2r);
+\end{scope}
+
+% Geometric view on the right
+\begin{scope}[xshift=3cm]
+% Axes
+\draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
+\draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
+
+% X-axis labels
+\foreach \x in {0,2,4,6,8} {
+    \draw (\x,0.1) -- (\x,-0.1) node[below] {\x};
+}
+
+% Lines
+% Line y = x (stored at root, also at [4,8])
+\draw[thick, blue] (0,0) -- (8,8) node[right] {$y=x$ (stored at root)};
+
+% Line y = 2x (stored at [0,4], routed to left)
+\draw[thick, green!60!black] (0,0) -- (4,8) node[above] {$y=2x$ (stored at $[0,4]$)};
+
+% New line y = 10 (inserted, stored at [4,6])
+\draw[thick, red, dashed] (0,10) -- (8,10) node[right] {$y=10$ (new line)};
+
+% Key points
+\filldraw[blue] (4,4) circle (2pt);
+\node[below right] at (4,4) {\small $(4,4)$};
+\filldraw[green!60!black] (2,4) circle (2pt);
+\node[above] at (2,4) {\small $(2,4)$};
+\filldraw[red] (5,10) circle (2pt);
+\node[above] at (5,10) {\small $(5,10)$};
+\filldraw[blue] (5,5) circle (2pt);
+\node[below] at (5,5) {\small $(5,5)$};
+
+% Interval brackets
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (0,-1.2) -- (4,-1.2) node[midway, below=8pt] {\small $[0,4]$};
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (4,-1.2) -- (8,-1.2) node[midway, below=8pt] {\small $[4,8]$};
+
+% Annotations
+\node[align=left] at (4,-3.5) {\small \textbf{Step 1:} At root $[0,8]$: $y=2x$ lower at $m=4$?\\
+\small No ($8 > 4$), so swap and route to right.\\
+\small \textbf{Step 2:} At $[4,8]$: $y=10$ lower at $m=6$?\\
+\small No ($10 > 6$), but check $[4,6]$: $y=10$ lower at $m=5$?\\
+\small Yes ($10 > 5$), store here.};
+\end{scope}
+\end{tikzpicture}
+\caption{Line Insertion Example. Inserting line $y=10$ into a tree with existing lines $y=x$ and $y=2x$. The new line is compared at each node; since it is higher at midpoints, it gets routed right until finding its optimal interval $[4,6]$.}
+\label{fig:insertion-example}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.85, every node/.style={font=\small}]
+% Tree structure on the left
+\begin{scope}[xshift=-5cm]
+% Root node [0, 8]
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
+\node[below=0.1cm of root] {\small $m=4$};
+
+% Level 1 nodes
+\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-2,-2.5) {$[0, 4]$: $y=2x$};
+\node[below=0.1cm of l1] {\small $m=2$};
+\node[draw, rectangle, minimum width=2.2cm] (r1) at (2,-2.5) {$[4, 8]$: $y=x$};
+
+% Level 2 nodes
+\node[draw, rectangle, fill=yellow!20, minimum width=2.2cm] (l2l) at (-3,-5) {$[0, 2]$: $-$};
+\node[draw, rectangle, minimum width=2.2cm] (l2r) at (-1,-5) {$[2, 4]$: $-$};
+\node[draw, rectangle, minimum width=2.2cm] (r2l) at (1,-5) {$[4, 6]$: $y=10$};
+\node[draw, rectangle, minimum width=2.2cm] (r2r) at (3,-5) {$[6, 8]$: $-$};
+
+% Query path highlighted
+\draw[->, very thick, blue] (root) -- (l1);
+\draw[->, very thick, blue] (l1) -- (l2l);
+
+% Query point annotation
+\node[circle, draw, red, thick, minimum size=0.5cm] at (-3,-5) {};
+\node[below=0.3cm of l2l, red] {\small Query $x=1$};
+
+% Legend
+\node[align=left] at (0,-7) {\small \textbf{Query path:} $[0,8] \to [0,4] \to [0,2]$\\
+\small Lines evaluated: $y=x$, $y=2x$};
+\end{scope}
+
+% Geometric view on the right
+\begin{scope}[xshift=3cm]
+% Axes
+\draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
+\draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
+
+% X-axis labels
+\foreach \x in {0,2,4,6,8} {
+    \draw (\x,0.1) -- (\x,-0.1) node[below] {\x};
+}
+
+% Query line at x=1
+\draw[thick, red, dashed] (1,-0.5) -- (1,10) node[above] {Query $x=1$};
+
+% Lines
+% Line y = x (stored at root)
+\draw[thick, blue] (0,0) -- (8,8) node[right] {$y=x$};
+
+% Line y = 2x (stored at [0,4])
+\draw[thick, green!60!black] (0,0) -- (4,8) node[above] {$y=2x$};
+
+% Line y = 10 (stored at [4,6])
+\draw[thick, orange] (4,10) -- (6,10);
+
+% Evaluate at x=1
+\filldraw[blue] (1,1) circle (2.5pt);
+\node[below right] at (1,1) {\small $y=x$ gives $1$};
+\filldraw[green!60!black] (1,2) circle (2.5pt);
+\node[above right] at (1,2) {\small $y=2x$ gives $2$};
+
+% Minimum indicator
+\draw[thick, ->, red] (1.5,0.5) -- (1.1,0.9);
+\node[right] at (1.5,0.5) {\small \textbf{Minimum:} $1$};
+
+% Evaluation table
+\node[draw, rectangle, fill=white] at (4,-2.5) {
+\begin{tabular}{l|c}
+\textbf{Line} & \textbf{Value at $x=1$} \\
+\hline
+$y=x$ & $1$ \\
+$y=2x$ & $2$ \\
+$y=10$ & $10$ (not on path) \\
+\hline
+\textbf{Result} & $\min = 1$
+\end{tabular}
+};
+\end{scope}
+\end{tikzpicture}
+\caption{Query Example. Querying at $x=1$ traverses the path $[0,8] \to [0,4] \to [0,2]$, evaluating stored lines $y=x$ and $y=2x$. The minimum value $1$ is returned. Line $y=10$ is not evaluated because it is stored in a disjoint subtree.}
+\label{fig:query-example}
+\end{figure}
 
 Each node in the tree represents an interval $[l, r]$ and stores one line. 
 
