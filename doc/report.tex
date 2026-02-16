@@ -142,7 +142,7 @@ The LICT offers a fundamentally different approach based on implicit envelope ma
 
 Each node in the tree represents an interval $[l, r]$ and stores one line. 
 
-Case 1: insertion. A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
+\paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
 \[
 m = \frac{l+r}{2}
 \]
@@ -237,7 +237,7 @@ Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query 
 
 Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at the midpoint, so the stored line is not necessarily globally optimal at that coordinate.
 
-Case 2: query. We traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
+\paragraph{Query.} We traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
 
 \begin{algorithm}[h]
 \caption{LICT Query}
