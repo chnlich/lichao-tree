@@ -226,34 +226,35 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x
 % Level 1 nodes
 \node[draw, rectangle, fill=blue!10, minimum width=2.5cm] (l1) at (-2.5,-2) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $-$};
+\node[draw, rectangle, fill=red!10, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $y=3x-8$};
+\node[below=0.1cm of r1] {\small $m=6$};
 
 % Level 2 nodes
 \node[draw, rectangle, minimum width=2.5cm] (l2l) at (-3.8,-4) {$[0, 2]$: $-$};
 \node[draw, rectangle, minimum width=2.5cm] (l2r) at (-1.2,-4) {$[2, 4]$: $-$};
-\node[draw, rectangle, fill=red!10, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $y=3x-8$};
-\node[below=0.1cm of r2l] {\small $m=5$};
+\node[draw, rectangle, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $-$};
 \node[draw, rectangle, minimum width=2.5cm] (r2r) at (3.8,-4) {$[6, 8]$: $-$};
 
 % Edges with labels
 \draw[->, thick] (root) -- (l1);
-\draw[->, thick, red] (root) -- (r1) node[midway, above right, red] {route new line};
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, red] {store here};
 \draw[->] (l1) -- (l2l);
 \draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, above left, red] {store here};
+\draw[->] (r1) -- (r2l);
 \draw[->] (r1) -- (r2r);
 
 % Explanation callouts
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -1) {
-\textbf{Step 1:} At $[0,8]$, $m=4$: $y=x$ gives 4,\\
-$y=3x-8$ gives 4. Equal at midpoint, so $y=x$ stays.\\
-New line routed to right child (left endpoint higher).
+\textbf{Step 1:} At $[0,8]$, $m=4$:\\
+$y=x$ gives 4, $y=3x-8$ gives 4.\\
+Midpoints equal, so $y=x$ stays.\\
+New line routed right ($L_{new}(l) > L_{st}(l)$).
 };
 
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -3) {
 \textbf{Step 2:} At $[4,8]$, node is empty.\\
-Store $y=3x-8$ here? No, check $[4,6]$.\\
-(New line wins on $[4,6]$, so route down).
+Store $y=3x-8$ here.\\
+Recursion ends (no line to displace).
 };
 
 \end{tikzpicture}
@@ -300,12 +301,13 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 % Level 1 nodes
 \node[draw, rectangle, fill=green!10, minimum width=2.5cm] (l1) at (-2.5,-2) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $-$};
+\node[draw, rectangle, fill=red!10, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $y=3x-8$};
+\node[below=0.1cm of r1] {\small $m=6$};
 
 % Level 2 nodes
 \node[draw, rectangle, fill=yellow!20, minimum width=2.5cm] (l2l) at (-3.8,-4) {$[0, 2]$: $-$};
 \node[draw, rectangle, minimum width=2.5cm] (l2r) at (-1.2,-4) {$[2, 4]$: $-$};
-\node[draw, rectangle, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $y=3x-8$};
+\node[draw, rectangle, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $-$};
 \node[draw, rectangle, minimum width=2.5cm] (r2r) at (3.8,-4) {$[6, 8]$: $-$};
 
 % Query path highlighted
