@@ -246,24 +246,24 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.
 \draw[->, thick, red] (r1) -- (r2l) node[midway, left, red, font=\tiny, xshift=-2pt] {route};
 \draw[->] (r1) -- (r2r);
 
-% Explanation callouts - repositioned with more space
-\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, fill opacity=0.9, text opacity=1, font=\scriptsize] at (4.0, 0) {
-\textbf{Step 1:} At $[0,8], m=4$\\
+% Explanation callouts - properly spaced
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] at (5.0, 0.5) {
+\textbf{Step 1:} At $[0,8], m=4$:\\
 $L_{st}(4)=4, L_{new}(4)=7$\\
-$y=x$ lower, stays.\\
-Route right.
+$y=x$ lower $\Rightarrow$ stays.\\
+Route $L_{new}$ right.
 };
 
-\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, fill opacity=0.9, text opacity=1, font=\scriptsize] at (4.0, -2.0) {
-\textbf{Step 2:} At $[4,8], m=6$\\
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] at (5.0, -1.5) {
+\textbf{Step 2:} At $[4,8], m=6$:\\
 $L_{st}(6)=5.6, L_{new}(6)=8$\\
-$y=0.6x+2$ lower, stays.\\
-Route left to $[4,6]$.
+$y=0.6x+2$ lower $\Rightarrow$ stays.\\
+Route $L_{new}$ left to $[4,6]$.
 };
 
-\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, fill opacity=0.9, text opacity=1, font=\scriptsize] at (4.0, -4.0) {
-\textbf{Step 3:} At $[4,6]$, empty.\\
-Store $L_{new}: y=0.5x+5$.\\
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] at (5.0, -3.5) {
+\textbf{Step 3:} At $[4,6]$, node empty.\\
+Store $L_{new}: y=0.5x+5$ here.\\
 Recursion ends.
 };
 
