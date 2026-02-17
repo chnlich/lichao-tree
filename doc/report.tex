@@ -342,30 +342,30 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 % Tree structure
 \node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $f_0$};
 \node[below=0.1cm of root] {\scriptsize $m=4$};
-\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $f_1$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $f_1$};
 \node[below=0.1cm of l1] {\scriptsize $m=2$};
 \node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $f_{new}$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
-\node[draw, rectangle, fill=yellow!20, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
 \node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
-\node[draw, rectangle, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: f_2$};
+\node[draw, rectangle, fill=green!20, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: f_2$};
 \node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
-% Query path
-\draw[->, very thick, blue] (root) -- (l1) node[midway, left, font=\tiny] {$1 \le 4$};
-\draw[->, very thick, blue] (l1) -- (l2ll) node[midway, left, font=\tiny] {$1 \le 2$};
+% Query path (x=5)
+\draw[->, very thick, blue] (root) -- (r1) node[midway, right, font=\tiny] {$5 > 4$};
+\draw[->, very thick, blue] (r1) -- (l2rl) node[midway, left, font=\tiny] {$5 \le 6$};
 
 % Result box
-\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize] at (4.8, -1.8) {
-\textbf{Query Result for $x=1$:}\\
-1. Eval $f_0(1) = 1$\\
-2. Eval $f_1(1) = -2$\\
-3. Eval empty $\to \infty$\\
-\textbf{Minimum:} $-2$
+\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize] at (-4.8, -1.8) {
+\textbf{Query Result for $x=5$:}\\
+1. Eval $f_0(5) = 5$\\
+2. Eval $f_{new}(5) = 5$\\
+3. Eval $f_2(5) = 4.5$\\
+\textbf{Minimum:} $4.5$
 };
-\node[below=0.2cm of l2ll, red, font=\scriptsize\bfseries] {Target $x=1$};
+\node[below=0.2cm of l2rl, red, font=\scriptsize\bfseries] {Target $x=5$};
 \end{tikzpicture}
-\caption{Query Tree View. To query at $x=1$, we follow the path to the leaf containing 1. We evaluate each stored line along the path ($f_0$ and $f_1$) and return the minimum.}
+\caption{Query Tree View. To query at $x=5$, we follow the path $[0,8] \to [4,8] \to [4,6]$. We evaluate each stored line along the path ($f_0$, $f_{new}$, and $f_2$) and return the minimum.}
 \label{fig:query-example}
 \end{figure}
 
