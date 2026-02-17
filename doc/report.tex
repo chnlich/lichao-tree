@@ -217,7 +217,7 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x
 
 Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.5x+5$ into a structure already containing $y=x$, $y=2x$, and $y=0.6x+2$.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
 % Tree structure
@@ -240,29 +240,29 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.
 
 % Edges with labels
 \draw[->, thick] (root) -- (l1);
-\draw[->, thick, red] (root) -- (r1) node[midway, above right, red] {route $L_{new}$};
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, red, font=\scriptsize] {route $L_{new}$};
 \draw[->] (l1) -- (l2l);
 \draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, above left, red] {route $L_{new}$};
+\draw[->, thick, red] (r1) -- (r2l) node[midway, left, red, font=\scriptsize, xshift=-2pt] {route $L_{new}$};
 \draw[->] (r1) -- (r2r);
 
-% Explanation callouts
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -0.5) {
+% Explanation callouts - repositioned to avoid overlap
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.8, text opacity=1] at (4.8, 0) {
 \textbf{Step 1:} At $[0,8]$, $m=4$:\\
-$L_{st}(4)=4$, $L_{new}(4)=7$.\\
+$L_{st}(4)=4, L_{new}(4)=7$.\\
 $y=x$ is lower, stays.\\
-New line routed right ($L_{new}(l) > L_{st}(l)$).
+Route right.
 };
 
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -2.2) {
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.8, text opacity=1] at (4.8, -2.5) {
 \textbf{Step 2:} At $[4,8]$, $m=6$:\\
-$L_{st}(6)=5.6$, $L_{new}(6)=8$.\\
-$y=0.6x+2$ is lower, stays.\\
-New line routed left ($L_{new}(l) > L_{st}(l)$).
+$L_{st}(6)=5.6, L_{new}(6)=8$.\\
+$y=0.6x+2$ lower, stays.\\
+Route left to $[4,6]$.
 };
 
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -4.0) {
-\textbf{Step 3:} At $[4,6]$, node empty.\\
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.8, text opacity=1] at (4.8, -5.0) {
+\textbf{Step 3:} At $[4,6]$, empty.\\
 Store $y=0.5x+5$ here.\\
 Recursion ends.
 };
@@ -276,7 +276,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 
 \paragraph{Query.} We traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{LICT Query}
 \label{alg:query}
 \begin{algorithmic}[1]
@@ -300,7 +300,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 
 Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to-leaf path.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
 % Tree structure
