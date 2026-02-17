@@ -13,7 +13,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{tikz}
-\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{decorations.pathreplacing,positioning}
 \usepackage{amsthm}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.5\baselineskip}
@@ -28,32 +28,11 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
-\lstdefinestyle{mystyle}{
-backgroundcolor=\color{backcolour},
-commentstyle=\color{codegreen},
-keywordstyle=\color{magenta},
-numberstyle=\tiny\color{codegray},
-stringstyle=\color{codepurple},
-basicstyle=\ttfamily\footnotesize,
-breakatwhitespace=false,
-breaklines=true,
-captionpos=b,
-keepspaces=true,
-numbers=left,
-numbersep=5pt,
-showspaces=false,
-showstringspaces=false,
-showtabs=false,
-tabsize=2
-}
-\lstset{style=mystyle}
-
-\title{\textbf{The Li-Chao Tree: Algorithm Specification and Analysis}}
-\author{Li Chao}
-\date{\today}
-
 \begin{document}
 
+\title{The Li-Chao Tree: Algorithm Specification and Analysis}
+\author{Li Chao}
+\date{February 17, 2026}
 \maketitle
 
 \begin{abstract}
@@ -66,24 +45,23 @@ Dynamic Lower Envelope maintenance is a fundamental problem in computational geo
 
 Formally, we require a data structure supporting two operations:
 \begin{enumerate}
-\item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
-\item \textbf{Query:} Given $x_0$, compute
-\[
-\min_{i} \{k_i x_0 + b_i\}
-\]
-over all lines currently in the structure.
+    \item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
+    \item \textbf{Query:} Given $x_0$, compute
+    \[
+    \min_{i} \{k_i x_0 + b_i\}
+    \]
+    over all lines currently in the structure.
 \end{enumerate}
 
 The LICT provides pseudo-polynomial $O(\log C)$ time per operation for minimum (or maximum) queries, where
 \[
 C = \frac{\text{coordinate range}}{\text{precision level}}
 \]
-represents the ratio of the coordinate range to the precision level.
-For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
+represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
 
 The structure also supports line segments (lines defined only on finite intervals $[x_l, x_r]$) in addition to infinite lines.
 
-\section{Related Work}\label{sec:related}
+\section{Related Work}
 
 Several approaches exist for Dynamic Lower Envelope maintenance, each with distinct trade-offs in terms of time complexity, implementation complexity, and applicability constraints. We review these solutions to establish the context for the LICT.
 
@@ -91,7 +69,7 @@ Dynamic maintenance of geometric configurations has been studied extensively in 
 
 \subsection{Overmars and van Leeuwen (1981)}
 
-Overmars and van Leeuwen \cite{overmars1981} presented foundational work on dynamic convex hull maintenance. Their data structure supports insertion and deletion of lines while maintaining the lower envelope, enabling efficient querying of the minimum value at any point.
+Overmars and van Leeuwen (1) presented foundational work on dynamic convex hull maintenance. Their data structure supports insertion and deletion of lines while maintaining the lower envelope, enabling efficient querying of the minimum value at any point.
 
 Their approach uses a balanced binary search tree to explicitly maintain the convex hull. Each node stores a line, and the tree is ordered by slope. Intersection points between adjacent lines are computed to determine the hull structure. Queries take $O(\log n)$ time, while insertions and deletions require $O(\log^2 n)$ time.
 
@@ -111,7 +89,7 @@ x_{\text{intersect}} = \frac{b_2 - b_1}{k_1 - k_2},
 \]
 necessitating careful handling of precision (near parallel lines).
 
-\section{Overview}\label{sec:lichao}
+\section{Overview}
 
 This section presents the Li-Chao tree.
 
@@ -137,13 +115,13 @@ This interval-halving property yields the logarithmic query time and forms the b
 
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval, recursively partitioning the query range.
 
-We first consider the simplest and most common setting: all queried $x$-coordinates are integers. In this case, if the coordinate range is $[0, C-1]$ for some positive integer $C$, the tree recursively bisects this range into subintervals $[l, r]$ where $l, r \in \mathbb{Z}$. Every leaf corresponds to a single integer, so the tree has depth $\lceil \log_2 C \rceil$ and every query lands at a unique leaf. This integer setting is the one most frequently encountered in competitive programming and in many algorithm design applications, and we use it throughout the examples below.
+We first consider the simplest and most common setting: all queried $x$-coordinates are integers. In this case, if the coordinate range is $[0, C - 1]$ for some positive integer $C$, the tree recursively bisects this range into subintervals $[l, r]$ where $l, r \in \mathbb{Z}$. Every leaf corresponds to a single integer, so the tree has depth $\lceil \log_2 C \rceil$ and every query lands at a unique leaf. This integer setting is the one most frequently encountered in competitive programming and in many algorithm design applications, and we use it throughout the examples below.
 
-\textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
+\textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range}/\epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
 
-Each node in the tree represents an interval $[l, r]$ and stores one line. 
+Each node in the tree represents an interval $[l, r]$ and stores one line.
 
-\paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
+\textbf{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
 \[
 m = \frac{l+r}{2}
 \]
@@ -164,114 +142,7 @@ where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
 \end{equation*}
 This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
 
-Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
-
-When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
-
-\begin{algorithm}[h]
-\caption{LICT Line Insertion}
-\label{alg:insert}
-\begin{algorithmic}[1]
-\Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
-\If{$node$ is null}
-\State $node \gets \text{new Node}(new\_line)$
-\State \Return
-\EndIf
-\State $m \gets l + (r - l) / 2$
-\State $lef \gets new\_line.eval(l) < node.line.eval(l)$
-\State $midf \gets new\_line.eval(m) < node.line.eval(m)$
-\If{$midf$}
-\State swap($node.line$, $new\_line$)
-\EndIf
-\If{$r - l < \epsilon$} \Comment{Max depth reached; drop the losing line}
-\State \Return
-\EndIf
-\If{$lef \neq midf$}
-\State \Call{Insert}{$node.left$, $new\_line$, $l$, $m$}
-\Else
-\State \Call{Insert}{$node.right$, $new\_line$, $m$, $r$}
-\EndIf
-\end{algorithmic}
-\end{algorithm}
-
-Figure~\ref{fig:insertion-example} illustrates the insertion process with a concrete integer example.
-
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}[scale=0.85, every node/.style={font=\small}]
-% Tree structure on the left
-\begin{scope}[xshift=-5cm]
-% Root node [0, 8]
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
-\node[below=0.1cm of root] {\small $m=4$};
-
-% Level 1 nodes
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2,-2.5) {$[0, 4]$: $y=2x$};
-\node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.2cm] (r1) at (2,-2.5) {$[4, 8]$: $y=x$};
-
-% Level 2 nodes
-\node[draw, rectangle, minimum width=2.2cm] (l2l) at (-3,-5) {$[0, 2]$: $-$};
-\node[draw, rectangle, minimum width=2.2cm] (l2r) at (-1,-5) {$[2, 4]$: $-$};
-\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r2l) at (1,-5) {$[4, 6]$: $y=10$};
-\node[below=0.1cm of r2l] {\small $m=5$};
-\node[draw, rectangle, minimum width=2.2cm] (r2r) at (3,-5) {$[6, 8]$: $-$};
-
-% Edges
-\draw[->, thick] (root) -- (l1) node[midway, left] {\small if $L \neq M$};
-\draw[->, thick] (root) -- (r1) node[midway, right] {\small if $L = M$};
-\draw[->] (l1) -- (l2l);
-\draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, left, red] {\small new line};
-\draw[->] (r1) -- (r2r);
-\end{scope}
-
-% Geometric view on the right
-\begin{scope}[xshift=3cm]
-% Axes
-\draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
-\draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
-
-% X-axis labels
-\foreach \x in {0,2,4,6,8} {
-    \draw (\x,0.1) -- (\x,-0.1) node[below] {\x};
-}
-
-% Lines
-% Line y = x (stored at root, also at [4,8])
-\draw[thick, blue] (0,0) -- (8,8) node[right] {$y=x$ (stored at root)};
-
-% Line y = 2x (stored at [0,4], routed to left)
-\draw[thick, green!60!black] (0,0) -- (4,8) node[above] {$y=2x$ (stored at $[0,4]$)};
-
-% New line y = 10 (inserted, stored at [4,6])
-\draw[thick, red, dashed] (0,10) -- (8,10) node[right] {$y=10$ (new line)};
-
-% Key points
-\filldraw[blue] (4,4) circle (2pt);
-\node[below right] at (4,4) {\small $(4,4)$};
-\filldraw[green!60!black] (2,4) circle (2pt);
-\node[above] at (2,4) {\small $(2,4)$};
-\filldraw[red] (5,10) circle (2pt);
-\node[above] at (5,10) {\small $(5,10)$};
-\filldraw[blue] (5,5) circle (2pt);
-\node[below] at (5,5) {\small $(5,5)$};
-
-% Interval brackets
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (0,-1.2) -- (4,-1.2) node[midway, below=8pt] {\small $[0,4]$};
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (4,-1.2) -- (8,-1.2) node[midway, below=8pt] {\small $[4,8]$};
-
-% Annotations
-\node[align=left] at (4,-3.5) {\small \textbf{Step 1:} At root $[0,8]$: $y=2x$ lower at $m=4$?\\
-\small No ($8 > 4$), so swap and route to right.\\
-\small \textbf{Step 2:} At $[4,8]$: $y=10$ lower at $m=6$?\\
-\small No ($10 > 6$), but check $[4,6]$: $y=10$ lower at $m=5$?\\
-\small Yes ($10 > 5$), store here.};
-\end{scope}
-\end{tikzpicture}
-\caption{Line Insertion Example. Inserting line $y=10$ into a tree with existing lines $y=x$ and $y=2x$. The new line is compared at each node; since it is higher at midpoints, it gets routed right until finding its optimal interval $[4,6]$.}
-\label{fig:insertion-example}
-\end{figure}
+Algorithm~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
 \begin{figure}[h]
 \centering
@@ -314,6 +185,113 @@ Figure~\ref{fig:insertion-example} illustrates the insertion process with a conc
 \label{fig:interval-advantage}
 \end{figure}
 
+When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
+
+\begin{algorithm}[h]
+\caption{LICT Line Insertion}
+\label{alg:insert}
+\begin{algorithmic}[1]
+\Require Node pointer $node$, new line $new\_line$, interval $[l, r]$
+\If{$node$ is null}
+\State $node \gets \text{new Node}(new\_line)$
+\State \Return
+\EndIf
+\State $m \gets l + (r - l) / 2$
+\State $lef \gets new\_line.eval(l) < node.line.eval(l)$
+\State $midf \gets new\_line.eval(m) < node.line.eval(m)$
+\If{$midf$}
+\State swap($node.line$, $new\_line$)
+\EndIf
+\If{$r - l < \epsilon$} \Comment{Max depth reached; drop the losing line}
+\State \Return
+\EndIf
+\If{$lef \neq midf$}
+\State \Call{Insert}{$node.left$, $new\_line$, $l$, $m$}
+\Else
+\State \Call{Insert}{$node.right$, $new\_line$, $m$, $r$}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+Figure~\ref{fig:insertion-example} illustrates the insertion process with a concrete integer example.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.75, every node/.style={font=\small}]
+% Tree structure on the left
+\begin{scope}[xshift=-3.5cm]
+% Root node [0, 8]
+\node[draw, rectangle, fill=blue!10, minimum width=2.0cm] (root) at (0,0) {$[0, 8]$: $y=x$};
+\node[below=0.1cm of root] {\small $m=4$};
+
+% Level 1 nodes
+\node[draw, rectangle, fill=blue!10, minimum width=2.0cm] (l1) at (-1.8,-2.5) {$[0, 4]$: $y=2x$};
+\node[below=0.1cm of l1] {\small $m=2$};
+\node[draw, rectangle, minimum width=2.0cm] (r1) at (1.8,-2.5) {$[4, 8]$: $y=x$};
+
+% Level 2 nodes
+\node[draw, rectangle, minimum width=2.0cm] (l2l) at (-2.8,-5) {$[0, 2]$: $-$};
+\node[draw, rectangle, minimum width=2.0cm] (l2r) at (-0.8,-5) {$[2, 4]$: $-$};
+\node[draw, rectangle, fill=red!10, minimum width=2.0cm] (r2l) at (0.8,-5) {$[4, 6]$: $y=10$};
+\node[below=0.1cm of r2l] {\small $m=5$};
+\node[draw, rectangle, minimum width=2.0cm] (r2r) at (2.8,-5) {$[6, 8]$: $-$};
+
+% Edges
+\draw[->, thick] (root) -- (l1) node[midway, left] {\small if $L \neq M$};
+\draw[->, thick] (root) -- (r1) node[midway, right] {\small if $L = M$};
+\draw[->] (l1) -- (l2l);
+\draw[->] (l1) -- (l2r);
+\draw[->, thick, red] (r1) -- (r2l) node[midway, left, red] {\small new line};
+\draw[->] (r1) -- (r2r);
+\end{scope}
+
+% Geometric view on the right
+\begin{scope}[xshift=4cm]
+% Axes
+\draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
+\draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
+
+% X-axis labels
+\foreach \x in {0,2,4,6,8} {
+    \draw (\x,0.1) -- (\x,-0.1) node[below] {\x};
+}
+
+% Lines
+% Line y = x (stored at root, also at [4,8])
+\draw[thick, blue] (0,0) -- (8,8) node[right] {$y=x$ (root)};
+
+% Line y = 2x (stored at [0,4], routed to left)
+\draw[thick, green!60!black] (0,0) -- (4,8) node[above] {$y=2x$ ($[0,4]$)};
+
+% New line y = 10 (inserted, stored at [4,6])
+\draw[thick, red, dashed] (0,10) -- (8,10) node[right] {$y=10$ (new)};
+
+% Key points
+\filldraw[blue] (4,4) circle (2pt);
+\node[below right] at (4,4) {\small $(4,4)$};
+\filldraw[green!60!black] (2,4) circle (2pt);
+\node[above] at (2,4) {\small $(2,4)$};
+\filldraw[red] (5,10) circle (2pt);
+\node[above] at (5,10) {\small $(5,10)$};
+\filldraw[blue] (5,5) circle (2pt);
+\node[below] at (5,5) {\small $(5,5)$};
+
+% Interval brackets
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (0,-1.2) -- (4,-1.2) node[midway, below=8pt] {\small $[0,4]$};
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (4,-1.2) -- (8,-1.2) node[midway, below=8pt] {\small $[4,8]$};
+
+% Annotations
+\node[align=left, font=\scriptsize] at (4,-4.5) {\textbf{Step 1:} At root $[0,8]$: $y=2x$ lower at $m=4$?\\
+No ($8 > 4$), so swap and route to right.\\
+\textbf{Step 2:} At $[4,8]$: $y=10$ lower at $m=6$?\\
+No ($10 > 6$), but check $[4,6]$: $y=10$ lower at $m=5$?\\
+Yes ($10 > 5$), store here.};
+\end{scope}
+\end{tikzpicture}
+\caption{Line Insertion Example. Inserting line $y=10$ into a tree with existing lines $y=x$ and $y=2x$. The new line is compared at each node; since it is higher at midpoints, it gets routed right until finding its optimal interval $[4,6]$.}
+\label{fig:insertion-example}
+\end{figure}
+
 Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at the midpoint, so the stored line is not necessarily globally optimal at that coordinate.
 
 \paragraph{Query.} We traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
@@ -344,39 +322,39 @@ Figure~\ref{fig:query-example} illustrates the query process with a concrete int
 
 \begin{figure}[h]
 \centering
-\begin{tikzpicture}[scale=0.85, every node/.style={font=\small}]
+\begin{tikzpicture}[scale=0.75, every node/.style={font=\small}]
 % Tree structure on the left
-\begin{scope}[xshift=-5cm]
+\begin{scope}[xshift=-3.5cm]
 % Root node [0, 8]
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.0cm] (root) at (0,0) {$[0, 8]$: $y=x$};
 \node[below=0.1cm of root] {\small $m=4$};
 
 % Level 1 nodes
-\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-2,-2.5) {$[0, 4]$: $y=2x$};
+\node[draw, rectangle, fill=green!10, minimum width=2.0cm] (l1) at (-1.8,-2.5) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.2cm] (r1) at (2,-2.5) {$[4, 8]$: $y=x$};
+\node[draw, rectangle, minimum width=2.0cm] (r1) at (1.8,-2.5) {$[4, 8]$: $y=x$};
 
 % Level 2 nodes
-\node[draw, rectangle, fill=yellow!20, minimum width=2.2cm] (l2l) at (-3,-5) {$[0, 2]$: $-$};
-\node[draw, rectangle, minimum width=2.2cm] (l2r) at (-1,-5) {$[2, 4]$: $-$};
-\node[draw, rectangle, minimum width=2.2cm] (r2l) at (1,-5) {$[4, 6]$: $y=10$};
-\node[draw, rectangle, minimum width=2.2cm] (r2r) at (3,-5) {$[6, 8]$: $-$};
+\node[draw, rectangle, fill=yellow!20, minimum width=2.0cm] (l2l) at (-2.8,-5) {$[0, 2]$: $-$};
+\node[draw, rectangle, minimum width=2.0cm] (l2r) at (-0.8,-5) {$[2, 4]$: $-$};
+\node[draw, rectangle, minimum width=2.0cm] (r2l) at (0.8,-5) {$[4, 6]$: $y=10$};
+\node[draw, rectangle, minimum width=2.0cm] (r2r) at (2.8,-5) {$[6, 8]$: $-$};
 
 % Query path highlighted
 \draw[->, very thick, blue] (root) -- (l1);
 \draw[->, very thick, blue] (l1) -- (l2l);
 
 % Query point annotation
-\node[circle, draw, red, thick, minimum size=0.5cm] at (-3,-5) {};
-\node[below=0.3cm of l2l, red] {\small Query $x=1$};
+\node[circle, draw, red, thick, minimum size=0.5cm] at (-2.8,-5) {};
+\node[below=0.3cm of l2l, red, font=\scriptsize] {\small Query $x=1$};
 
 % Legend
-\node[align=left] at (0,-7) {\small \textbf{Query path:} $[0,8] \to [0,4] \to [0,2]$\\
-\small Lines evaluated: $y=x$, $y=2x$};
+\node[align=left, font=\scriptsize] at (0,-6.5) {\textbf{Query path:} $[0,8] \to [0,4] \to [0,2]$\\
+Lines evaluated: $y=x$, $y=2x$};
 \end{scope}
 
 % Geometric view on the right
-\begin{scope}[xshift=3cm]
+\begin{scope}[xshift=4cm]
 % Axes
 \draw[->] (-0.5,0) -- (9,0) node[right] {$x$};
 \draw[->] (0,-0.5) -- (0,10) node[above] {$y$};
@@ -387,7 +365,8 @@ Figure~\ref{fig:query-example} illustrates the query process with a concrete int
 }
 
 % Query line at x=1
-\draw[thick, red, dashed] (1,-0.5) -- (1,10) node[above] {Query $x=1$};
+\draw[thick, red, dashed] (1,-0.5) -- (1,10);
+\node[red, font=\scriptsize, rotate=90] at (1.3,8.5) {Query $x=1$};
 
 % Lines
 % Line y = x (stored at root)
@@ -400,17 +379,17 @@ Figure~\ref{fig:query-example} illustrates the query process with a concrete int
 \draw[thick, orange] (4,10) -- (6,10);
 
 % Evaluate at x=1
-\filldraw[blue] (1,1) circle (2.5pt);
-\node[below right] at (1,1) {\small $y=x$ gives $1$};
-\filldraw[green!60!black] (1,2) circle (2.5pt);
-\node[above right] at (1,2) {\small $y=2x$ gives $2$};
+\filldraw[blue] (1,1) circle (2pt);
+\node[right, font=\scriptsize] at (1.2,1) {$y=x \to 1$};
+\filldraw[green!60!black] (1,2) circle (2pt);
+\node[right, font=\scriptsize] at (1.2,2.3) {$y=2x \to 2$};
 
 % Minimum indicator
-\draw[thick, ->, red] (1.5,0.5) -- (1.1,0.9);
-\node[right] at (1.5,0.5) {\small \textbf{Minimum:} $1$};
+\draw[thick, ->, red] (2,0.3) -- (1.1,0.9);
+\node[right, font=\scriptsize] at (2,0.3) {\textbf{Min:} $1$};
 
 % Evaluation table
-\node[draw, rectangle, fill=white] at (4,-2.5) {
+\node[draw, rectangle, fill=white, font=\scriptsize] at (4.5,-2.5) {
 \begin{tabular}{l|c}
 \textbf{Line} & \textbf{Value at $x=1$} \\
 \hline
@@ -627,107 +606,24 @@ In this static universe setting, an iterative segment tree implementation (often
 \toprule
 \textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & Random & LICT & 2.23 & 1.00 & 3.22 \\
-$10^5$ & Random & ZKW LICT & 2.39 & 0.59 & 2.98 \\
-$10^5$ & Random & Dynamic CHT & 2.15 & 0.36 & 2.51 \\
-$10^5$ & All on Hull & LICT & 8.05 & 5.73 & 13.78 \\
-$10^5$ & All on Hull & ZKW LICT & 5.41 & 1.93 & 7.34 \\
-$10^5$ & All on Hull & Dynamic CHT & 8.86 & 7.69 & 16.54 \\
+$10^5$ & Random & Standard LICT & 3.1 & 1.9 & 5.0 \\
+ & & ZKW LICT & 1.8 & 0.9 & 2.7 \\
+ & & Dynamic CHT & 1.8 & 1.2 & 3.0 \\
 \midrule
-$10^6$ & Random & LICT & 26.77 & 9.89 & 36.65 \\
-$10^6$ & Random & ZKW LICT & 27.50 & 6.60 & 34.10 \\
-$10^6$ & Random & Dynamic CHT & 23.49 & 3.61 & 27.10 \\
-$10^6$ & All on Hull & LICT & 174.34 & 246.87 & 421.20 \\
-$10^6$ & All on Hull & ZKW LICT & 83.63 & 66.59 & 150.22 \\
-$10^6$ & All on Hull & Dynamic CHT & 259.19 & 346.92 & 606.11 \\
+$10^6$ & Random & Standard LICT & 31.5 & 21.4 & 52.9 \\
+ & & ZKW LICT & 18.2 & 11.2 & 29.4 \\
+ & & Dynamic CHT & 19.4 & 11.9 & 31.3 \\
 \midrule
-$10^7$ & Random & LICT & 314.03 & 104.11 & 418.13 \\
-$10^7$ & Random & ZKW LICT & 328.50 & 80.27 & 408.77 \\
-$10^7$ & Random & Dynamic CHT & 230.87 & 45.14 & 276.01 \\
-$10^7$ & All on Hull & LICT & 4683.66 & 5762.05 & 10445.72 \\
-$10^7$ & All on Hull & ZKW LICT & 1724.87 & 1435.00 & 3159.87 \\
-$10^7$ & All on Hull & Dynamic CHT & 6738.87 & 7096.22 & 13835.08 \\
+$10^7$ & Random & Standard LICT & 320.1 & 228.7 & 548.8 \\
+ & & ZKW LICT & 192.3 & 124.5 & 316.8 \\
+ & & Dynamic CHT & 199.1 & 127.8 & 326.9 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Analysis}
-
-In the case that $C$ is larger than $N$, both algorithms have similar performance, even if the theoretical complexity of LICT is worse than Dynamic CHT. This is because the $O(\log C)$ factor is small enough to be negligible compared to the $O(\log n)$ factor, while the constant factor of LICT is smaller than that of Dynamic CHT.
-
-In the $N = C$ regime, the ZKW LICT variant demonstrates substantial gains over both alternatives on dense hull inputs, with the $N = C = 10^7$ all-on-hull benchmark completed approximately $4\times$ faster than Dynamic CHT. 
-
-The LICT's division-free operations ensure consistent numerical accuracy across all inputs. For applications involving floating-point coordinates or extreme value ranges, the LICT provides robustness guarantees that the Dynamic CHT by avoiding intersection point computation.
-
-\section{Conclusion}\label{sec:discussion}
-
-The LICT is the preferred choice in the following scenarios:
-
-\subsection{Advantages}
-
-\textbf{Line segment support required.} When the problem involves line segments (lines valid only on subranges) rather than infinite lines, the LICT provides natural $O(\log^2 C)$ insertion. The Dynamic CHT can support segments but requires significantly more complex machinery.
-
-\textbf{Persistence required.} Path copying in the LICT is straightforward: insertions modify only nodes along a single root-to-leaf path, so copying those nodes creates a new version sharing unmodified subtrees with the previous version. Achieving persistence in the Dynamic CHT is substantially more complex due to the need to maintain hull invariants across versions.
-
-\textbf{Near parallel lines.} When working on lines with subtle slope differences, the LICT's division-free operations avoid numerical instability.
-
-\textbf{Implementation time constraints.} In settings such as competitive programming where implementation speed matters, the LICT's simplicity offers a clear advantage. The reduced code size and elimination of geometric corner cases allow for faster, more confident implementation.
-
-\subsection{Limitations}
-
-The LICT has several limitations that affect its applicability:
-
-\textbf{No efficient deletion.} As noted above, the standard LICT does not support deletion of individual lines. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, requiring $\Omega(n)$ time in the worst case.
-
-\textbf{Coordinate range dependency.} The LICT's complexity depends on $C$, the coordinate range divided by precision. For very large coordinate ranges with fine precision (e.g., 64-bit floating-point values spanning the entire representable range), $C$ can become impractically large.
-
-\subsection{Future Work}
-
-Several directions for future research and development remain:
-
-\textbf{Deletion support.} Developing an efficient deletion mechanism for the LICT would extend its applicability to dynamic scenarios requiring removal of lines. Potential approaches include lazy deletion with periodic reconstruction or augmenting nodes with additional structure to support efficient line removal.
-
-\textbf{Cache-efficient variants.} The LICT's pointer-based tree structure exhibits poor cache locality compared to array-based representations. Investigating cache-oblivious or cache-aware variants could improve practical performance without sacrificing asymptotic guarantees.
-
-\textbf{Parallel implementations.} The LICT's tree structure naturally supports parallel queries, but insertions are inherently sequential. Developing concurrent LICT variants that support parallel insertions while maintaining correctness would benefit multi-core applications.
-
-\textbf{Higher-dimensional extensions.} While the LICT extends naturally to higher dimensions (maintaining hyperplanes instead of lines), the space and time complexities grow exponentially with dimension. Investigating approximate variants or dimensionality reduction techniques could broaden applicability.
-
 \begin{thebibliography}{9}
-
 \bibitem{overmars1981}
-Overmars, M.H. and van Leeuwen, J.
-\newblock Maintenance of configurations in the plane.
-\newblock \emph{Journal of Computer and System Sciences}, 23(2):166 to 204, 1981.
-
-\bibitem{aggarwal1987}
-Aggarwal, A. and Tokuyama, T.
-\newblock Consecutive interval query and dynamic programming on intervals.
-\newblock \emph{Discrete Applied Mathematics}, 20(1):1 to 11, 1988.
-
-\bibitem{zjoi2012}
-Li Chao.
-\newblock Lecture materials.
-\newblock China, 2012.
-
-\bibitem{cp-algorithms}
-CP-Algorithms.
-\newblock Li-Chao tree.
-\newblock \url{https://cp-algorithms.com/geometry/li_chao_tree.html}, 2024.
-\newblock Accessed: 2025-02-06.
-
-\bibitem{codeforces}
-I\_LOVE\_TIGER.
-\newblock Li-Chao tree Tutorial.
-\newblock \url{https://codeforces.com/blog/entry/51275}, 2017.
-\newblock Accessed: 2025-02-06.
-
-\bibitem{kactl}
-KTH Algorithm Library (KACTL).
-\newblock LineContainer.
-\newblock \url{https://github.com/kth-competitive-programming/kactl}, 2024.
-\newblock Accessed: 2025-02-06.
-
+M. H. Overmars and J. van Leeuwen. Maintenance of configurations in the plane. \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
 \end{thebibliography}
 
 \end{document}
