@@ -219,53 +219,56 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.75, every node/.style={font=\small}]
+\begin{tikzpicture}[scale=0.8, every node/.style={font=\small}]
 % Tree structure
 % Root node [0, 8]
 \node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
 \node[below=0.1cm of root] {\scriptsize $m=4$};
 
 % Level 1 nodes
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2.0,-2.0) {$[0, 4]$: $y=2x$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\scriptsize $m=2$};
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (2.0,-2.0) {$[4, 8]$: $y=0.6x+2$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.6x+2$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
 
-% Level 2 nodes
-\node[draw, rectangle, minimum width=1.5cm] (l2l) at (-3.0,-4.0) {$[0, 2]$: $-$};
-\node[draw, rectangle, minimum width=1.5cm] (l2r) at (-1.0,-4.0) {$[2, 4]$: $-$};
-\node[draw, rectangle, fill=red!10, minimum width=1.5cm] (r2l) at (1.0,-4.0) {$[4, 6]$: $L_{new}$};
-\node[below=0.1cm of r2l] {\scriptsize $m=5$};
-\node[draw, rectangle, minimum width=1.5cm] (r2r) at (3.0,-4.0) {$[6, 8]$: $-$};
+% Level 2 nodes (increased horizontal spacing to prevent overlap)
+\node[draw, rectangle, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
+\node[draw, rectangle, fill=red!10, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: L_{new}$};
+\node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
-% Edges with labels
+% Edges
 \draw[->, thick] (root) -- (l1);
-\draw[->, thick, red] (root) -- (r1) node[midway, right, red, font=\tiny, xshift=2pt] {route};
-\draw[->] (l1) -- (l2l);
-\draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, left, red, font=\tiny, xshift=-2pt] {route};
-\draw[->] (r1) -- (r2r);
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, red, font=\tiny] {route};
+\draw[->] (l1) -- (l2ll);
+\draw[->] (l1) -- (l2lr);
+\draw[->, thick, red] (r1) -- (l2rl) node[midway, left, red, font=\tiny, xshift=-2pt] {route};
+\draw[->] (r1) -- (l2rr);
 
-% Explanation callouts - properly spaced
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] at (5.0, 0.5) {
+\node[below=0.1cm of l2rl] {\scriptsize $m=5$};
+
+% Explanation callouts - properly spaced and moved right
+\begin{scope}[xshift=6.8cm]
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s1) at (0, 0.5) {
 \textbf{Step 1:} At $[0,8], m=4$:\\
 $L_{st}(4)=4, L_{new}(4)=7$\\
 $y=x$ lower $\Rightarrow$ stays.\\
 Route $L_{new}$ right.
 };
 
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] at (5.0, -1.5) {
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s2) at (0, -1.8) {
 \textbf{Step 2:} At $[4,8], m=6$:\\
 $L_{st}(6)=5.6, L_{new}(6)=8$\\
 $y=0.6x+2$ lower $\Rightarrow$ stays.\\
 Route $L_{new}$ left to $[4,6]$.
 };
 
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] at (5.0, -3.5) {
+\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s3) at (0, -4.1) {
 \textbf{Step 3:} At $[4,6]$, node empty.\\
 Store $L_{new}: y=0.5x+5$ here.\\
 Recursion ends.
 };
+\end{scope}
 
 \end{tikzpicture}
 \caption{Line Insertion Tree View. Inserting line $y=0.5x+5$. This example shows how a line is routed through multiple occupied nodes ($[0,8] \to [4,8] \to [4,6]$) based on midpoint comparisons until it finds an empty node.}
@@ -302,30 +305,30 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.75, every node/.style={font=\small}]
+\begin{tikzpicture}[scale=0.8, every node/.style={font=\small}]
 % Tree structure
 % Root node [0, 8]
 \node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
 \node[below=0.1cm of root] {\scriptsize $m=4$};
 
 % Level 1 nodes
-\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-2.0,-2.0) {$[0, 4]$: $y=2x$};
+\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\scriptsize $m=2$};
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (2.0,-2.0) {$[4, 8]$: $y=0.6x+2$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.6x+2$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
 
-% Level 2 nodes
-\node[draw, rectangle, fill=yellow!20, minimum width=1.5cm] (l2l) at (-3.0,-4.0) {$[0, 2]$: $-$};
-\node[draw, rectangle, minimum width=1.5cm] (l2r) at (-1.0,-4.0) {$[2, 4]$: $-$};
-\node[draw, rectangle, minimum width=1.5cm] (r2l) at (1.0,-4.0) {$[4, 6]$: $L_{new}$};
-\node[draw, rectangle, minimum width=1.5cm] (r2r) at (3.0,-4.0) {$[6, 8]$: $-$};
+% Level 2 nodes (consistent horizontal spacing)
+\node[draw, rectangle, fill=yellow!20, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: y=0.5x+5$};
+\node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
 % Query path highlighted
-\draw[->, very thick, blue] (root) -- (l1) node[midway, left, font=\tiny] {$x=1 \le 4$};
-\draw[->, very thick, blue] (l1) -- (l2l) node[midway, left, font=\tiny] {$x=1 \le 2$};
+\draw[->, very thick, blue] (root) -- (l1) node[midway, left, font=\tiny, xshift=-2pt] {$x=1 \le 4$};
+\draw[->, very thick, blue] (l1) -- (l2ll) node[midway, left, font=\tiny, xshift=-2pt] {$x=1 \le 2$};
 
 % Result box
-\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize] at (4.0, -1.8) {
+\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize] at (4.8, -1.8) {
 \textbf{Query Result for $x=1$:}\\
 1. Eval root $y=x \to 1$\\
 2. Eval child $y=2x \to 2$\\
@@ -333,7 +336,7 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 \textbf{Minimum:} $1$
 };
 
-\node[below=0.2cm of l2l, red, font=\scriptsize\bfseries] {Target $x=1$};
+\node[below=0.2cm of l2ll, red, font=\scriptsize\bfseries] {Target $x=1$};
 
 \end{tikzpicture}
 \caption{Query Tree View. To query at $x=1$, we follow the path to the leaf containing 1. At each node along the path, we evaluate the stored line and take the minimum of all results.}
