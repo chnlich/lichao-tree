@@ -334,7 +334,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \end{algorithmic}
 \end{algorithm}
 
-Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to-leaf path in the tree structure from the previous example.
+Figure~\ref{fig:query-example} shows a query at $x=5$ following a single root-to-leaf path in the tree structure from the previous example.
 
 \begin{figure}[H]
 \centering
@@ -347,16 +347,16 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 \node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $f_{new}$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
 \node[draw, rectangle, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
-\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
-\node[draw, rectangle, fill=green!20, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: f_2$};
+\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.6,-4.5) {$[2, 4]: -$};
+\node[draw, rectangle, fill=green!20, minimum width=1.4cm] (l2rl) at (1.6,-4.5) {$[4, 6]: f_2$};
 \node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
 % Query path (x=5)
 \draw[->, very thick, blue] (root) -- (r1) node[midway, right, font=\tiny] {$5 > 4$};
 \draw[->, very thick, blue] (r1) -- (l2rl) node[midway, left, font=\tiny] {$5 \le 6$};
 
-% Result box
-\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize] at (-4.8, -1.8) {
+% Result box - moved to avoid overlap
+\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize, anchor=west] at (6.2, -1.8) {
 \textbf{Query Result for $x=5$:}\\
 1. Eval $f_0(5) = 5$\\
 2. Eval $f_{new}(5) = 5$\\
