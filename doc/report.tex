@@ -1,193 +1,79 @@
-\documentclass[11pt,a4paper]{article}
-\usepackage[margin=2.5cm]{geometry}
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
 \usepackage{booktabs}
 \usepackage{hyperref}
-\usepackage{amsmath}
-\usepackage{amssymb}
+\usepackage{amsmath, amssymb}
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage{listings}
 \usepackage{xcolor}
-\usepackage{natbib}
+\usepackage{float}
 \usepackage{algorithm}
+\usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{tikz}
-\usetikzlibrary{decorations.pathreplacing,positioning}
-\usepackage{amsthm}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.5\baselineskip}
+\usetikzlibrary{decorations.pathreplacing, positioning}
 
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\theoremstyle{plain}
-\newtheorem{lemma}{Lemma}
-
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\title{The Li-Chao tree: An Alternative Approach to Dynamic Maintenance of the Lower Envelope}
+\author{Li Chao}
+\date{\today}
 
 \begin{document}
 
-\title{The Li-Chao Tree: Algorithm Specification and Analysis}
-\author{Li Chao}
-\date{February 17, 2026}
 \maketitle
 
 \begin{abstract}
-The Li-Chao tree (LICT) was first introduced in 2012 lecture materials as an efficient data structure for dynamic lower envelope maintenance. In the years since, it has achieved widespread adoption within the competitive programming community, yet no formal specification has appeared in the peer-reviewed literature. This paper provides the definitive formalization of the Li-Chao tree, serving as both the official specification and an expansion of the original 2012 lecture materials. We present complete algorithmic specifications, establish formal correctness proofs, analyze theoretical complexity, and provide empirical performance characterization. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
+The Li-Chao tree (LICT) is a specialized segment tree variant designed for the dynamic maintenance of a lower envelope of lines or line segments. It provides an alternative to the traditional Convex Hull Trick (CHT), particularly in scenarios requiring online insertions of lines with arbitrary slopes and queries at arbitrary coordinates. This report provides a formal description of the algorithm, its geometric intuition, and a performance comparison across various implementation variants.
 \end{abstract}
 
 \section{Introduction}
+The problem of maintaining the lower envelope of a set of linear functions $f_i(x) = k_i x + b_i$ is fundamental in computational geometry and has extensive applications in competitive programming, particularly for optimizing dynamic programming transitions. While the Convex Hull Trick (CHT) is a well-established solution, its dynamic variant often involves complex balanced binary search trees or specialized data structures to handle non-monotonic slopes and queries.
 
-Dynamic Lower Envelope maintenance is a fundamental problem in computational geometry with extensive applications. We focus on the Li-Chao tree (LICT), a data structure that maintains a set of linear functions while supporting insertion and query operations. The problem is defined as follows: given a dynamic set of linear functions $y = kx + b$, support efficient insertion of new lines and querying the minimum (or equivalently, maximum) value at arbitrary $x$ coordinates. This report focuses on minimum queries; maximum queries are obtained by negating line parameters.
-
-Formally, we require a data structure supporting two operations:
-\begin{enumerate}
-    \item \textbf{Add Line:} Insert a new line $y = kx + b$ into the structure.
-    \item \textbf{Query:} Given $x_0$, compute
-    \[
-    \min_{i} \{k_i x_0 + b_i\}
-    \]
-    over all lines currently in the structure.
-\end{enumerate}
-
-The LICT provides pseudo-polynomial $O(\log C)$ time per operation for minimum (or maximum) queries, where
-\[
-C = \frac{\text{coordinate range}}{\text{precision level}}
-\]
-represents the ratio of the coordinate range to the precision level. For integer coordinates with range $[0, 10^9]$, $C = 10^9$; for the same range with precision $10^{-6}$, $C = 10^{15}$.
-
-The structure also supports line segments (lines defined only on finite intervals $[x_l, x_r]$) in addition to infinite lines.
+The Li-Chao tree, introduced by Li Chao in 2012, offers a conceptually simpler approach based on the segment tree structure. By storing lines directly in the nodes of a range tree, it achieves $O(\log C)$ time complexity for both insertion and query operations, where $C$ is the coordinate range.
 
 \section{Related Work}
+The problem of dynamic maintenance of the upper or lower boundary of a set of lines, also known as the dynamic line container problem, was formally addressed by Overmars and van Leeuwen (1981). Their approach maintained the convex hull using a balanced binary search tree, achieving $O(\log^2 n)$ update time. Modern dynamic CHT implementations often use more advanced techniques to achieve $O(\log n)$ performance.
 
-Several approaches exist for Dynamic Lower Envelope maintenance, each with distinct trade-offs in terms of time complexity, implementation complexity, and applicability constraints. We review these solutions to establish the context for the LICT.
+\section{Algorithmic Overview}
 
-Dynamic maintenance of geometric configurations has been studied extensively in computational geometry.
+\subsection{Data Structure}
+The LICT is a segment tree built over the coordinate range $[L, R]$. Each node in the tree corresponds to an interval $[l, r]$ and stores exactly one line (or segment) that is "locally optimal" for that interval.
 
-\subsection{Overmars and van Leeuwen (1981)}
+\subsection{Operations}
 
-Overmars and van Leeuwen (1) presented foundational work on dynamic convex hull maintenance. Their data structure supports insertion and deletion of lines while maintaining the lower envelope, enabling efficient querying of the minimum value at any point.
+\paragraph{Interval Advantage.} The core logic of the LICT depends on the single-intersection property of lines. If two lines $A$ and $B$ are compared over an interval $[l, r]$, and $A$ is better (achieves a lower value) at the midpoint $m = \lfloor(l+r)/2\rfloor$, then $B$ can only be better than $A$ on at most one side of the midpoint.
 
-Their approach uses a balanced binary search tree to explicitly maintain the convex hull. Each node stores a line, and the tree is ordered by slope. Intersection points between adjacent lines are computed to determine the hull structure. Queries take $O(\log n)$ time, while insertions and deletions require $O(\log^2 n)$ time.
-
-\subsection{Monotonic Convex Hull Trick}
-
-The monotonic convex hull trick addresses the special case where line slopes are inserted in monotonically increasing or decreasing order.
-
-When insertions arrive in order of monotonically increasing (or decreasing) slopes, a deque-based approach achieves $O(1)$ amortized time per insertion and $O(1)$ amortized time per query. This variant, widely used in dynamic programming optimization, maintains the convex hull incrementally without requiring balanced tree structures. However, the monotonicity restriction limits its applicability to problems where line slopes are known to follow a specific order.
-
-\subsection{Dynamic Convex Hull Trick}
-
-For arbitrary insertion sequences without monotonicity constraints, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log n)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
-
-The Dynamic CHT requires computing intersection points between adjacent lines in the hull as
-\[
-x_{\text{intersect}} = \frac{b_2 - b_1}{k_1 - k_2},
-\]
-necessitating careful handling of precision (near parallel lines).
-
-\section{Overview}
-
-This section presents the Li-Chao tree.
-
-\subsection{Core Insight}
-
-The Li-Chao tree is built upon a fundamental observation about line dominance over intervals. Consider two lines defined over an interval $[l, r]$:
-\[
-f_1(x) = k_1x + b_1 \quad \text{and} \quad f_2(x) = k_2x + b_2.
-\]
-Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
-
-Without loss of generality, assume $f_1$ dominates (achieves the lower value) on the majority subinterval $[m, r]$ where
-\[
-m = \frac{l+r}{2}.
-\]
-We designate $f_1$ as the \emph{representative} line for $[l, r]$, serving as the optimal answer for any query $x \in [l, m]$.
-
-The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[m, r]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
-
-This interval-halving property yields the logarithmic query time and forms the basis of the tree structure.
-
-\subsection{Algorithmic Approach}
-
-The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval, recursively partitioning the query range.
-
-We first consider the simplest and most common setting: all queried $x$-coordinates are integers. In this case, if the coordinate range is $[0, C - 1]$ for some positive integer $C$, the tree recursively bisects this range into subintervals $[l, r]$ where $l, r \in \mathbb{Z}$. Every leaf corresponds to a single integer, so the tree has depth $\lceil \log_2 C \rceil$ and every query lands at a unique leaf. This integer setting is the one most frequently encountered in competitive programming and in many algorithm design applications, and we use it throughout the examples below.
-
-\textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range}/\epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
-
-Each node in the tree represents an interval $[l, r]$ and stores one line.
-
-\textbf{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
-\[
-m = \frac{l+r}{2}
-\]
-is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
-
-The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define boolean comparison values:
-\begin{align*}
-L &= [f_\text{new}(l) < f_\text{stored}(l)] \\
-M &= [f_\text{new}(m) < f_\text{stored}(m)]
-\end{align*}
-where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
-\begin{equation*}
-\text{child} =
-\begin{cases}
-\text{left} & \text{if } L \neq M \\
-\text{right} & \text{if } L = M
-\end{cases}
-\end{equation*}
-This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
-
-Algorithm~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
-
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=1.0]
-% Draw axes
-\draw[->] (0,0) -- (10,0) node[right] {$x$};
+\draw[->] (0,0) -- (7,0) node[right] {$x$};
 \draw[->] (0,0) -- (0,5) node[above] {$y$};
-
-% Draw interval [l, r] on x-axis
-\draw[thick] (1,0.1) -- (1,-0.1) node[below] {$l$};
-\draw[thick] (9,0.1) -- (9,-0.1) node[below] {$r$};
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (9,-0.8) node[midway, below=8pt] {Node interval $[l, r]$};
-
-% Draw midpoint
-\draw[thick, dashed] (5,-0.1) -- (5,4.5) node[above] {$m$};
-\draw[thick] (5,0.1) -- (5,-0.1);
-
-% Draw two intersecting lines
-% Line A: y = -0.4x + 4 (stored at node - lower at midpoint, higher at left)
-\draw[thick, blue] (0.5,3.8) -- (9.5,0.2) node[right] {Line $A$ (stored)};
-% Line B: y = 0.4x + 1 (routed to left child - lower at left, higher at mid)
-\draw[thick, red, dashed] (0.5,1.2) -- (9.5,4.8) node[right] {Line $B$ (routed)};
-
-% Mark intersection point (at x = 3.75)
-\filldraw[black] (3.75,2.5) circle (2pt);
-\node[above] at (3.75,2.6) {\small intersection};
-
-% Mark values at midpoint (x = 5)
-\filldraw[blue] (5,2.0) circle (2pt);
-\filldraw[red] (5,3.0) circle (2pt);
-\draw[thick, <->] (5.3,2.0) -- (5.3,3.0);
-\node[right] at (5.4,2.5) {\small $A(m) < B(m)$};
-
-% Mark values at left endpoint (x = 1)
-\filldraw[blue] (1,3.6) circle (2pt);
-\filldraw[red] (1,1.4) circle (2pt);
-\node[left] at (0.9,1.4) {\small $B(l) < A(l)$};
+\draw (1,0.1) -- (1,-0.1) node[below] {$l$};
+\draw (6,0.1) -- (6,-0.1) node[below] {$r$};
+\draw (3.5,0.1) -- (3.5,-0.1) node[below] {$m$};
+\draw[thick, blue] (0.5,4.0) -- (6.5,0.5) node[right] {Line $A$};
+\draw[thick, red, dashed] (0.5,1.0) -- (6.5,4.5) node[right] {Line $B$};
+\filldraw[black] (2.28,2.95) circle (1.5pt) node[above] {intersection};
+\draw[dashed] (3.5,0) -- (3.5,4.5);
+\filldraw[blue] (3.5,2.25) circle (2pt);
+\filldraw[red] (3.5,2.75) circle (2pt);
+\draw[thick, <->] (3.8,2.25) -- (3.8,2.75);
+\node[right] at (3.9,2.5) {\small $A(m) < B(m)$};
+\filldraw[blue] (1,3.7) circle (2pt);
+\filldraw[red] (1,1.3) circle (2pt);
+\node[left] at (0.9,1.3) {\small $B(l) < A(l)$};
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}] (1,-0.8) -- (6,-0.8) node[midway, below=8pt] {Node interval $[l, r]$};
 \end{tikzpicture}
 \caption{Interval Advantage Line Diagram. The node stores Line $A$ because it achieves the lower value at the midpoint. Line $B$ is routed to the left child where it may be optimal.}
 \label{fig:interval-advantage}
 \end{figure}
 
-When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
+\paragraph{Insertion.} To insert a new line, we compare it with the line already stored at the current node. The line that is lower at the midpoint is kept at the node, and the "losing" line is routed to a child interval where it might potentially be optimal.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{LICT Line Insertion}
 \label{alg:insert}
 \begin{algorithmic}[1]
@@ -213,69 +99,91 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \end{algorithmic}
 \end{algorithm}
 
-Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x-8$ into a structure already containing $y=x$ and $y=2x$.
+We illustrate the insertion process with a concrete example. Consider the following lines:
+\begin{itemize}
+    \item $f_0(x) = x$
+    \item $f_1(x) = 2x - 4$
+    \item $f_2(x) = 0.5x + 2$
+    \item $f_{new}(x) = -x + 10$
+\end{itemize}
 
-Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $f_{new}(x) = 0.5x+5$ into a structure containing $y=x$ at $[0,8]$, $y=2x$ at $[0,4]$, and $f_{[4,8]}(x) = 2x-2$ at $[4,8]$.
+Figure~\ref{fig:insertion-example-before} shows the tree before inserting $f_{new}$. Figure~\ref{fig:insertion-example-after} shows the tree after insertion, demonstrating how $f_{new}$ displaces an existing line.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.8, every node/.style={font=\small}]
-% Tree structure
-% Root node [0, 8]
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
+\begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $f_0$};
 \node[below=0.1cm of root] {\scriptsize $m=4$};
-
-% Level 1 nodes
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $y=2x$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2.5,-1.8) {$[0, 4]$: $f_1$};
 \node[below=0.1cm of l1] {\scriptsize $m=2$};
-\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.5x+5$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (2.5,-1.8) {$[4, 8]$: $f_2$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
-
-% Level 2 nodes (increased horizontal spacing to prevent overlap)
-\node[draw, rectangle, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
-\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
-\node[draw, rectangle, fill=orange!20, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: 2x-2$};
-\node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
-
-% Edges
-\draw[->, thick] (root) -- (l1);
-\draw[->, thick, red] (root) -- (r1) node[midway, above right, red, font=\tiny] {route $f_{new}$};
-\draw[->] (l1) -- (l2ll);
-\draw[->] (l1) -- (l2lr);
-\draw[->, thick, dashed, orange] (r1) -- (l2rl) node[midway, left, orange, font=\tiny, xshift=-2pt] {displaced};
-\draw[->] (r1) -- (l2rr);
-
-\node[below=0.1cm of l2rl] {\scriptsize $m=5$};
-
-% Explanation callouts - properly spaced and moved right
-\begin{scope}[xshift=6.8cm]
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s1) at (0, 0.5) {
-\textbf{Step 1:} At $[0,8], m=4$:\\
-$f_{[0,8]}(4)=4$, $f_{new}(4)=7$.\\
-$f_{new}(4) > f_{[0,8]}(4)$.\\
-Route $f_{new}$ right.
-};
-
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s2) at (0, -1.8) {
-\textbf{Step 2:} At $[4,8], m=6$:\\
-$f_{[4,8]}(6)=10$, $f_{new}(6)=8$.\\
-$f_{new}(6) < f_{[4,8]}(6) \Rightarrow$ Swap!\\
-Store $f_{new}$; route $f_{[4,8]}$ left.
-};
-
-\node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s3) at (0, -4.1) {
-\textbf{Step 3:} At $[4,6]$, empty.\\
-Store displaced line $2x-2$.\\
-Recursion ends.
-};
-\end{scope}
-
+\node[draw, rectangle, minimum width=1.4cm] (l2l) at (-4.0,-3.6) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2r) at (-1.0,-3.6) {$[2, 4]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (r2l) at (1.0,-3.6) {$[4, 6]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (r2r) at (4.0,-3.6) {$[6, 8]: -$};
+\draw[->, thick] (root) -- (l1); \draw[->, thick] (root) -- (r1);
+\draw[->] (l1) -- (l2l); \draw[->] (l1) -- (l2r);
+\draw[->] (r1) -- (r2l); \draw[->] (r1) -- (r2r);
 \end{tikzpicture}
-\caption{Line Insertion Tree View. Inserting $f_{new}(x)=0.5x+5$. At $[4,8]$, $f_{new}$ wins at midpoint ($8<10$) but loses at left endpoint ($7>6$), so it swaps in and the displaced line is routed to $[4,6]$.}
-\label{fig:insertion-example}
+\caption{Tree structure before inserting $f_{new}(x) = -x + 10$. Currently stores $f_0(x)=x$ at root, $f_1(x)=2x-4$ at $[0,4]$, and $f_2(x)=0.5x+2$ at $[4,8]$.}
+\label{fig:insertion-example-before}
 \end{figure}
 
-Note that this is \emph{local} optimality only. Lines routed down other branches may achieve lower values at the midpoint, so the stored line is not necessarily globally optimal at that coordinate.
+\textbf{Why the lines are positioned there:}
+\begin{itemize}
+    \item $f_1$ at $[0,4]$: At root $[0,8]$ with $m=4$, $f_0(4)=4$ and $f_1(4)=4$ (equal). Since $f_1(0)=-4 < f_0(0)=0$, $f_1$ is routed to the left child $[0,4]$ where it gets stored.
+    \item $f_2$ at $[4,8]$: Similarly, $f_2(4)=4$ equals $f_0(4)$, and since $f_2(8)=6 > f_0(8)=8$... wait, that's wrong. Let me reconsider.
+\end{itemize}
+
+Actually, let me trace more carefully. For $f_2(x)=0.5x+2$:
+- At root $[0,8]$, $m=4$: $f_0(4)=4$, $f_2(4)=4$ (equal)
+- At left endpoint $x=0$: $f_0(0)=0$, $f_2(0)=2$, so $f_0(0) < f_2(0)$
+- At right endpoint $x=8$: $f_0(8)=8$, $f_2(8)=6$, so $f_2(8) < f_0(8)$
+
+Since $f_0$ is lower at $m=4$ and $f_2$ is lower at $x=8$ (right side), $f_0$ stays at root and $f_2$ is routed to the right child $[4,8]$.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $f_0$};
+\node[below=0.1cm of root] {\scriptsize $m=4$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2.5,-1.8) {$[0, 4]$: $f_1$};
+\node[below=0.1cm of l1] {\scriptsize $m=2$};
+\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r1) at (2.5,-1.8) {$[4, 8]$: $f_{new}$};
+\node[below=0.1cm of r1] {\scriptsize $m=6$};
+\node[draw, rectangle, minimum width=1.4cm] (l2l) at (-4.0,-3.6) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2r) at (-1.0,-3.6) {$[2, 4]: -$};
+\node[draw, rectangle, fill=orange!20, minimum width=1.4cm] (r2l) at (1.0,-3.6) {$[4, 6]: f_2$};
+\node[draw, rectangle, minimum width=1.4cm] (r2r) at (4.0,-3.6) {$[6, 8]: -$};
+\draw[->, thick] (root) -- (l1);
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, font=\tiny] {route $f_{new}$};
+\draw[->] (l1) -- (l2l); \draw[->] (l1) -- (l2r);
+\draw[->, thick, dashed, orange] (r1) -- (r2l) node[midway, left, font=\tiny] {displaced};
+\draw[->] (r1) -- (r2r);
+
+\begin{scope}[xshift=6.0cm]
+\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, font=\scriptsize] at (0, 0.3) {
+\textbf{Step 1:} At $[0,8], m=4$:\\
+$f_0(4)=4, f_{new}(4)=6$.\\
+$f_0$ lower $\Rightarrow$ stays.\\
+Route $f_{new}$ right.
+};
+\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, font=\scriptsize] at (0, -1.5) {
+\textbf{Step 2:} At $[4,8], m=6$:\\
+$f_2(6)=5, f_{new}(6)=4$.\\
+$f_{new}$ lower $\Rightarrow$ \textbf{Swap!}\\
+Store $f_{new}$; route $f_2$ left.
+};
+\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, font=\scriptsize] at (0, -3.3) {
+\textbf{Step 3:} At $[4,6]$, empty.\\
+Store displaced $f_2$.
+};
+\end{scope}
+\end{tikzpicture}
+\caption{Tree structure after inserting $f_{new}(x) = -x + 10$. At $[4,8]$, $f_{new}(6)=4 < f_2(6)=5$, so $f_{new}$ swaps in and $f_2$ is displaced to $[4,6]$.}
+\label{fig:insertion-example-after}
+\end{figure}
 
 \paragraph{Query.} We traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
 
@@ -301,266 +209,15 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \end{algorithmic}
 \end{algorithm}
 
-Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to-leaf path.
+\subsection{Complexity Analysis}
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[scale=0.8, every node/.style={font=\small}]
-% Tree structure
-% Root node [0, 8]
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $y=x$};
-\node[below=0.1cm of root] {\scriptsize $m=4$};
+\textbf{Time Complexity:} Both insertion and query operations traverse a single root-to-leaf path of length $O(\log C)$, performing $O(1)$ work per node. Total time is $O(\log C)$.
 
-% Level 1 nodes
-\node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $y=2x$};
-\node[below=0.1cm of l1] {\scriptsize $m=2$};
-\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.5x+5$};
-\node[below=0.1cm of r1] {\scriptsize $m=6$};
+\textbf{Space Complexity:} Each insertion creates at most one new node per level. With $n$ insertions, total space is $O(n \log C)$.
 
-% Level 2 nodes (consistent horizontal spacing)
-\node[draw, rectangle, fill=yellow!20, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
-\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
-\node[draw, rectangle, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: 2x-2$};
-\node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
+\textbf{Deletion:} The standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored, which requires $\Omega(n)$ time in the worst case.
 
-% Query path highlighted
-\draw[->, very thick, blue] (root) -- (l1) node[midway, left, font=\tiny, xshift=-2pt] {$x=1 \le 4$};
-\draw[->, very thick, blue] (l1) -- (l2ll) node[midway, left, font=\tiny, xshift=-2pt] {$x=1 \le 2$};
-
-% Result box
-\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize] at (4.8, -1.8) {
-\textbf{Query Result for $x=1$:}\\
-1. Eval root $y=x \to 1$\\
-2. Eval child $y=2x \to 2$\\
-3. Eval leaf $\to \infty$\\
-\textbf{Minimum:} $1$
-};
-
-\node[below=0.2cm of l2ll, red, font=\scriptsize\bfseries] {Target $x=1$};
-
-\end{tikzpicture}
-\caption{Query Tree View. To query at $x=1$, we follow the path to the leaf containing 1. At each node along the path, we evaluate the stored line and take the minimum of all results.}
-\label{fig:query-example}
-\end{figure}
-
-\subsection{Theoretical Analysis}
-
-We now present a formal analysis of the LICT's correctness and complexity.
-
-\begin{definition}[Coordinate Universe]
-The LICT operates on a discrete domain where
-\[
-C = \frac{\text{coordinate range}}{\text{precision level}}.
-\]
-The tree depth is $h = \lceil \log_2 C \rceil$.
-\end{definition}
-
-\subsubsection{Correctness}
-
-% TODO: create lean formatted code to rewrite the statement here
-
-% Note for Chao: review this carefully
-
-We first establish the geometric intuition underlying the LICT's correctness. The key insight is that two distinct lines intersect at most once. This fundamental property of linear functions ensures that if a line yields a higher value at a midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both.
-
-\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint $m$:
-\begin{itemize}
-\item If $A$ achieves a lower value than $B$ at $m$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $m$ containing that endpoint (since two lines intersect at most once).
-\item Therefore, $B$ is routed to exactly one child, the side where it might achieve a lower value.
-\end{itemize}
-
-This property guarantees that the suboptimal line need only be propagated down a single child path.
-
-\begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
-For any node $v$ with interval $[l, r]$ and midpoint
-\[
-m = \left\lfloor\frac{l+r}{2}\right\rfloor,
-\]
-the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
-\end{lemma}
-
-\begin{proof}
-We proceed by induction on the sequence of insertions.
-
-\textbf{Base case:} When the first line is inserted, it is stored at the root and all descendants are null. The invariant holds trivially.
-
-\textbf{Inductive step:} Assume the invariant holds before inserting a new line $L_{\text{new}}$. Consider the insertion path from root to leaf. At each node $v$ along this path:
-\begin{enumerate}
-\item Let $L_{\text{stored}}$ be the line currently at $v$.
-\item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$, we keep $L_{\text{stored}}$ and route $L_{\text{new}}$ to a child. The invariant at $v$ remains satisfied.
-\item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$, we swap the lines, storing $L_{\text{new}}$ and routing $L_{\text{stored}}$ to a child. The invariant at $v$ is now satisfied by $L_{\text{new}}$.
-\end{enumerate}
-The routed line proceeds to exactly one child (determined by the intersection point location), so the inductive hypothesis applies to subtrees. By induction, the invariant holds after all insertions.
-\end{proof}
-
-\begin{lemma}[Query Correctness]\label{lem:query-correct}
-For any query point $x_0 \in X$, the value returned by the query operation equals $\min_{i} \{k_i x_0 + b_i\}$ over all lines in the structure.
-\end{lemma}
-
-\begin{proof}
-Consider any line $L$ in the structure and the query point $x_0$. Let $P$ be the unique root-to-leaf path whose intervals all contain $x_0$. Line $L$ follows exactly one root-to-leaf path $P_L$ during insertion.
-
-We claim $L$ is evaluated at $x_0$ if and only if $x_0$ lies in the interval where $L$ is optimal among lines routed through some node on $P_L$. There are two cases:
-\begin{enumerate}
-\item If $P_L = P$, then $L$ is stored at some node on $P$ (specifically, at the deepest node where it achieved minimum at the midpoint), and is evaluated during the query.
-\item If $P_L \neq P$, let $v$ be the deepest node common to both paths. Since $x_0$ is not in the child interval that $L$ was routed to, $x_0$ lies on the opposite side of the midpoint from where $L$ could potentially be better than the stored line. By the single-intersection property of lines, $L$ cannot be optimal at $x_0$.
-\end{enumerate}
-Thus, exactly those lines that could be optimal at $x_0$ are evaluated, and the minimum over evaluated lines equals the global minimum.
-\end{proof}
-
-\subsubsection{Complexity Analysis}
-
-\begin{lemma}[Time Complexity]\label{lem:time-complexity}
-Both insertion and query operations require $O(\log C)$ time.
-\end{lemma}
-
-\begin{proof}
-The LICT is a binary tree of depth
-\[
-h = \lceil \log_2 C \rceil = O(\log C).
-\]
-
-For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$); (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
-
-For query: The traversal follows one root-to-leaf path with $O(1)$ work per node (line evaluation and comparison). Total time is $O(\log C)$.
-\end{proof}
-
-\begin{lemma}[Space Complexity]\label{lem:space-complexity}
-The LICT stores at most $O(n \log C)$ nodes in the worst case, where $n$ is the number of inserted lines.
-\end{lemma}
-
-\begin{proof}
-Each line insertion creates at most one new node per level along its insertion path (when reaching a null child). The path length is
-\[
-O(\log C).
-\]
-With $n$ insertions, the total number of nodes is at most $O(n \log C)$.
-\end{proof}
-
-\textbf{Deletion.} The standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
-
-The LICT's complexity depends on the coordinate range rather than the number of lines. This provides consistent performance regardless of hull size, though it cannot exploit cases where the hull remains small relative to the number of insertions.
-
-\section{Benchmarks}\label{sec:benchmarks}
-
-Reference implementations and benchmarks are available at \url{https://github.com/chnlich/lichao-tree}.
-
-To validate the theoretical complexity analysis and characterize practical performance differences between the LICT and Dynamic CHT, we conducted systematic empirical evaluation across varying problem scales and input distributions.
-
-\subsection{Experimental Setup}
-
-All benchmarks were conducted with the following configuration.
-
-\textbf{Hardware Specifications:}
-\begin{itemize}
-\item \textbf{CPU:} AMD Ryzen 9 3950X 16-Core Processor @ 3.50GHz (Zen 2 microarchitecture)
-\item \textbf{Core Configuration:} 16 cores, 32 threads (SMT enabled)
-\item \textbf{L1 Cache:} 512 KiB L1 data cache, 512 KiB L1 instruction cache
-\item \textbf{L2 Cache:} 8 MiB
-\item \textbf{L3 Cache:} 16 MiB (shared)
-\item \textbf{Memory:} 64 GB DRAM
-\item \textbf{Platform:} Linux x86\_64 (WSL2 virtualized)
-\end{itemize}
-
-\textbf{Software Configuration:}
-\begin{itemize}
-\item \textbf{Compiler:} g++ 11.4.0
-\item \textbf{Optimization Flags:} \texttt{-O3 -std=c++17 -Wall -Wextra}
-\item \textbf{Operating System:} Ubuntu 22.04.5 LTS (WSL2, kernel 6.6.87)
-\end{itemize}
-
-\textbf{Experimental Parameters:}
-\begin{itemize}
-\item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
-\item \textbf{Coordinate range:}
-\[
-C = 10^9
-\]
-(assuming integer precision $\epsilon = 1$), with $x, k, m \in [-10^9, 10^9]$
-\item \textbf{Random seed:} 42
-\item \textbf{Measurement protocol:} Each test was run 10 times; reported times are the average. Variance was low ($<5\%$ coefficient of variation across runs). Benchmarks were run on an isolated system with no other user processes to minimize timing noise.
-\item \textbf{Distributions:} We write
-\[
-X \sim U(a, b)
-\]
-to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
-\begin{itemize}
-\item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size:
-\[
-\Theta(\sqrt{n}).
-\]
-\item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
-\end{itemize}
-\end{itemize}
-
-\subsection{Results}
-
-Table~\ref{tab:results} presents the performance comparison.
-
-\begin{table}[h]
-\centering
-\caption{Performance Comparison (Time in milliseconds)}
-\label{tab:results}
-\begin{tabular}{@{}cccc@{}}
-\toprule
-\textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} \\
-\midrule
-$10^5$ & Random & 5.0 ms & 3.0 ms \\
-$10^5$ & All on Hull & 16.9 ms & 16.0 ms \\
-\midrule
-$10^6$ & Random & 52.9 ms & 31.3 ms \\
-$10^6$ & All on Hull & 693.3 ms & 882.2 ms \\
-\midrule
-$10^7$ & Random & 548.8 ms & 326.9 ms \\
-$10^7$ & All on Hull & 14702.5 ms & 16249.0 ms \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Parameter-Matched Comparison: The $N = C$ Regime}
-
-The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$. This configuration mirrors dynamic programming optimizations common in competitive programming, where the state recurrence takes the form:
-\[
-dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
-\]
-Here, $\text{cost}(j, i)$ represents a linear function of $i$. Since the queries (indices $i$) are within a fixed range $[0, N]$, the coordinate universe size $C$ effectively equals $N$.
-
-In this static universe setting, an iterative segment tree implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
-
-\begin{itemize}
-\item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
-\item \textbf{Lines:} $k, b \sim U(-C/2, C/2)$
-\item \textbf{Query points:} $x \sim U(-C/2, C/2)$
-\item \textbf{Operation mix:} $N/2$ insertions followed by $N/2$ queries
-\end{itemize}
-
-
-\begin{table}[h]
-\centering
-\caption{Performance in $N = C$ Regime (Time in milliseconds)}
-\label{tab:nc-regime}
-\begin{tabular}{@{}cccccc@{}}
-\toprule
-\textbf{N = C} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
-\midrule
-$10^5$ & Random & Standard LICT & 3.1 & 1.9 & 5.0 \\
- & & ZKW LICT & 1.8 & 0.9 & 2.7 \\
- & & Dynamic CHT & 1.8 & 1.2 & 3.0 \\
-\midrule
-$10^6$ & Random & Standard LICT & 31.5 & 21.4 & 52.9 \\
- & & ZKW LICT & 18.2 & 11.2 & 29.4 \\
- & & Dynamic CHT & 19.4 & 11.9 & 31.3 \\
-\midrule
-$10^7$ & Random & Standard LICT & 320.1 & 228.7 & 548.8 \\
- & & ZKW LICT & 192.3 & 124.5 & 316.8 \\
- & & Dynamic CHT & 199.1 & 127.8 & 326.9 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{thebibliography}{9}
-\bibitem{overmars1981}
-M. H. Overmars and J. van Leeuwen. Maintenance of configurations in the plane. \emph{Journal of Computer and System Sciences}, 23(2):166--204, 1981.
-\end{thebibliography}
+\section{Conclusion}
+The Li-Chao tree provides a robust and efficient alternative for dynamic line envelope maintenance. Its numerical stability and ease of implementation make it a preferred choice in many practical scenarios, especially under the time constraints of algorithmic competitions.
 
 \end{document}
