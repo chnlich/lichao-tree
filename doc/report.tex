@@ -215,7 +215,7 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 
 Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x-8$ into a structure already containing $y=x$ and $y=2x$.
 
-Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.5x+5$ into a structure already containing $y=x$, $y=2x$, and $y=0.6x+2$.
+Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $f_{new}(x) = 0.5x+5$ into a structure containing $y=x$ at $[0,8]$, $y=2x$ at $[0,4]$, and $f_{[4,8]}(x) = 2x-2$ at $[4,8]$.
 
 \begin{figure}[H]
 \centering
@@ -228,21 +228,21 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.
 % Level 1 nodes
 \node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\scriptsize $m=2$};
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.6x+2$};
+\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.5x+5$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
 
 % Level 2 nodes (increased horizontal spacing to prevent overlap)
 \node[draw, rectangle, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
 \node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
-\node[draw, rectangle, fill=red!10, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: L_{new}$};
+\node[draw, rectangle, fill=orange!20, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: 2x-2$};
 \node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
 % Edges
 \draw[->, thick] (root) -- (l1);
-\draw[->, thick, red] (root) -- (r1) node[midway, above right, red, font=\tiny] {route};
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, red, font=\tiny] {route $f_{new}$};
 \draw[->] (l1) -- (l2ll);
 \draw[->] (l1) -- (l2lr);
-\draw[->, thick, red] (r1) -- (l2rl) node[midway, left, red, font=\tiny, xshift=-2pt] {route};
+\draw[->, thick, dashed, orange] (r1) -- (l2rl) node[midway, left, orange, font=\tiny, xshift=-2pt] {displaced};
 \draw[->] (r1) -- (l2rr);
 
 \node[below=0.1cm of l2rl] {\scriptsize $m=5$};
@@ -251,27 +251,27 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=0.
 \begin{scope}[xshift=6.8cm]
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s1) at (0, 0.5) {
 \textbf{Step 1:} At $[0,8], m=4$:\\
-$L_{st}(4)=4, L_{new}(4)=7$\\
-$y=x$ lower $\Rightarrow$ stays.\\
-Route $L_{new}$ right.
+$f_{[0,8]}(4)=4$, $f_{new}(4)=7$.\\
+$f_{new}(4) > f_{[0,8]}(4)$.\\
+Route $f_{new}$ right.
 };
 
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s2) at (0, -1.8) {
 \textbf{Step 2:} At $[4,8], m=6$:\\
-$L_{st}(6)=5.6, L_{new}(6)=8$\\
-$y=0.6x+2$ lower $\Rightarrow$ stays.\\
-Route $L_{new}$ left to $[4,6]$.
+$f_{[4,8]}(6)=10$, $f_{new}(6)=8$.\\
+$f_{new}(6) < f_{[4,8]}(6) \Rightarrow$ Swap!\\
+Store $f_{new}$; route $f_{[4,8]}$ left.
 };
 
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west, fill=white, fill opacity=0.95, font=\scriptsize] (s3) at (0, -4.1) {
-\textbf{Step 3:} At $[4,6]$, node empty.\\
-Store $L_{new}: y=0.5x+5$ here.\\
+\textbf{Step 3:} At $[4,6]$, empty.\\
+Store displaced line $2x-2$.\\
 Recursion ends.
 };
 \end{scope}
 
 \end{tikzpicture}
-\caption{Line Insertion Tree View. Inserting line $y=0.5x+5$. This example shows how a line is routed through multiple occupied nodes ($[0,8] \to [4,8] \to [4,6]$) based on midpoint comparisons until it finds an empty node.}
+\caption{Line Insertion Tree View. Inserting $f_{new}(x)=0.5x+5$. At $[4,8]$, $f_{new}$ wins at midpoint ($8<10$) but loses at left endpoint ($7>6$), so it swaps in and the displaced line is routed to $[4,6]$.}
 \label{fig:insertion-example}
 \end{figure}
 
@@ -314,13 +314,13 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 % Level 1 nodes
 \node[draw, rectangle, fill=green!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\scriptsize $m=2$};
-\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.6x+2$};
+\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $y=0.5x+5$};
 \node[below=0.1cm of r1] {\scriptsize $m=6$};
 
 % Level 2 nodes (consistent horizontal spacing)
 \node[draw, rectangle, fill=yellow!20, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
 \node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.2,-4.5) {$[2, 4]: -$};
-\node[draw, rectangle, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: y=0.5x+5$};
+\node[draw, rectangle, minimum width=1.4cm] (l2rl) at (1.2,-4.5) {$[4, 6]: 2x-2$};
 \node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
 % Query path highlighted
