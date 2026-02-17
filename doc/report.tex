@@ -351,11 +351,19 @@ Figure~\ref{fig:query-example} shows a query at $x=5$ following a single root-to
 \node[draw, rectangle, fill=green!20, minimum width=1.4cm] (l2rl) at (1.6,-4.5) {$[4, 6]: f_2$};
 \node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
 
-% Query path (x=5)
+% All edges (normal lines)
+\draw[->] (root) -- (l1);
+\draw[->] (root) -- (r1);
+\draw[->] (l1) -- (l2ll);
+\draw[->] (l1) -- (l2lr);
+\draw[->] (r1) -- (l2rl);
+\draw[->] (r1) -- (l2rr);
+
+% Query path (bold blue lines on top)
 \draw[->, very thick, blue] (root) -- (r1) node[midway, right, font=\tiny] {$5 > 4$};
 \draw[->, very thick, blue] (r1) -- (l2rl) node[midway, left, font=\tiny] {$5 \le 6$};
 
-% Result box - moved to avoid overlap
+% Result box
 \node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize, anchor=west] at (6.2, -1.8) {
 \textbf{Query Result for $x=5$:}\\
 1. Eval $f_0(5) = 5$\\
