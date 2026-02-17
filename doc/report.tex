@@ -213,7 +213,7 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \end{algorithmic}
 \end{algorithm}
 
-Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=10$ into a structure already containing $y=x$ and $y=2x$.
+Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x-8$ into a structure already containing $y=x$ and $y=2x$.
 
 \begin{figure}[h]
 \centering
@@ -231,33 +231,33 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=10
 % Level 2 nodes
 \node[draw, rectangle, minimum width=2.5cm] (l2l) at (-3.8,-4) {$[0, 2]$: $-$};
 \node[draw, rectangle, minimum width=2.5cm] (l2r) at (-1.2,-4) {$[2, 4]$: $-$};
-\node[draw, rectangle, fill=red!10, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $y=10$};
+\node[draw, rectangle, fill=red!10, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $y=3x-8$};
 \node[below=0.1cm of r2l] {\small $m=5$};
 \node[draw, rectangle, minimum width=2.5cm] (r2r) at (3.8,-4) {$[6, 8]$: $-$};
 
 % Edges with labels
 \draw[->, thick] (root) -- (l1);
-\draw[->, thick, red] (root) -- (r1) node[midway, above right, red] {route $y=10$};
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, red] {route new line};
 \draw[->] (l1) -- (l2l);
 \draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, above left, red] {store here};
+\draw[->, thick, red] (r1) -- (r2l) node[midway, above left, red] {swap \& route};
 \draw[->] (r1) -- (r2r);
 
 % Explanation callouts
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -1) {
-\textbf{Step 1:} Compare $y=10$ at $m=4$.\\
-$y=x$ is lower ($4 < 10$), so it stays.\\
-$y=10$ is routed to right child.
+\textbf{Step 1:} At $[0,8]$, $m=4$: $y=x$ gives 4,\\
+$y=3x-8$ gives 4. Equal at midpoint, so $y=x$ stays.\\
+New line routed to right child (left endpoint higher).
 };
 
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -3) {
-\textbf{Step 2:} Interval $[4, 8]$ midpoint $m=6$.\\
-$y=x$ is lower ($6 < 10$), so it stays.\\
-$y=10$ is routed to interval $[4, 6]$.
+\textbf{Step 2:} At $[4,8]$, $m=6$: $y=x$ gives 6,\\
+$y=3x-8$ gives 10. New line wins at $[4,6]$,\\
+so swap: store $y=3x-8$, route $y=x$ to $[6,8]$.
 };
 
 \end{tikzpicture}
-\caption{Line Insertion Tree View. Inserting line $y=10$. At each node, the line with the lower value at the midpoint is stored, while the other is routed to a child. Red arrows highlight the insertion path.}
+\caption{Line Insertion Tree View. Inserting line $y=3x-8$ (slope 3) into a tree with $y=x$ and $y=2x$. At each node, the line with the lower value at the midpoint is stored, while the other is routed to a child. Red arrows highlight the insertion path.}
 \label{fig:insertion-example}
 \end{figure}
 
@@ -305,7 +305,7 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 % Level 2 nodes
 \node[draw, rectangle, fill=yellow!20, minimum width=2.5cm] (l2l) at (-3.8,-4) {$[0, 2]$: $-$};
 \node[draw, rectangle, minimum width=2.5cm] (l2r) at (-1.2,-4) {$[2, 4]$: $-$};
-\node[draw, rectangle, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $y=10$};
+\node[draw, rectangle, minimum width=2.5cm] (r2l) at (1.2,-4) {$[4, 6]$: $y=3x-8$};
 \node[draw, rectangle, minimum width=2.5cm] (r2r) at (3.8,-4) {$[6, 8]$: $-$};
 
 % Query path highlighted
