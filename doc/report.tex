@@ -226,7 +226,7 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x
 % Level 1 nodes
 \node[draw, rectangle, fill=blue!10, minimum width=2.5cm] (l1) at (-2.5,-2) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $y=x$};
+\node[draw, rectangle, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $-$};
 
 % Level 2 nodes
 \node[draw, rectangle, minimum width=2.5cm] (l2l) at (-3.8,-4) {$[0, 2]$: $-$};
@@ -240,7 +240,7 @@ Figure~\ref{fig:insertion-example} illustrates the insertion of a new line $y=3x
 \draw[->, thick, red] (root) -- (r1) node[midway, above right, red] {route new line};
 \draw[->] (l1) -- (l2l);
 \draw[->] (l1) -- (l2r);
-\draw[->, thick, red] (r1) -- (r2l) node[midway, above left, red] {swap \& route};
+\draw[->, thick, red] (r1) -- (r2l) node[midway, above left, red] {store here};
 \draw[->] (r1) -- (r2r);
 
 % Explanation callouts
@@ -251,9 +251,9 @@ New line routed to right child (left endpoint higher).
 };
 
 \node[draw, dashed, rounded corners, inner sep=5pt, align=left, anchor=west] at (4.5, -3) {
-\textbf{Step 2:} At $[4,8]$, $m=6$: $y=x$ gives 6,\\
-$y=3x-8$ gives 10. New line wins at $[4,6]$,\\
-so swap: store $y=3x-8$, route $y=x$ to $[6,8]$.
+\textbf{Step 2:} At $[4,8]$, node is empty.\\
+Store $y=3x-8$ here? No, check $[4,6]$.\\
+(New line wins on $[4,6]$, so route down).
 };
 
 \end{tikzpicture}
@@ -300,7 +300,7 @@ Figure~\ref{fig:query-example} shows a query at $x=1$ following a single root-to
 % Level 1 nodes
 \node[draw, rectangle, fill=green!10, minimum width=2.5cm] (l1) at (-2.5,-2) {$[0, 4]$: $y=2x$};
 \node[below=0.1cm of l1] {\small $m=2$};
-\node[draw, rectangle, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $y=x$};
+\node[draw, rectangle, minimum width=2.5cm] (r1) at (2.5,-2) {$[4, 8]$: $-$};
 
 % Level 2 nodes
 \node[draw, rectangle, fill=yellow!20, minimum width=2.5cm] (l2l) at (-3.8,-4) {$[0, 2]$: $-$};
