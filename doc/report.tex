@@ -409,7 +409,7 @@ to denote that random variable $X$ is drawn from a continuous uniform distributi
 \[
 \Theta(\sqrt{n}).
 \]
-\item \textbf{All on Hull:} Lines $y = i \cdot x - i^2$ for $i \in [1, n]$. All $n$ lines contribute to the hull.
+\item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, n-1]$. All $n$ lines contribute to the hull.
 \end{itemize}
 \end{itemize}
 
@@ -450,7 +450,7 @@ In this static universe setting, an iterative segment tree implementation (often
 \begin{itemize}
 \item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
 \item \textbf{Lines:} $k, b \sim U(-C/2, C/2)$
-\item \textbf{Query points:} $x \sim U(-C/2, C/2)$
+\item \textbf{Query points:} $x \sim U(-C/2, C/2)$ (Random), $x \sim U(0, N)$ (All on Hull)
 \item \textbf{Operation mix:} $N/2$ insertions followed by $N/2$ queries
 \end{itemize}
 
