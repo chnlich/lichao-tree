@@ -9,11 +9,11 @@
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{natbib}
+\usepackage[numbers]{natbib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{tikz}
-\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{decorations.pathreplacing,positioning}
 \usepackage{amsthm}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.5\baselineskip}
@@ -141,8 +141,6 @@ We first consider the simplest and most common setting: all queried $x$-coordina
 
 \textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
 
-% TODO: Insert two pictures, one demonstrates how a new line is inserted, another one demonstrates what to do when a query comes. The example can be shown in integer queries cases
-
 Each node in the tree represents an interval $[l, r]$ and stores one line. 
 
 \paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
@@ -195,6 +193,69 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \EndIf
 \end{algorithmic}
 \end{algorithm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $f_0$};
+\node[below=0.1cm of root] {\scriptsize $m=4$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2.5,-1.8) {$[0, 4]$: $f_1$};
+\node[below=0.1cm of l1] {\scriptsize $m=2$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (2.5,-1.8) {$[4, 8]$: $f_2$};
+\node[below=0.1cm of r1] {\scriptsize $m=6$};
+\node[draw, rectangle, minimum width=1.4cm] (l2l) at (-4.0,-3.6) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2r) at (-1.0,-3.6) {$[2, 4]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (r2l) at (1.0,-3.6) {$[4, 6]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (r2r) at (4.0,-3.6) {$[6, 8]: -$};
+\draw[->, thick] (root) -- (l1); \draw[->, thick] (root) -- (r1);
+\draw[->] (l1) -- (l2l); \draw[->] (l1) -- (l2r);
+\draw[->] (r1) -- (r2l); \draw[->] (r1) -- (r2r);
+\end{tikzpicture}
+\caption{Tree structure before inserting $f_{new}(x) = -x + 10$. Currently stores $f_0(x)=x$ at root, $f_1(x)=2x-4$ at $[0,4]$, and $f_2(x)=0.5x+2$ at $[4,8]$.}
+\label{fig:insertion-example-before}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.9, every node/.style={font=\small}]
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $f_0$};
+\node[below=0.1cm of root] {\scriptsize $m=4$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-2.5,-1.8) {$[0, 4]$: $f_1$};
+\node[below=0.1cm of l1] {\scriptsize $m=2$};
+\node[draw, rectangle, fill=red!10, minimum width=2.2cm] (r1) at (2.5,-1.8) {$[4, 8]$: $f_{new}$};
+\node[below=0.1cm of r1] {\scriptsize $m=6$};
+\node[draw, rectangle, minimum width=1.4cm] (l2l) at (-4.0,-3.6) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2r) at (-1.0,-3.6) {$[2, 4]: -$};
+\node[draw, rectangle, fill=orange!20, minimum width=1.4cm] (r2l) at (1.0,-3.6) {$[4, 6]: f_2$};
+\node[draw, rectangle, minimum width=1.4cm] (r2r) at (4.0,-3.6) {$[6, 8]: -$};
+\draw[->, thick] (root) -- (l1);
+\draw[->, thick, red] (root) -- (r1) node[midway, above right, font=\tiny] {route $f_{new}$};
+\draw[->] (l1) -- (l2l); \draw[->] (l1) -- (l2r);
+\draw[->, thick, dashed, orange] (r1) -- (r2l) node[midway, left, font=\tiny] {displaced};
+\draw[->] (r1) -- (r2r);
+
+\begin{scope}[xshift=6.0cm]
+\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, font=\scriptsize] at (0, 0.3) {
+\textbf{Step 1:} At $[0,8], m=4$:\\
+$f_0(4)=4, f_{new}(4)=6$.\\
+$f_0$ lower $\Rightarrow$ stays.\\
+Route $f_{new}$ right.
+};
+\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, font=\scriptsize] at (0, -1.5) {
+\textbf{Step 2:} At $[4,8], m=6$:\\
+$f_2(6)=5, f_{new}(6)=4$.\\
+$f_{new}$ lower $\Rightarrow$ \textbf{Swap!}\\
+Store $f_{new}$; route $f_2$ left.
+};
+\node[draw, dashed, rounded corners, inner sep=4pt, align=left, anchor=west, fill=white, font=\scriptsize] at (0, -3.3) {
+\textbf{Step 3:} At $[4,6]$, empty.\\
+Store displaced $f_2$.
+};
+\end{scope}
+\end{tikzpicture}
+\caption{Tree structure after inserting $f_{new}(x) = -x + 10$. At $[4,8]$, $f_{new}(6)=4 < f_2(6)=5$, so $f_{new}$ swaps in and $f_2$ is displaced to $[4,6]$.}
+\label{fig:insertion-example-after}
+\end{figure}
 
 \begin{figure}[h]
 \centering
@@ -263,6 +324,47 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \end{algorithmic}
 \end{algorithm}
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.8, every node/.style={font=\small}]
+% Tree structure
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (root) at (0,0) {$[0, 8]$: $f_0$};
+\node[below=0.1cm of root] {\scriptsize $m=4$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (l1) at (-3.2,-2.0) {$[0, 4]$: $f_1$};
+\node[below=0.1cm of l1] {\scriptsize $m=2$};
+\node[draw, rectangle, fill=blue!10, minimum width=2.2cm] (r1) at (3.2,-2.0) {$[4, 8]$: $f_{new}$};
+\node[below=0.1cm of r1] {\scriptsize $m=6$};
+\node[draw, rectangle, minimum width=1.4cm] (l2ll) at (-5.2,-4.5) {$[0, 2]: -$};
+\node[draw, rectangle, minimum width=1.4cm] (l2lr) at (-1.6,-4.5) {$[2, 4]: -$};
+\node[draw, rectangle, fill=green!20, minimum width=1.4cm] (l2rl) at (1.6,-4.5) {$[4, 6]: f_2$};
+\node[draw, rectangle, minimum width=1.4cm] (l2rr) at (5.2,-4.5) {$[6, 8]: -$};
+
+% All edges (normal lines)
+\draw[->] (root) -- (l1);
+\draw[->] (root) -- (r1);
+\draw[->] (l1) -- (l2ll);
+\draw[->] (l1) -- (l2lr);
+\draw[->] (r1) -- (l2rl);
+\draw[->] (r1) -- (l2rr);
+
+% Query path (bold blue lines on top)
+\draw[->, very thick, blue] (root) -- (r1) node[midway, right, font=\tiny] {$5 > 4$};
+\draw[->, very thick, blue] (r1) -- (l2rl) node[midway, left, font=\tiny] {$5 \le 6$};
+
+% Result box
+\node[draw, thick, fill=white, rounded corners, align=left, font=\scriptsize, anchor=west] at (6.2, -1.8) {
+\textbf{Query Result for $x=5$:}\\
+1. Eval $f_0(5) = 5$\\
+2. Eval $f_{new}(5) = 5$\\
+3. Eval $f_2(5) = 4.5$\\
+\textbf{Minimum:} $4.5$
+};
+\node[below=0.2cm of l2rl, red, font=\scriptsize\bfseries] {Target $x=5$};
+\end{tikzpicture}
+\caption{Query Tree View. To query at $x=5$, we follow the path $[0,8] \to [4,8] \to [4,6]$. We evaluate each stored line along the path ($f_0$, $f_{new}$, and $f_2$) and return the minimum.}
+\label{fig:query-example}
+\end{figure}
+
 \subsection{Theoretical Analysis}
 
 We now present a formal analysis of the LICT's correctness and complexity.
@@ -289,7 +391,7 @@ def Line.eval (f : Line) (x : Int) : Int := f.k * x + f.b
 -- The core geometric property: Two lines intersect at most once.
 theorem li_chao_condition (f g : Line) (l m r : Int) 
     (hlm : l < m) (hmr : m < r) :
-  g.eval l < f.eval l → g.eval r < f.eval r → g.eval m < f.eval m := by
+  g.eval l < f.eval l -> g.eval r < f.eval r -> g.eval m < f.eval m := by
   intro hl hr
   -- Proof omitted for brevity
   sorry
@@ -310,7 +412,7 @@ def query (t : Tree) (x : Int) : Int :=
 -- Correctness Theorem
 -- The query returns the minimum value among all inserted lines at x
 theorem query_correct (lines : List Line) (x : Int) (l r : Nat) 
-    (h_in : l <= x ∧ x <= r) :
+    (h_in : l <= x /\ x <= r) :
   let t_final := lines.foldl insert (build ... l r)
   query t_final x = min (query t_init x) (brute_force_min lines x)
 \end{lstlisting}
