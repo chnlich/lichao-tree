@@ -1,0 +1,31 @@
+{"synthetic": false,
+ "schemaVersion": "2025-09-10",
+ "outputs":
+ {"o": ["e9e7f3798cc9d275.olean"],
+  "i": "e5c786e7a5fec424.ilean",
+  "c": "5f9ff559c6951c4b.c"},
+ "log":
+ [{"message":
+   ".> LEAN_PATH=/home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/.lake/build/lib/lean /home/chnlich/.elan/toolchains/leanprover--lean4---v4.28.0/bin/lean /home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/LiChao.lean -o /home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/.lake/build/lib/lean/LiChao.olean -i /home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/.lake/build/lib/lean/LiChao.ilean -c /home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/.lake/build/ir/LiChao.c --setup /home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/.lake/build/ir/LiChao.setup.json --json",
+   "level": "trace"},
+  {"message": "LiChao.lean:14:8: declaration uses `sorry`", "level": "warning"},
+  {"message": "LiChao.lean:22:8: declaration uses `sorry`", "level": "warning"},
+  {"message": "LiChao.lean:87:8: declaration uses `sorry`",
+   "level": "warning"}],
+ "inputs":
+ [["LiChao:deps",
+   [["deps",
+     [["lichao/LiChao:extraDep", [["@lichao:extraDep", "00000000000006bb"]]],
+      ["imports", "00000000000006bb"]]],
+    ["libs",
+     [["import dynlibs", "00000000000006bb"],
+      ["package external libraries", "00000000000006bb"],
+      ["module dynlibs", "00000000000006bb"],
+      ["module plugins", "00000000000006bb"]]]]],
+  ["Lean 4.28.0, commit 7e01a1bf5c70fc6167d49c345d3bf80596e9a79b",
+   "a96bc04a2e5e9630"],
+  ["/home/chnlich/workspace/lichao-tree/proofs/lichao_proofs/LiChao.lean",
+   "cdf567f686d0646a"],
+  ["options", "00000000000006bb"],
+  ["Module.leanArgs: #[]", "00000000000006bb"]],
+ "depHash": "2b89993ef2dd4ad9"}
