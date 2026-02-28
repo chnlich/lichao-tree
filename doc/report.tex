@@ -379,45 +379,7 @@ The tree depth is $h = \lceil \log_2 C \rceil$.
 
 \subsubsection{Correctness}
 
-We provide a formal specification of the Li-Chao tree in the Lean 4 theorem prover. The core correctness relies on the geometric property that two lines intersect at most once.
-
-\begin{lstlisting}[language=Haskell, caption=Formal Specification in Lean 4]
-structure Line where
-  k : Int
-  b : Int
-
-def Line.eval (f : Line) (x : Int) : Int := f.k * x + f.b
-
--- The core geometric property: Two lines intersect at most once.
-theorem li_chao_condition (f g : Line) (l m r : Int) 
-    (hlm : l < m) (hmr : m < r) :
-  g.eval l < f.eval l -> g.eval r < f.eval r -> g.eval m < f.eval m := by
-  intro hl hr
-  -- Proof omitted for brevity
-  sorry
-
-inductive Tree
-| empty
-| node (l r : Nat) (line : Line) (left right : Tree)
-
-def query (t : Tree) (x : Int) : Int :=
-  match t with
-  | Tree.empty => 2000000000
-  | Tree.node l r line left right =>
-    let val := line.eval x
-    let m := ((l : Int) + (r : Int)) / 2
-    if x <= m then min val (query left x)
-    else min val (query right x)
-
--- Correctness Theorem
--- The query returns the minimum value among all inserted lines at x
-theorem query_correct (lines : List Line) (x : Int) (l r : Nat) 
-    (h_in : l <= x /\ x <= r) :
-  let t_final := lines.foldl insert (build ... l r)
-  query t_final x = min (query t_init x) (brute_force_min lines x)
-\end{lstlisting}
-
-We first establish the geometric intuition underlying the LICT's correctness. The key insight is that two distinct lines intersect at most once. This fundamental property of linear functions ensures that if a line yields a higher value at a midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both.
+The correctness of the LICT relies on the geometric property that two distinct lines intersect at most once. This fundamental property of linear functions ensures that if a line yields a higher value at a midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both.
 
 \textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint $m$:
 \begin{itemize}
