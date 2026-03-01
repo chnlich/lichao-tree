@@ -498,7 +498,7 @@ to denote that random variable $X$ is drawn from a continuous uniform distributi
 \[
 \Theta(\log N).
 \]
-By point-line duality, each line $y = kx + m$ maps to the dual point $(k, m)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
+By point-line duality~\cite{deberg2008}, each line $y = kx + m$ maps to the dual point $(k, m)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
 \item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull.
 \end{itemize}
 \end{itemize}
@@ -541,7 +541,7 @@ dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
 \]
 Here, $\text{cost}(j, i)$ represents a linear function of $i$. Since the queries (indices $i$) are within a fixed range $[0, N]$, the coordinate universe size $C$ effectively equals $N$.
 
-In this static universe setting, an iterative segment tree implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
+In this static universe setting, an iterative segment tree~\cite{bentley1977} implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
 
 \begin{itemize}
 \item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
@@ -600,7 +600,7 @@ The LICT is the preferred choice in the following scenarios:
 
 \textbf{Line segment support required.} When the problem involves line segments (lines valid only on subranges) rather than infinite lines, the LICT provides natural $O(\log^2 C)$ insertion. The Dynamic CHT can support segments but requires significantly more complex machinery.
 
-\textbf{Persistence required.} Path copying in the LICT is straightforward: insertions modify only nodes along a single root-to-leaf path, so copying those nodes creates a new version sharing unmodified subtrees with the previous version. Achieving persistence in the Dynamic CHT is substantially more complex due to the need to maintain hull invariants across versions.
+\textbf{Persistence required.} Path copying~\cite{driscoll1989} in the LICT is straightforward: insertions modify only nodes along a single root-to-leaf path, so copying those nodes creates a new version sharing unmodified subtrees with the previous version. Achieving persistence in the Dynamic CHT is substantially more complex due to the need to maintain hull invariants across versions.
 
 \textbf{Near parallel lines.} When working on lines with subtle slope differences, the LICT's division-free operations avoid numerical instability.
 
@@ -638,6 +638,21 @@ Li Chao.
 \newblock \begin{CJK}{UTF8}{gbsn}线段树\end{CJK} [Segment trees].
 \newblock Lecture slides, Hangzhou Xuejun High School, China, 2012.
 \newblock Available at \url{https://github.com/nicklimmm/lichao-tree/blob/main/doc/slides.ppt}.
+
+\bibitem{deberg2008}
+de Berg, M., Cheong, O., van Kreveld, M., and Overmars, M.
+\newblock \emph{Computational Geometry: Algorithms and Applications}.
+\newblock Springer, 3rd edition, 2008.
+
+\bibitem{driscoll1989}
+Driscoll, J.R., Sarnak, N., Sleator, D.D., and Tarjan, R.E.
+\newblock Making data structures persistent.
+\newblock \emph{Journal of Computer and System Sciences}, 38(1):86 to 124, 1989.
+
+\bibitem{bentley1977}
+Bentley, J.L.
+\newblock Solutions to Klee's rectangle problems.
+\newblock Unpublished manuscript, Carnegie Mellon University, 1977.
 
 \bibitem{renyi1963}
 R\'{e}nyi, A. and Sulanke, R.
