@@ -378,51 +378,71 @@ The tree depth is $h = \lceil \log_2 C \rceil$.
 
 \subsubsection{Correctness}
 
-The correctness of the LICT relies on the geometric property that two distinct lines intersect at most once. This fundamental property of linear functions ensures that if a line yields a higher value at a midpoint, it can yield a lower value than the stored line on at most one side of the midpoint, never both.
+We establish the correctness of the LICT through three results: a foundational property of linear functions, a local invariant maintained by insertion, and a global correctness theorem for queries.
 
-\textbf{Why this maintains the lower envelope.} Consider two lines $A$ and $B$ compared at a node's midpoint $m$:
-\begin{itemize}
-\item If $A$ achieves a lower value than $B$ at $m$, but $B$ yields a lower value at one endpoint, then $B$ can only outperform $A$ on the side of $m$ containing that endpoint (since two lines intersect at most once).
-\item Therefore, $B$ is routed to exactly one child, the side where it might achieve a lower value.
-\end{itemize}
+\begin{lemma}[Linear Domination]\label{lem:linear-dom}
+Let $f(x) = k_1 x + b_1$ and $g(x) = k_2 x + b_2$ be linear functions. If $f(a) \leq g(a)$ and $f(b) \leq g(b)$ for $a \leq b$, then $f(x) \leq g(x)$ for all $x \in [a, b]$.
+\end{lemma}
 
-This property guarantees that the suboptimal line need only be propagated down a single child path.
+\begin{proof}
+Let $h(x) = f(x) - g(x)$. Since $h$ is linear with $h(a) \leq 0$ and $h(b) \leq 0$, for any $x \in [a, b]$:
+\[
+h(x) = h(a) \cdot \frac{b - x}{b - a} + h(b) \cdot \frac{x - a}{b - a} \leq 0. \qedhere
+\]
+\end{proof}
 
 \begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
 For any node $v$ with interval $[l, r]$ and midpoint
 \[
 m = \left\lfloor\frac{l+r}{2}\right\rfloor,
 \]
-the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been routed through $v$.
+the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been compared at $v$.
 \end{lemma}
 
 \begin{proof}
-We proceed by induction on the sequence of insertions.
+By induction on the number of insertions.
 
-\textbf{Base case:} When the first line is inserted, it is stored at the root and all descendants are null. The invariant holds trivially.
+\textbf{Base case.} The first line compared at $v$ is stored directly. The invariant holds trivially.
 
-\textbf{Inductive step:} Assume the invariant holds before inserting a new line $L_{\text{new}}$. Consider the insertion path from root to leaf. At each node $v$ along this path:
-\begin{enumerate}
-\item Let $L_{\text{stored}}$ be the line currently at $v$.
-\item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$, we keep $L_{\text{stored}}$ and route $L_{\text{new}}$ to a child. The invariant at $v$ remains satisfied.
-\item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$, we swap the lines, storing $L_{\text{new}}$ and routing $L_{\text{stored}}$ to a child. The invariant at $v$ is now satisfied by $L_{\text{new}}$.
-\end{enumerate}
-The routed line proceeds to exactly one child (determined by the intersection point location), so the inductive hypothesis applies to subtrees. By induction, the invariant holds after all insertions.
+\textbf{Inductive step.} Suppose the invariant holds before a new line $L_{\text{new}}$ is compared at $v$ against the stored line $L_{\text{stored}}$.
+\begin{itemize}
+\item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$: $L_{\text{stored}}$ remains, still optimal at $m$.
+\item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$: $L_{\text{new}}$ replaces $L_{\text{stored}}$, now optimal at $m$ among all lines compared so far.
+\end{itemize}
+Nodes not on the insertion path are unmodified, so the invariant is preserved there trivially.
 \end{proof}
 
 \begin{lemma}[Query Correctness]\label{lem:query-correct}
-For any query point $x_0 \in X$, the value returned by the query operation equals $\min_{i} \{k_i x_0 + b_i\}$ over all lines in the structure.
+For any query point $x_0$, the value returned by the query operation equals $\min_{i} \{k_i x_0 + b_i\}$ over all lines in the structure.
 \end{lemma}
 
 \begin{proof}
-Consider any line $L$ in the structure and the query point $x_0$. Let $P$ be the unique root-to-leaf path whose intervals all contain $x_0$. Line $L$ follows exactly one root-to-leaf path $P_L$ during insertion.
+The query traverses the unique root-to-leaf path $P$ containing $x_0$, returning the minimum of the stored lines' values at $x_0$. Since these are a subset of all inserted lines, $\text{query}(x_0) \geq \min_i L_i(x_0)$. It remains to show the reverse inequality.
 
-We claim $L$ is evaluated at $x_0$ if and only if $x_0$ lies in the interval where $L$ is optimal among lines routed through some node on $P_L$. There are two cases:
-\begin{enumerate}
-\item If $P_L = P$, then $L$ is stored at some node on $P$ (specifically, at the deepest node where it achieved minimum at the midpoint), and is evaluated during the query.
-\item If $P_L \neq P$, let $v$ be the deepest node common to both paths. Since $x_0$ is not in the child interval that $L$ was routed to, $x_0$ lies on the opposite side of the midpoint from where $L$ could potentially be better than the stored line. By the single-intersection property of lines, $L$ cannot be optimal at $x_0$.
-\end{enumerate}
-Thus, exactly those lines that could be optimal at $x_0$ are evaluated, and the minimum over evaluated lines equals the global minimum.
+\textbf{Claim.} For every inserted line $L$, there exists a node $v \in P$ such that $\text{stored}(v)(x_0) \leq L(x_0)$.
+
+Consider the insertion of $L$. At each node along the insertion path, the winner at the midpoint is stored and the loser (the \emph{pushed line}) is routed to one child.
+
+\textbf{Case 1: $L$ is pushed to the child not containing $x_0$ at some node $w$.}
+Let $S$ denote the line stored at $w$ (the winner) and let $L$ be the pushed line (the loser). By construction, $S(m_w) \leq L(m_w)$. We show $S(x_0) \leq L(x_0)$:
+\begin{itemize}
+\item If $L$ is pushed left ($L(l) < S(l)$, so the intersection lies in $[l, m_w]$): then $x_0 > m_w$. Since $S(m_w) \leq L(m_w)$ and the intersection is in $[l, m_w]$, $S$ dominates $L$ on $[m_w, r]$. By Lemma~\ref{lem:linear-dom}, $S(x_0) \leq L(x_0)$.
+\item If $L$ is pushed right ($L(l) \geq S(l)$): then $x_0 \leq m_w$. We have $S(l) \leq L(l)$ and $S(m_w) \leq L(m_w)$. By Lemma~\ref{lem:linear-dom} on $[l, m_w]$, $S(x_0) \leq L(x_0)$.
+\end{itemize}
+
+At the moment of routing, $S$ is stored at $w \in P$ and $S(x_0) \leq L(x_0)$.
+
+If $S$ is later displaced from $w$ by a new line $C$ (with $C(m_w) < S(m_w)$):
+\begin{itemize}
+\item If $S$ is routed toward $x_0$: $S$ moves to a deeper node on $P$, and $S(x_0) \leq L(x_0)$ is still witnessed on $P$.
+\item If $S$ is routed away from $x_0$: by the same argument above, $C(x_0) \leq S(x_0) \leq L(x_0)$, and $C$ is now stored at $w \in P$.
+\end{itemize}
+By induction on the number of subsequent displacements, the claim is maintained.
+
+\textbf{Case 2: $L$ is never pushed off $P$.}
+Then $L$ is stored at some node on $P$. If later displaced, the same displacement analysis applies: either $L$ moves deeper along $P$, or the line replacing $L$ dominates it at $x_0$. At a leaf, the winner of the single-point comparison dominates the loser trivially. In all cases, some line on $P$ achieves $\leq L(x_0)$.
+
+Since the claim holds for every inserted line $L$, we have $\text{query}(x_0) \leq \min_i L_i(x_0)$. Combined with the reverse inequality, equality follows.
 \end{proof}
 
 \subsubsection{Complexity Analysis}
