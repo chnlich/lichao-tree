@@ -378,7 +378,7 @@ The tree depth is $h = \lceil \log_2 C \rceil$.
 
 \subsubsection{Correctness}
 
-We establish the correctness of the LICT through three results: a foundational property of linear functions, a local invariant maintained by insertion, and a global correctness theorem for queries.
+We establish the correctness of the LICT through three results: a foundational property of linear functions, a routing invariant maintained by insertion, and a global correctness theorem for queries.
 
 \begin{lemma}[Linear Domination]\label{lem:linear-dom}
 Let $f(x) = k_1 x + b_1$ and $g(x) = k_2 x + b_2$ be linear functions. If $f(a) \leq g(a)$ and $f(b) \leq g(b)$ for $a \leq b$, then $f(x) \leq g(x)$ for all $x \in [a, b]$.
@@ -391,25 +391,12 @@ h(x) = h(a) \cdot \frac{b - x}{b - a} + h(b) \cdot \frac{x - a}{b - a} \leq 0. \
 \]
 \end{proof}
 
-\begin{lemma}[Local Optimality Invariant]\label{lem:local-opt}
-For any node $v$ with interval $[l, r]$ and midpoint
-\[
-m = \left\lfloor\frac{l+r}{2}\right\rfloor,
-\]
-the line stored at $v$ achieves the minimum value at $x = m$ among all lines that have been compared at $v$.
+\begin{lemma}[Routing Dominance]\label{lem:routing-dom}
+At a node with interval $[l, r]$ and midpoint $m$, if line $A$ is kept ($A(m) \leq B(m)$) and line $B$ is pushed to one child, then $A$ dominates $B$ on the opposite child's interval.
 \end{lemma}
 
 \begin{proof}
-By induction on the number of insertions.
-
-\textbf{Base case.} The first line compared at $v$ is stored directly. The invariant holds trivially.
-
-\textbf{Inductive step.} Suppose the invariant holds before a new line $L_{\text{new}}$ is compared at $v$ against the stored line $L_{\text{stored}}$.
-\begin{itemize}
-\item If $L_{\text{new}}(m) \geq L_{\text{stored}}(m)$: $L_{\text{stored}}$ remains, still optimal at $m$.
-\item If $L_{\text{new}}(m) < L_{\text{stored}}(m)$: $L_{\text{new}}$ replaces $L_{\text{stored}}$, now optimal at $m$ among all lines compared so far.
-\end{itemize}
-Nodes not on the insertion path are unmodified, so the invariant is preserved there trivially.
+Without loss of generality, suppose $B$ is pushed to the left child, so $B(l) < A(l)$. Since $A(m) \leq B(m)$ and $B(l) < A(l)$, the two lines intersect in $[l, m]$. For all $x \in [m, r]$, the difference $A(x) - B(x)$ has the same sign as at $m$, so $A(x) \leq B(x)$. By Lemma~\ref{lem:linear-dom}, $A$ dominates $B$ on $[m, r]$.
 \end{proof}
 
 \begin{lemma}[Query Correctness]\label{lem:query-correct}
@@ -421,12 +408,12 @@ The query traverses the unique root-to-leaf path $P$ containing $x_0$, returning
 
 Suppose for contradiction that $\text{query}(x_0) > \min_i L_i(x_0)$. Let $L^*$ be a line achieving the global minimum at $x_0$. Then no line stored on $P$ has value $\leq L^*(x_0)$ at $x_0$; in particular, $L^*$ is not stored on any node of $P$.
 
-Since $L^*$ enters at the root (on $P$) and is not stored on $P$ in the final tree, at some node $w \in P$, $L^*$ was pushed to the child not containing $x_0$. The line $S$ kept at $w$ satisfies $S(m_w) \leq L^*(m_w)$. Since two lines intersect at most once, the intersection of $S$ and $L^*$ (if any) lies in the half where $L^*$ was pushed. Therefore $S$ dominates $L^*$ on the half containing $x_0$, and by Lemma~\ref{lem:linear-dom}, $S(x_0) \leq L^*(x_0)$, contradicting the assumption.
+Since $L^*$ enters at the root (on $P$) and is not stored on $P$ in the final tree, at some node $w \in P$, $L^*$ was pushed to the child not containing $x_0$. By Lemma~\ref{lem:routing-dom}, the line $S$ kept at $w$ satisfies $S(x_0) \leq L^*(x_0)$, contradicting the assumption.
 
 If $S$ is later displaced from $w$ by a new line $C$:
 \begin{itemize}
 \item If $S$ is routed toward $x_0$: $S$ moves deeper on $P$, preserving the contradiction.
-\item If $S$ is routed away from $x_0$: by the same reasoning, $C(x_0) \leq S(x_0) \leq L^*(x_0)$, and $C$ is at $w \in P$. If $C$ is also displaced, repeat.
+\item If $S$ is routed away from $x_0$: by Lemma~\ref{lem:routing-dom}, $C(x_0) \leq S(x_0) \leq L^*(x_0)$, and $C$ is at $w \in P$. If $C$ is also displaced, repeat.
 \end{itemize}
 Since displacements are finite, the chain terminates with a contradiction.
 \end{proof}
