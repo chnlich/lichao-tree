@@ -421,18 +421,14 @@ The query traverses the unique root-to-leaf path $P$ containing $x_0$, returning
 
 Suppose for contradiction that $\text{query}(x_0) > \min_i L_i(x_0)$. Let $L^*$ be a line achieving the global minimum at $x_0$. Then no line stored on $P$ has value $\leq L^*(x_0)$ at $x_0$; in particular, $L^*$ is not stored on any node of $P$.
 
-Since $L^*$ enters the tree at the root (which lies on $P$) and is not stored on $P$ in the final tree, $L^*$ must have been pushed to a child not containing $x_0$ at some node $w \in P$. At that moment, the line $S$ kept at $w$ satisfies $S(m_w) \leq L^*(m_w)$. We show $S(x_0) \leq L^*(x_0)$:
-\begin{itemize}
-\item If $L^*$ is pushed left ($L^*(l) < S(l)$, so the intersection lies in $[l, m_w]$): then $x_0 > m_w$, and $S$ dominates $L^*$ on $[m_w, r]$. By Lemma~\ref{lem:linear-dom}, $S(x_0) \leq L^*(x_0)$.
-\item If $L^*$ is pushed right ($L^*(l) \geq S(l)$): then $x_0 \leq m_w$. We have $S(l) \leq L^*(l)$ and $S(m_w) \leq L^*(m_w)$. By Lemma~\ref{lem:linear-dom} on $[l, m_w]$, $S(x_0) \leq L^*(x_0)$.
-\end{itemize}
+Since $L^*$ enters at the root (on $P$) and is not stored on $P$ in the final tree, at some node $w \in P$, $L^*$ was pushed to the child not containing $x_0$. The line $S$ kept at $w$ satisfies $S(m_w) \leq L^*(m_w)$. Since two lines intersect at most once, the intersection of $S$ and $L^*$ (if any) lies in the half where $L^*$ was pushed. Therefore $S$ dominates $L^*$ on the half containing $x_0$, and by Lemma~\ref{lem:linear-dom}, $S(x_0) \leq L^*(x_0)$, contradicting the assumption.
 
-If $S$ remains on $P$, then $\text{query}(x_0) \leq S(x_0) \leq L^*(x_0)$, contradicting the assumption. If $S$ is later displaced from $w$ by a new line $C$ (with $C(m_w) < S(m_w)$):
+If $S$ is later displaced from $w$ by a new line $C$:
 \begin{itemize}
-\item If $S$ is routed toward $x_0$: $S$ moves to a deeper node on $P$, and $\text{query}(x_0) \leq S(x_0) \leq L^*(x_0)$, again a contradiction.
-\item If $S$ is routed away from $x_0$: by the same argument, $C(x_0) \leq S(x_0) \leq L^*(x_0)$, and $C$ is stored at $w \in P$. If $C$ remains, contradiction. If $C$ is also displaced, repeat.
+\item If $S$ is routed toward $x_0$: $S$ moves deeper on $P$, preserving the contradiction.
+\item If $S$ is routed away from $x_0$: by the same reasoning, $C(x_0) \leq S(x_0) \leq L^*(x_0)$, and $C$ is at $w \in P$. If $C$ is also displaced, repeat.
 \end{itemize}
-Since the number of displacements is finite, this chain terminates with some line on $P$ achieving $\leq L^*(x_0)$ at $x_0$, contradicting the assumption.
+Since displacements are finite, the chain terminates with a contradiction.
 \end{proof}
 
 \subsubsection{Complexity Analysis}
