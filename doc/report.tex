@@ -510,18 +510,24 @@ Table~\ref{tab:results} presents the performance comparison.
 \centering
 \caption{Performance Comparison (Time in milliseconds)}
 \label{tab:results}
-\begin{tabular}{@{}cccc@{}}
+\begin{tabular}{@{}cccccc@{}}
 \toprule
-\textbf{N} & \textbf{Distribution} & \textbf{LICT} & \textbf{Dynamic CHT} \\
+\textbf{N} & \textbf{Distribution} & \textbf{Algorithm} & \textbf{Insert (ms)} & \textbf{Query (ms)} & \textbf{Total (ms)} \\
 \midrule
-$10^5$ & Random & 5.0 ms & 3.0 ms \\
-$10^5$ & All on Hull & 16.9 ms & 16.0 ms \\
+$10^5$ & Random & LICT & --- & --- & --- \\
+$10^5$ & Random & Dynamic CHT & --- & --- & --- \\
+$10^5$ & All on Hull & LICT & --- & --- & --- \\
+$10^5$ & All on Hull & Dynamic CHT & --- & --- & --- \\
 \midrule
-$10^6$ & Random & 52.9 ms & 31.3 ms \\
-$10^6$ & All on Hull & 693.3 ms & 882.2 ms \\
+$10^6$ & Random & LICT & --- & --- & --- \\
+$10^6$ & Random & Dynamic CHT & --- & --- & --- \\
+$10^6$ & All on Hull & LICT & --- & --- & --- \\
+$10^6$ & All on Hull & Dynamic CHT & --- & --- & --- \\
 \midrule
-$10^7$ & Random & 548.8 ms & 326.9 ms \\
-$10^7$ & All on Hull & 14702.5 ms & 16249.0 ms \\
+$10^7$ & Random & LICT & --- & --- & --- \\
+$10^7$ & Random & Dynamic CHT & --- & --- & --- \\
+$10^7$ & All on Hull & LICT & --- & --- & --- \\
+$10^7$ & All on Hull & Dynamic CHT & --- & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}

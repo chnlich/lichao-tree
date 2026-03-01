@@ -15,37 +15,11 @@ struct Result {
     string name;
     int n;
     string distribution;
-    double time_ms;
+    double insert_time_ms;
+    double query_time_ms;
+    double total_time_ms;
     long long checksum;
 };
-
-long long run_lichao(const vector<Operation>& ops) {
-    LC::LiChaoTree lict(-1e9 - 7, 1e9 + 7);
-    long long sum = 0;
-    for (const auto& op : ops) {
-        if (op.type == ADD) {
-            lict.add_line(op.val1, op.val2);
-        } else {
-            llint res = lict.query(op.val1);
-            if (res < 2e18) sum += res;
-        }
-    }
-    return sum;
-}
-
-long long run_cht(const vector<Operation>& ops) {
-    CHT::DynamicCHT cht;
-    long long sum = 0;
-    for (const auto& op : ops) {
-        if (op.type == ADD) {
-            cht.add_line(op.val1, op.val2);
-        } else {
-            llint res = cht.query(op.val1);
-            if (res < 2e18) sum += res;
-        }
-    }
-    return sum;
-}
 
 const int NUM_RUNS = 10;
 
@@ -58,27 +32,60 @@ double average_time(const vector<double>& times) {
 void benchmark(int n, string dist_name, const vector<Operation>& ops, vector<Result>& results) {
     cerr << "Running benchmark: N=" << n << ", Dist=" << dist_name << " (" << NUM_RUNS << " runs, average)" << endl;
 
+    // Split ops into separate insert and query vectors
+    vector<pair<llint,llint>> inserts;
+    vector<llint> queries;
+    for (const auto& op : ops) {
+        if (op.type == ADD) {
+            inserts.push_back({op.val1, op.val2});
+        } else {
+            queries.push_back(op.val1);
+        }
+    }
+
     // Run Li Chao (Standard) - NUM_RUNS times, take average
-    vector<double> lc_times;
+    vector<double> lc_insert_times, lc_query_times, lc_total_times;
     long long sum_lc = 0;
     for (int r = 0; r < NUM_RUNS; ++r) {
-        auto start = high_resolution_clock::now();
-        sum_lc = run_lichao(ops);
-        auto end = high_resolution_clock::now();
-        lc_times.push_back(duration_cast<milliseconds>(end - start).count());
+        LC::LiChaoTree lict(-1e9 - 7, 1e9 + 7);
+        auto t0 = high_resolution_clock::now();
+        for (const auto& ins : inserts) lict.add_line(ins.first, ins.second);
+        auto t1 = high_resolution_clock::now();
+        long long sum = 0;
+        for (llint x : queries) {
+            llint res = lict.query(x);
+            if (res < 2e18) sum += res;
+        }
+        auto t2 = high_resolution_clock::now();
+        lc_insert_times.push_back(duration_cast<microseconds>(t1 - t0).count() / 1000.0);
+        lc_query_times.push_back(duration_cast<microseconds>(t2 - t1).count() / 1000.0);
+        lc_total_times.push_back(duration_cast<microseconds>(t2 - t0).count() / 1000.0);
+        sum_lc = sum;
     }
-    results.push_back({"LICT", n, dist_name, average_time(lc_times), sum_lc});
+    results.push_back({"LICT", n, dist_name, average_time(lc_insert_times),
+                        average_time(lc_query_times), average_time(lc_total_times), sum_lc});
 
     // Run Dynamic CHT - NUM_RUNS times, take average
-    vector<double> cht_times;
+    vector<double> cht_insert_times, cht_query_times, cht_total_times;
     long long sum_cht = 0;
     for (int r = 0; r < NUM_RUNS; ++r) {
-        auto start = high_resolution_clock::now();
-        sum_cht = run_cht(ops);
-        auto end = high_resolution_clock::now();
-        cht_times.push_back(duration_cast<milliseconds>(end - start).count());
+        CHT::DynamicCHT cht;
+        auto t0 = high_resolution_clock::now();
+        for (const auto& ins : inserts) cht.add_line(ins.first, ins.second);
+        auto t1 = high_resolution_clock::now();
+        long long sum = 0;
+        for (llint x : queries) {
+            llint res = cht.query(x);
+            if (res < 2e18) sum += res;
+        }
+        auto t2 = high_resolution_clock::now();
+        cht_insert_times.push_back(duration_cast<microseconds>(t1 - t0).count() / 1000.0);
+        cht_query_times.push_back(duration_cast<microseconds>(t2 - t1).count() / 1000.0);
+        cht_total_times.push_back(duration_cast<microseconds>(t2 - t0).count() / 1000.0);
+        sum_cht = sum;
     }
-    results.push_back({"Dynamic CHT", n, dist_name, average_time(cht_times), sum_cht});
+    results.push_back({"Dynamic CHT", n, dist_name, average_time(cht_insert_times),
+                        average_time(cht_query_times), average_time(cht_total_times), sum_cht});
 
     if (sum_lc != sum_cht) {
         cerr << "WARNING: Checksum mismatch! LICT: " << sum_lc << " CHT: " << sum_cht << endl;
@@ -101,17 +108,21 @@ void run_n_smaller_than_c() {
 
     // Output Markdown Table to stdout
     cout << "\n# Benchmark Results (Average of " << NUM_RUNS << " runs)\n\n";
-    cout << "| N | Distribution | Algorithm | Time (ms) | Checksum |\n";
-    cout << "|---|---|---|---|---|\n";
+    cout << "| N | Distribution | Algorithm | Insert (ms) | Query (ms) | Total (ms) | Checksum |\n";
+    cout << "|---|---|---|---|---|---|---|\n";
     for (const auto& res : results) {
-        cout << "| " << res.n << " | " << res.distribution << " | " << res.name << " | " << res.time_ms << " | " << res.checksum << " |\n";
+        cout << "| " << res.n << " | " << res.distribution << " | " << res.name << " | "
+             << fixed << setprecision(2) << res.insert_time_ms << " | "
+             << res.query_time_ms << " | " << res.total_time_ms << " | " << res.checksum << " |\n";
     }
 
     // Output CSV to file
     ofstream csv("benchmark_results.csv");
-    csv << "N,Distribution,Algorithm,Time_ms,Checksum\n";
+    csv << "N,Distribution,Algorithm,Insert_Time_ms,Query_Time_ms,Total_Time_ms,Checksum\n";
     for (const auto& res : results) {
-        csv << res.n << "," << res.distribution << "," << res.name << "," << res.time_ms << "," << res.checksum << "\n";
+        csv << res.n << "," << res.distribution << "," << res.name << ","
+            << res.insert_time_ms << "," << res.query_time_ms << ","
+            << res.total_time_ms << "," << res.checksum << "\n";
     }
     csv.close();
     cerr << "Results saved to benchmark_results.csv" << endl;
