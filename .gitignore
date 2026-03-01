@@ -10,3 +10,6 @@ benchmark/benchmark_results.csv
 
 # Doc related files
 doc/report.log
+
+# Built PDF (tracked builds go through CI or local-only)
+doc/*.pdf
