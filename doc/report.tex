@@ -508,8 +508,9 @@ to denote that random variable $X$ is drawn from a continuous uniform distributi
 \begin{itemize}
 \item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size:
 \[
-\Theta(\sqrt{N}).
+\Theta(\log N).
 \]
+By point--line duality, each line $y = kx + m$ maps to the dual point $(k, m)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi--Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
 \item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull.
 \end{itemize}
 \end{itemize}
@@ -664,6 +665,11 @@ KTH Algorithm Library (KACTL).
 \newblock LineContainer.
 \newblock \url{https://github.com/kth-competitive-programming/kactl}, 2024.
 \newblock Accessed: 2025-02-06.
+
+\bibitem{renyi1963}
+R\'{e}nyi, A. and Sulanke, R.
+\newblock \"{U}ber die konvexe H\"{u}lle von $n$ zuf\"{a}llig gew\"{a}hlten Punkten.
+\newblock \emph{Zeitschrift f\"{u}r Wahrscheinlichkeitstheorie und verwandte Gebiete}, 2(1):75--84, 1963.
 
 \end{thebibliography}
 
