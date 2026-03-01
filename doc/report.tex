@@ -56,7 +56,7 @@ tabsize=2
 \maketitle
 
 \begin{abstract}
-The Li-Chao tree (LICT) was first introduced in 2012 lecture materials as an efficient data structure for dynamic lower envelope maintenance. In the years since, it has achieved widespread adoption within the competitive programming community, yet no formal specification has appeared in the peer-reviewed literature. This paper provides the definitive formalization of the Li-Chao tree, serving as both the official specification and an expansion of the original 2012 lecture materials. We present complete algorithmic specifications, establish formal correctness proofs, analyze theoretical complexity, and provide empirical performance characterization. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
+The Li-Chao tree (LICT) was first introduced in lecture materials~\cite{lichao2012} as an efficient data structure for dynamic lower envelope maintenance. In the years since, it has achieved widespread adoption within the competitive programming community, yet no formal specification has appeared in the peer-reviewed literature. This paper provides the definitive formalization of the Li-Chao tree, serving as both the official specification and an expansion of the original lecture materials~\cite{lichao2012}. We present complete algorithmic specifications, establish formal correctness proofs, analyze theoretical complexity, and provide empirical performance characterization. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
 \end{abstract}
 
 \section{Introduction}
@@ -625,6 +625,9 @@ Several directions for future research and development remain:
 
 \textbf{Higher-dimensional extensions.} While the LICT extends naturally to higher dimensions (maintaining hyperplanes instead of lines), the space and time complexities grow exponentially with dimension. Investigating approximate variants or dimensionality reduction techniques could broaden applicability.
 
+\section*{Acknowledgments}
+The following community resources have contributed to the dissemination of Li-Chao tree techniques: CP-Algorithms (\url{https://cp-algorithms.com/geometry/li_chao_tree.html}), the Codeforces tutorial by I\_LOVE\_TIGER (\url{https://codeforces.com/blog/entry/51275}), and the KTH Algorithm Competition Template Library (KACTL, \url{https://github.com/kth-competitive-programming/kactl}).
+
 \begin{thebibliography}{9}
 
 \bibitem{overmars1981}
@@ -632,38 +635,16 @@ Overmars, M.H. and van Leeuwen, J.
 \newblock Maintenance of configurations in the plane.
 \newblock \emph{Journal of Computer and System Sciences}, 23(2):166 to 204, 1981.
 
-\bibitem{aggarwal1987}
-Aggarwal, A. and Tokuyama, T.
-\newblock Consecutive interval query and dynamic programming on intervals.
-\newblock \emph{Discrete Applied Mathematics}, 20(1):1 to 11, 1988.
-
-\bibitem{zjoi2012}
+\bibitem{lichao2012}
 Li Chao.
-\newblock Lecture materials.
-\newblock China, 2012.
-
-\bibitem{cp-algorithms}
-CP-Algorithms.
-\newblock Li-Chao tree.
-\newblock \url{https://cp-algorithms.com/geometry/li_chao_tree.html}, 2024.
-\newblock Accessed: 2025-02-06.
-
-\bibitem{codeforces}
-I\_LOVE\_TIGER.
-\newblock Li-Chao tree Tutorial.
-\newblock \url{https://codeforces.com/blog/entry/51275}, 2017.
-\newblock Accessed: 2025-02-06.
-
-\bibitem{kactl}
-KTH Algorithm Library (KACTL).
-\newblock LineContainer.
-\newblock \url{https://github.com/kth-competitive-programming/kactl}, 2024.
-\newblock Accessed: 2025-02-06.
+\newblock Segment trees (in Chinese).
+\newblock Lecture slides, Hangzhou Xuejun High School, China, 2012.
+\newblock Available at \url{https://github.com/nicklimmm/lichao-tree/blob/main/doc/slides.ppt}.
 
 \bibitem{renyi1963}
 R\'{e}nyi, A. and Sulanke, R.
 \newblock \"{U}ber die konvexe H\"{u}lle von $n$ zuf\"{a}llig gew\"{a}hlten Punkten.
-\newblock \emph{Zeitschrift f\"{u}r Wahrscheinlichkeitstheorie und verwandte Gebiete}, 2(1):75--84, 1963.
+\newblock \emph{Zeitschrift f\"{u}r Wahrscheinlichkeitstheorie und verwandte Gebiete}, 2(1):75 to 84, 1963.
 
 \end{thebibliography}
 
