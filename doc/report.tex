@@ -92,7 +92,7 @@ Dynamic maintenance of geometric configurations has been studied extensively in 
 
 Overmars and van Leeuwen \cite{overmars1981} presented foundational work on dynamic convex hull maintenance. Their data structure supports insertion and deletion of lines while maintaining the lower envelope, enabling efficient querying of the minimum value at any point.
 
-Their approach uses a balanced binary search tree to explicitly maintain the convex hull. Each node stores a line, and the tree is ordered by slope. Intersection points between adjacent lines are computed to determine the hull structure. Queries take $O(\log n)$ time, while insertions and deletions require $O(\log^2 n)$ time.
+Their approach uses a balanced binary search tree to explicitly maintain the convex hull. Each node stores a line, and the tree is ordered by slope. Intersection points between adjacent lines are computed to determine the hull structure. Queries take $O(\log N)$ time, while insertions and deletions require $O(\log^2 N)$ time.
 
 \subsection{Monotonic Convex Hull Trick}
 
@@ -102,7 +102,7 @@ When insertions arrive in order of monotonically increasing (or decreasing) slop
 
 \subsection{Dynamic Convex Hull Trick}
 
-For arbitrary insertion sequences without monotonicity constraints, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log n)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
+For arbitrary insertion sequences without monotonicity constraints, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log N)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
 
 The Dynamic CHT requires computing intersection points between adjacent lines in the hull as
 \[
@@ -453,16 +453,16 @@ For query: The traversal follows one root-to-leaf path with $O(1)$ work per node
 \end{proof}
 
 \begin{lemma}[Space Complexity]\label{lem:space-complexity}
-The LICT stores at most $O(n)$ nodes in the worst case, where $n$ is the number of inserted lines.
+The LICT stores at most $O(N)$ nodes in the worst case, where $N$ is the number of inserted lines.
 \end{lemma}
 
 \begin{proof}
-Each full-line insertion follows a single root-to-leaf path. At each existing node, the algorithm performs $O(1)$ comparisons and recurses into exactly one child (Algorithm~\ref{alg:insert}, lines 11--14). When it reaches a null child, it creates exactly one new node and returns (lines 1--3). Therefore each insertion creates at most one new node. With $n$ insertions, the total number of nodes is at most $n$, giving $O(n)$ space.
+Each full-line insertion follows a single root-to-leaf path. At each existing node, the algorithm performs $O(1)$ comparisons and recurses into exactly one child (Algorithm~\ref{alg:insert}, lines 11--14). When it reaches a null child, it creates exactly one new node and returns (lines 1--3). Therefore each insertion creates at most one new node. With $N$ insertions, the total number of nodes is at most $N$, giving $O(N)$ space.
 
-\textbf{Remark.} For line \emph{segment} insertion, each segment may decompose into $O(\log C)$ canonical intervals, creating up to $O(\log C)$ nodes per insertion and $O(n \log C)$ nodes overall.
+\textbf{Remark.} For line \emph{segment} insertion, each segment may decompose into $O(\log C)$ canonical intervals, creating up to $O(\log C)$ nodes per insertion and $O(N \log C)$ nodes overall.
 \end{proof}
 
-\textbf{Deletion.} The standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(n)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
+\textbf{Deletion.} The standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(N)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
 
 The LICT's complexity depends on the coordinate range rather than the number of lines. This provides consistent performance regardless of hull size, though it cannot exploit cases where the hull remains small relative to the number of insertions.
 
@@ -512,9 +512,9 @@ to denote that random variable $X$ is drawn from a continuous uniform distributi
 \begin{itemize}
 \item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size:
 \[
-\Theta(\sqrt{n}).
+\Theta(\sqrt{N}).
 \]
-\item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, n-1]$. All $n$ lines contribute to the hull.
+\item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull.
 \end{itemize}
 \end{itemize}
 
@@ -544,7 +544,7 @@ $10^7$ & All on Hull & 14702.5 ms & 16249.0 ms \\
 
 \subsection{Parameter-Matched Comparison: The $N = C$ Regime}
 
-The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log n)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$. This configuration mirrors dynamic programming optimizations common in competitive programming, where the state recurrence takes the form:
+The theoretical complexity analysis reveals that Dynamic CHT achieves $O(\log N)$ time while LICT achieves $O(\log C)$. To directly compare these regimes, we conduct experiments where the number of lines $N$ equals the coordinate universe size $C$. This configuration mirrors dynamic programming optimizations common in competitive programming, where the state recurrence takes the form:
 \[
 dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
 \]
@@ -594,7 +594,7 @@ $10^7$ & All on Hull & Dynamic CHT & 6738.87 & 7096.22 & 13835.08 \\
 
 \subsection{Analysis}
 
-In the case that $C$ is larger than $N$, both algorithms have similar performance, even if the theoretical complexity of LICT is worse than Dynamic CHT. This is because the $O(\log C)$ factor is small enough to be negligible compared to the $O(\log n)$ factor, while the constant factor of LICT is smaller than that of Dynamic CHT.
+In the case that $C$ is larger than $N$, both algorithms have similar performance, even if the theoretical complexity of LICT is worse than Dynamic CHT. This is because the $O(\log C)$ factor is small enough to be negligible compared to the $O(\log N)$ factor, while the constant factor of LICT is smaller than that of Dynamic CHT.
 
 In the $N = C$ regime, the ZKW LICT variant demonstrates substantial gains over both alternatives on dense hull inputs, with the $N = C = 10^7$ all-on-hull benchmark completed approximately $4\times$ faster than Dynamic CHT. 
 
@@ -618,7 +618,7 @@ The LICT is the preferred choice in the following scenarios:
 
 The LICT has several limitations that affect its applicability:
 
-\textbf{No efficient deletion.} As noted above, the standard LICT does not support deletion of individual lines. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, requiring $\Omega(n)$ time in the worst case.
+\textbf{No efficient deletion.} As noted above, the standard LICT does not support deletion of individual lines. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, requiring $\Omega(N)$ time in the worst case.
 
 \textbf{Coordinate range dependency.} The LICT's complexity depends on $C$, the coordinate range divided by precision. For very large coordinate ranges with fine precision (e.g., 64-bit floating-point values spanning the entire representable range), $C$ can become impractically large.
 
