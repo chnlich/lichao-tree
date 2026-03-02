@@ -328,6 +328,7 @@ int main(int argc, char* argv[]) {
 
     if (argc == 1) {
         do_n_smaller_than_c = true;
+        do_n_equals_c = true;
     } else {
         for (int i = 1; i < argc; ++i) {
             string arg = argv[i];
