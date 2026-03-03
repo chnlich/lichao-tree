@@ -181,6 +181,18 @@ Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query 
 
 When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
 
+\begin{definition}[Li Chao Tree]\label{def:lict}
+A \emph{Li Chao Tree} over a domain $[L, R]$ is a binary tree where:
+\begin{itemize}
+  \item Each node owns an interval $[l, r] \subseteq [L, R]$ with midpoint $m = (l+r)/2$, and stores at most one line $f(x) = kx + b$.
+  \item \textbf{Invariant.} The stored line achieves the minimum value at $m$ among all lines ever routed through that node.
+  \item \textbf{Children.} Left child owns $[l, m]$; right child owns $(m, r]$. Children are created lazily on first insertion.
+  \item \textbf{Initial state.} An empty tree is a single null root over $[L, R]$.
+\end{itemize}
+\end{definition}
+
+The correctness of this invariant follows from Lemma~\ref{lem:linear-dom} and Lemma~\ref{lem:routing-dom} below.
+
 \begin{algorithm}[h]
 \caption{LICT Line Insertion}
 \label{alg:insert}
