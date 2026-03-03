@@ -186,7 +186,7 @@ A \emph{Li Chao Tree} over a domain $[L, R]$ is a binary tree where:
 \begin{itemize}
   \item Each node owns an interval $[l, r] \subseteq [L, R]$ with midpoint $m = (l+r)/2$, and stores at most one line $f(x) = kx + b$.
   \item \textbf{Invariant.} The stored line achieves the minimum value at $m$ among all lines ever routed through that node.
-  \item \textbf{Children.} Left child owns $[l, m]$; right child owns $(m, r]$. Children are created lazily on first insertion.
+  \item \textbf{Children.} Left child owns $[l, m]$; right child owns $[m, r]$. Children are created lazily on first insertion.
   \item \textbf{Initial state.} An empty tree is a single null root over $[L, R]$.
 \end{itemize}
 \end{definition}
