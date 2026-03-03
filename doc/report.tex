@@ -365,6 +365,30 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 \label{fig:query-example}
 \end{figure}
 
+\subsection{Line Segment Extension}
+
+The LICT extends naturally from full lines to line segments. To insert a line segment defined on $[x_l, x_r]$, we decompose this interval into $O(\log C)$ \emph{canonical intervals} of the implicit segment tree. Each canonical interval corresponds to a node whose range is entirely contained within $[x_l, x_r]$. Algorithm~\ref{alg:insert} is then called independently on each such interval to insert the line restricted to that subrange.
+
+\begin{algorithm}[h]
+\caption{LICT Segment Insertion}
+\label{alg:segment-insert}
+\begin{algorithmic}[1]
+\Require Node pointer $node$, line $line$, node interval $[l, r]$, segment bounds $[x_l, x_r]$
+\If{$x_r < l$ \textbf{or} $r < x_l$}
+\State \Return \Comment{No overlap}
+\EndIf
+\If{$x_l \leq l$ \textbf{and} $r \leq x_r$}
+\State \Call{Insert}{$node$, $line$, $l$, $r$} \Comment{Algorithm~\ref{alg:insert}}
+\State \Return
+\EndIf
+\State $m \gets l + (r - l) / 2$
+\State \Call{SegmentInsert}{$node.left$, $line$, $l$, $m$, $x_l$, $x_r$}
+\State \Call{SegmentInsert}{$node.right$, $line$, $m$, $r$, $x_l$, $x_r$}
+\end{algorithmic}
+\end{algorithm}
+
+The total cost per segment insertion is $O(\log^2 C)$: the interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals, and each call to Algorithm~\ref{alg:insert} takes $O(\log C)$ time.
+
 \subsection{Theoretical Analysis}
 
 We now present a formal analysis of the LICT's correctness and complexity.
@@ -419,10 +443,18 @@ If $S$ is later displaced from $w$ by a new line $C$:
 Since displacements are finite, the chain terminates with a contradiction.
 \end{proof}
 
+\begin{lemma}[Segment Insertion Correctness]\label{lem:segment-correct}
+Algorithm~\ref{alg:segment-insert} correctly maintains the lower envelope for a line segment defined on $[x_l, x_r]$.
+\end{lemma}
+
+\begin{proof}
+The interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals of the implicit segment tree, each corresponding to a node whose range lies entirely within $[x_l, x_r]$. For each canonical interval $[l_i, r_i]$, Algorithm~\ref{alg:insert} inserts the line restricted to $[l_i, r_i]$. By Lemma~\ref{lem:routing-dom}, each such insertion correctly maintains the lower envelope within $[l_i, r_i]$. Since the canonical intervals cover $[x_l, x_r]$ exactly and no insertion affects nodes outside $[x_l, x_r]$, the overall lower envelope is correctly maintained.
+\end{proof}
+
 \subsubsection{Complexity Analysis}
 
 \begin{lemma}[Time Complexity]\label{lem:time-complexity}
-Both insertion and query operations require $O(\log C)$ time.
+Line insertion and query operations require $O(\log C)$ time. Line segment insertion (Algorithm~\ref{alg:segment-insert}) requires $O(\log^2 C)$ time.
 \end{lemma}
 
 \begin{proof}
@@ -434,6 +466,8 @@ h = \lceil \log_2 C \rceil = O(\log C).
 For insertion: The new line follows exactly one root-to-leaf path. At each node, we perform: (1) $O(1)$ line evaluations ($kx + b$); (2) $O(1)$ comparisons; and (3) optionally a line swap. Each operation takes $O(1)$ time. With $O(\log C)$ nodes visited, total time is $O(\log C)$.
 
 For query: The traversal follows one root-to-leaf path with $O(1)$ work per node (line evaluation and comparison). Total time is $O(\log C)$.
+
+For segment insertion: The segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals, each invoking Algorithm~\ref{alg:insert} at cost $O(\log C)$. The total time is $O(\log C) \times O(\log C) = O(\log^2 C)$.
 \end{proof}
 
 \begin{lemma}[Space Complexity]\label{lem:space-complexity}
@@ -443,7 +477,7 @@ The LICT stores at most $O(N)$ nodes in the worst case, where $N$ is the number 
 \begin{proof}
 Each full-line insertion follows a single root-to-leaf path. At each existing node, the algorithm performs $O(1)$ comparisons and recurses into exactly one child. If the path reaches a null child, it creates one new node and returns; if the path terminates at an existing leaf, no new node is created. Therefore each insertion creates at most one new node. With $N$ insertions, the total number of nodes is at most $N$, giving $O(N)$ space.
 
-\textbf{Remark.} For line \emph{segment} insertion, each segment may decompose into $O(\log C)$ canonical intervals, creating up to $O(\log C)$ nodes per insertion and $O(N \log C)$ nodes overall.
+\textbf{Remark.} For line segment insertion (Algorithm~\ref{alg:segment-insert}), each segment decomposes into $O(\log C)$ canonical intervals, creating up to $O(\log C)$ nodes per insertion and $O(N \log C)$ nodes overall.
 \end{proof}
 
 \textbf{Deletion.} The standard LICT does not support efficient deletion. Removing a line would require traversing all nodes where that line might be stored and recomputing optimal lines from descendants, which requires $\Omega(N)$ time in the worst case. For applications requiring deletion, an alternative approach is reconstructing the tree periodically.
