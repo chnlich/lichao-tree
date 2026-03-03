@@ -448,7 +448,7 @@ Algorithm~\ref{alg:segment-insert} correctly maintains the lower envelope for a 
 \end{lemma}
 
 \begin{proof}
-The interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals of the implicit segment tree, each corresponding to a node whose range lies entirely within $[x_l, x_r]$. For each canonical interval $[l_i, r_i]$, Algorithm~\ref{alg:insert} inserts the line restricted to $[l_i, r_i]$. By Lemma~\ref{lem:routing-dom}, each such insertion correctly maintains the lower envelope within $[l_i, r_i]$. Since the canonical intervals cover $[x_l, x_r]$ exactly and no insertion affects nodes outside $[x_l, x_r]$, the overall lower envelope is correctly maintained.
+The interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals of the implicit segment tree, each corresponding to a node whose range lies entirely within $[x_l, x_r]$. For each canonical interval $[l_i, r_i]$, Algorithm~\ref{alg:insert} inserts the line restricted to $[l_i, r_i]$. By Lemma~\ref{lem:query-correct} applied to the subtree rooted at $[l_i, r_i]$, each such insertion correctly maintains the lower envelope within $[l_i, r_i]$. Since the canonical intervals cover $[x_l, x_r]$ exactly and no insertion affects nodes outside $[x_l, x_r]$, the overall lower envelope is correctly maintained.
 \end{proof}
 
 \subsubsection{Complexity Analysis}
