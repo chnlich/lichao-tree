@@ -127,9 +127,9 @@ Without loss of generality, assume $f_1$ dominates (achieves the lower value) on
 \[
 m = \frac{l+r}{2}.
 \]
-We designate $f_1$ as the \emph{representative} line for $[l, r]$, serving as the optimal answer for any query $x \in [l, m]$.
+We designate $f_1$ as the \emph{representative} line for $[l, r]$, serving as the optimal answer for any query $x \in [m, r]$.
 
-The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[m, r]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
+The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
 
 This interval-halving property yields the logarithmic query time and forms the basis of the tree structure.
 
