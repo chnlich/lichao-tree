@@ -98,13 +98,13 @@ Their approach uses a balanced binary search tree to explicitly maintain the con
 
 \subsection{Monotonic Convex Hull Trick}
 
-The monotonic convex hull trick addresses the special case where line slopes are inserted in monotonically increasing or decreasing order.
+The monotonic convex hull trick addresses the special case where line slopes are inserted in monotonically increasing or decreasing order~\cite{cpalgorithms_cht}.
 
 When insertions arrive in order of monotonically increasing (or decreasing) slopes, a deque-based approach achieves $O(1)$ amortized time per insertion and $O(1)$ amortized time per query. This variant, widely used in dynamic programming optimization, maintains the convex hull incrementally without requiring balanced tree structures. However, the monotonicity restriction limits its applicability to problems where line slopes are known to follow a specific order.
 
 \subsection{Dynamic Convex Hull Trick}
 
-For arbitrary insertion sequences without monotonicity constraints, a balanced binary search tree maintains the hull explicitly. Each insertion and query requires $O(\log N)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
+For arbitrary insertion sequences without monotonicity constraints, a balanced binary search tree maintains the hull explicitly~\cite{kactl}. Each insertion and query requires $O(\log N)$ amortized time. The implementation complexity stems from the need to compute and maintain intersection points between adjacent lines in the hull.
 
 The Dynamic CHT requires computing intersection points between adjacent lines in the hull as
 \[
@@ -124,13 +124,13 @@ f_1(x) = k_1x + b_1 \quad \text{and} \quad f_2(x) = k_2x + b_2.
 \]
 Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
 
-Without loss of generality, assume $f_1$ dominates (achieves the lower value) on the majority subinterval $[m, r]$ where
+Without loss of generality, assume $f_1$ dominates (achieves the lower value) at the midpoint and therefore on $[m, r]$ where
 \[
 m = \frac{l+r}{2}.
 \]
 We designate $f_1$ as the \emph{representative} line for $[l, r]$, serving as the optimal answer for any query $x \in [m, r]$.
 
-The key insight is that $f_2$ only requires consideration when the query falls in the minority subinterval $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
+The key insight is that $f_2$ only requires consideration when the query falls in the opposite half $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
 
 This interval-halving property yields the logarithmic query time and forms the basis of the tree structure.
 
@@ -143,18 +143,6 @@ We first consider the simplest and most common setting: all queried $x$-coordina
 \textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
 
 Each node in the tree represents an interval $[l, r]$ and stores one line.
-
-\begin{definition}[LICT Node Structure]\label{def:lict-node}
-Each node $v$ in the LICT represents an interval $[l, r]$ and contains:
-\begin{enumerate}
-\item A stored line $f_v(x) = k_v x + b_v$ (or \texttt{null} if no line has been routed through $v$),
-\item Pointers to left and right children, representing subintervals $[l, m]$ and $[m, r]$ respectively, where $m = \lfloor(l+r)/2\rfloor$.
-\end{enumerate}
-\textbf{Tree invariant:} At each node $v$ with interval $[l, r]$ and midpoint $m$, the stored line $f_v$ achieves the minimum value at $m$ among all lines that have been routed through $v$:
-\[
-f_v(m) = \min \{ g(m) : g \text{ has been routed through } v \}.
-\]
-\end{definition}
 
 \paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
 \[
@@ -219,7 +207,7 @@ The correctness of this invariant follows from Lemma~\ref{lem:linear-dom} and Le
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Remark (tie-breaking).} When $f_\text{new}(m) = f_\text{stored}(m)$, the strict $<$ comparison on line~8 evaluates to false, so the stored line is kept and the new line is pushed down. This convention is arbitrary but must be consistent; it ensures the tree invariant (Definition~\ref{def:lict-node}) is maintained.
+\textbf{Remark (tie-breaking).} When $f_\text{new}(m) = f_\text{stored}(m)$, the strict $<$ comparison on line~8 evaluates to false, so the stored line is kept and the new line is pushed down. This convention is arbitrary but must be consistent; it ensures the tree invariant (Definition~\ref{def:lict}) is maintained.
 
 \begin{figure}[H]
 \centering
@@ -539,6 +527,8 @@ All benchmarks were conducted with the following configuration.
 \item \textbf{Operating System:} Ubuntu 22.04.5 LTS (WSL2, kernel 6.6.87)
 \end{itemize}
 
+The Dynamic CHT baseline uses the KACTL \texttt{LineContainer}~\cite{kactl}, a \texttt{std::multiset}-based implementation widely adopted in competitive programming.
+
 \textbf{Experimental Parameters:}
 \begin{itemize}
 \item \textbf{Test sizes:} $10^5$, $10^6$, and $10^7$ operations
@@ -560,7 +550,7 @@ to denote that random variable $X$ is drawn from a continuous uniform distributi
 \Theta(\log N).
 \]
 By point-line duality~\cite{deberg2008}, each line $y = kx + b$ maps to the dual point $(k, b)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
-\item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull.
+\item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull, since the slopes $-(i+1)$ are all distinct and any line with a unique slope appears on the lower envelope.
 \end{itemize}
 \end{itemize}
 
