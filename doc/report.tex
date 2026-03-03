@@ -22,6 +22,7 @@
 \newtheorem{definition}{Definition}
 \theoremstyle{plain}
 \newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -74,7 +75,7 @@ Formally, we require a data structure supporting two operations:
 over all lines currently in the structure.
 \end{enumerate}
 
-The LICT provides pseudo-polynomial $O(\log C)$ time per operation for minimum (or maximum) queries, where
+The LICT provides $O(\log C)$ time per operation for minimum (or maximum) queries, where the complexity is parameterized by the coordinate universe size rather than the number of inserted lines.  Here,
 \[
 C = \frac{\text{coordinate range}}{\text{precision level}}
 \]
@@ -111,7 +112,7 @@ x_{\text{intersect}} = \frac{b_2 - b_1}{k_1 - k_2},
 \]
 necessitating careful handling of precision (near parallel lines).
 
-\section{Overview}\label{sec:lichao}
+\section{The Li-Chao Tree}\label{sec:lichao}
 
 This section presents the Li-Chao tree.
 
@@ -141,7 +142,19 @@ We first consider the simplest and most common setting: all queried $x$-coordina
 
 \textbf{Remark (non-integer queries).} The same structure handles queries at non-integer coordinates by refining the discretisation. If queries require precision $\epsilon$ (e.g., $\epsilon = 10^{-6}$), one can rescale the coordinate range by $1/\epsilon$, effectively treating each precision step as one unit. The coordinate universe size becomes $C = \text{coordinate range} / \epsilon$, and the tree depth grows to $\lceil \log_2 C \rceil$ accordingly. All algorithmic details remain identical; only the universe size changes. For example, a range of $[0, 10^9]$ with precision $10^{-6}$ yields $C = 10^{15}$ and tree depth $\approx 50$.
 
-Each node in the tree represents an interval $[l, r]$ and stores one line. 
+Each node in the tree represents an interval $[l, r]$ and stores one line.
+
+\begin{definition}[LICT Node Structure]\label{def:lict-node}
+Each node $v$ in the LICT represents an interval $[l, r]$ and contains:
+\begin{enumerate}
+\item A stored line $f_v(x) = k_v x + b_v$ (or \texttt{null} if no line has been routed through $v$),
+\item Pointers to left and right children, representing subintervals $[l, m]$ and $[m, r]$ respectively, where $m = \lfloor(l+r)/2\rfloor$.
+\end{enumerate}
+\textbf{Tree invariant:} At each node $v$ with interval $[l, r]$ and midpoint $m$, the stored line $f_v$ achieves the minimum value at $m$ among all lines that have been routed through $v$:
+\[
+f_v(m) = \min \{ g(m) : g \text{ has been routed through } v \}.
+\]
+\end{definition}
 
 \paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
 \[
@@ -193,6 +206,8 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \EndIf
 \end{algorithmic}
 \end{algorithm}
+
+\textbf{Remark (tie-breaking).} When $f_\text{new}(m) = f_\text{stored}(m)$, the strict $<$ comparison on line~8 evaluates to false, so the stored line is kept and the new line is pushed down. This convention is arbitrary but must be consistent; it ensures the tree invariant (Definition~\ref{def:lict-node}) is maintained.
 
 \begin{figure}[H]
 \centering
@@ -424,9 +439,9 @@ At a node with interval $[l, r]$ and midpoint $m$, if line $A$ is kept ($A(m) \l
 Without loss of generality, suppose $B$ is pushed to the left child, so $B(l) < A(l)$. Since $A(m) \leq B(m)$ and $B(l) < A(l)$, the two lines intersect in $[l, m]$. For all $x \in [m, r]$, the difference $A(x) - B(x)$ has the same sign as at $m$, so $A(x) \leq B(x)$. By Lemma~\ref{lem:linear-dom}, $A$ dominates $B$ on $[m, r]$.
 \end{proof}
 
-\begin{lemma}[Query Correctness]\label{lem:query-correct}
+\begin{theorem}[Query Correctness]\label{thm:query-correct}
 For any query point $x_0$, the value returned by the query operation equals $\min_{i} \{k_i x_0 + b_i\}$ over all lines in the structure.
-\end{lemma}
+\end{theorem}
 
 \begin{proof}
 The query traverses the unique root-to-leaf path $P$ containing $x_0$, returning the minimum of the stored lines' values at $x_0$. Since these are a subset of all inserted lines, $\text{query}(x_0) \geq \min_i L_i(x_0)$. It remains to show the reverse inequality.
@@ -448,7 +463,7 @@ Algorithm~\ref{alg:segment-insert} correctly maintains the lower envelope for a 
 \end{lemma}
 
 \begin{proof}
-The interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals of the implicit segment tree, each corresponding to a node whose range lies entirely within $[x_l, x_r]$. For each canonical interval $[l_i, r_i]$, Algorithm~\ref{alg:insert} inserts the line restricted to $[l_i, r_i]$. By Lemma~\ref{lem:query-correct} applied to the subtree rooted at $[l_i, r_i]$, each such insertion correctly maintains the lower envelope within $[l_i, r_i]$. Since the canonical intervals cover $[x_l, x_r]$ exactly and no insertion affects nodes outside $[x_l, x_r]$, the overall lower envelope is correctly maintained.
+The interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals of the implicit segment tree, each corresponding to a node whose range lies entirely within $[x_l, x_r]$. For each canonical interval $[l_i, r_i]$, Algorithm~\ref{alg:insert} inserts the line restricted to $[l_i, r_i]$. By Theorem~\ref{thm:query-correct} applied to the subtree rooted at $[l_i, r_i]$, each such insertion correctly maintains the lower envelope within $[l_i, r_i]$. Since the canonical intervals cover $[x_l, x_r]$ exactly and no insertion affects nodes outside $[x_l, x_r]$, the overall lower envelope is correctly maintained.
 \end{proof}
 
 \subsubsection{Complexity Analysis}
@@ -528,11 +543,11 @@ X \sim U(a, b)
 \]
 to denote that random variable $X$ is drawn from a continuous uniform distribution over the interval $[a, b]$.
 \begin{itemize}
-\item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $m \sim U(-10^9, 10^9)$. Expected hull size:
+\item \textbf{Random:} Slopes $k \sim U(-10^9, 10^9)$, intercepts $b \sim U(-10^9, 10^9)$. Expected hull size:
 \[
 \Theta(\log N).
 \]
-By point-line duality~\cite{deberg2008}, each line $y = kx + m$ maps to the dual point $(k, m)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
+By point-line duality~\cite{deberg2008}, each line $y = kx + b$ maps to the dual point $(k, b)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
 \item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull.
 \end{itemize}
 \end{itemize}
@@ -575,7 +590,7 @@ dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
 \]
 Here, $\text{cost}(j, i)$ represents a linear function of $i$. Since the queries (indices $i$) are within a fixed range $[0, N]$, the coordinate universe size $C$ effectively equals $N$.
 
-In this static universe setting, an iterative segment tree~\cite{bentley1977} implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
+In this static universe setting, an iterative segment tree~\cite{zkw2005} implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
 
 \begin{itemize}
 \item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
@@ -624,7 +639,7 @@ In the case that $C$ is larger than $N$, both algorithms have similar performanc
 
 In the $N = C$ regime, the ZKW LICT variant demonstrates substantial gains over both alternatives on dense hull inputs, with the $N = C = 10^7$ all-on-hull benchmark completed approximately $4\times$ faster than Dynamic CHT. 
 
-The LICT's division-free operations ensure consistent numerical accuracy across all inputs. For applications involving floating-point coordinates or extreme value ranges, the LICT provides robustness guarantees that the Dynamic CHT by avoiding intersection point computation.
+The LICT's division-free operations ensure consistent numerical accuracy across all inputs. For applications involving floating-point coordinates or extreme value ranges, the LICT provides robustness guarantees that the Dynamic CHT lacks, by avoiding intersection point computation.
 
 \section{Conclusion}\label{sec:discussion}
 
