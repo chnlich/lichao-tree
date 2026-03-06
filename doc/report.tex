@@ -122,7 +122,7 @@ The Li-Chao tree is built upon a fundamental observation about line dominance ov
 \[
 f_1(x) = k_1x + b_1 \quad \text{and} \quad f_2(x) = k_2x + b_2.
 \]
-Since two distinct lines intersect at most once, one line must be strictly lower than the other on more than half of the interval.
+Since two distinct lines intersect at most once, one line must be lower than the other on at least half of the interval.
 
 Without loss of generality, assume $f_1$ dominates (achieves the lower value) at the midpoint and therefore on $[m, r]$ where
 \[
@@ -549,7 +549,7 @@ to denote that random variable $X$ is drawn from a continuous uniform distributi
 \[
 \Theta(\log N).
 \]
-By point-line duality~\cite{deberg2008}, each line $y = kx + b$ maps to the dual point $(k, b)$. The upper envelope size of the lines equals the upper convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
+By point-line duality~\cite{deberg2008}, each line $y = kx + b$ maps to the dual point $(k, b)$. The lower envelope size of the lines equals the lower convex hull size of the dual point set, which is uniformly distributed in the rectangle $[-10^9, 10^9]^2$. By the R\'{e}nyi and Sulanke theorem~\cite{renyi1963}, the expected number of convex hull vertices of $N$ uniform random points in a convex polygon is $\Theta(\log N)$.
 \item \textbf{All on Hull:} Lines $y = -(i+1)x + (i+1)^2$ for $i \in [0, N-1]$. All $N$ lines contribute to the hull, since the dual points $(-(i+1),\,(i+1)^2)$ lie on the convex parabola $b = k^2$, so all are vertices of the lower hull.
 \end{itemize}
 \end{itemize}
