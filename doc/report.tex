@@ -592,7 +592,7 @@ dp[i] = \min_{0 \le j < i} \{ dp[j] + \text{cost}(j, i) \}
 \]
 Here, $\text{cost}(j, i)$ represents a linear function of $i$. Since the queries (indices $i$) are within a fixed range $[0, N]$, the coordinate universe size $C$ effectively equals $N$.
 
-In this static universe setting, an iterative segment tree~\cite{zkw2005} implementation (often called ZKW segment tree) can be employed to reduce recursion overhead and improve cache locality. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
+In this static universe setting, an iterative segment tree~\cite{zkw2005} implementation (often called ZKW segment tree) can be employed to eliminate recursion overhead and may improve cache locality due to its contiguous memory layout. We therefore include a third variant, \textbf{ZKW LICT}, in this comparison to evaluate the benefits of this specialized optimization against the standard LICT and Dynamic CHT.
 
 \begin{itemize}
 \item \textbf{Configuration:} $N = C = 10^5$, $N = C = 10^6$, and $N = C = 10^7$
