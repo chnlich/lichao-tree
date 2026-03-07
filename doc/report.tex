@@ -136,6 +136,18 @@ This interval-halving property yields the logarithmic query time and forms the b
 
 \subsection{Algorithmic Approach}
 
+\begin{definition}[Li Chao Tree]\label{def:lict}
+A \emph{Li Chao Tree} over a domain $[L, R]$ is a binary tree where:
+\begin{itemize}
+  \item Each node owns an interval $[l, r] \subseteq [L, R]$ with midpoint $m = (l+r)/2$, and stores at most one line $f(x) = kx + b$.
+  \item \textbf{Invariant.} The stored line achieves the minimum value at $m$ among all lines ever routed through that node.
+  \item \textbf{Children.} Left child owns $[l, m]$; right child owns $[m, r]$. Children are created lazily on first insertion.
+  \item \textbf{Initial state.} An empty tree is a single null root over $[L, R]$.
+\end{itemize}
+\end{definition}
+
+The correctness of this invariant follows from Lemma~\ref{lem:linear-dom} and Lemma~\ref{lem:routing-dom} below.
+
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval, recursively partitioning the query range.
 
 We first consider the simplest and most common setting: all queried $x$-coordinates are integers. In this case, if the coordinate range is $[0, C-1]$ for some positive integer $C$, the tree recursively bisects this range into subintervals $[l, r]$ where $l, r \in \mathbb{Z}$. Every leaf corresponds to a single integer, so the tree has depth $\lceil \log_2 C \rceil$ and every query lands at a unique leaf. This integer setting is the one most frequently encountered in competitive programming and in many algorithm design applications, and we use it throughout the examples below.
@@ -150,23 +162,11 @@ m = \frac{l+r}{2}
 \]
 is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
-The appropriate child is determined by where the relative ordering changes. Let $\mathit{lef} = (f_\text{new}(l) < f_\text{stored}(l))$ and $\mathit{midf} = (f_\text{new}(m) < f_\text{stored}(m))$. If $\mathit{lef} \neq \mathit{midf}$, the intersection lies in $[l, m]$, so recurse left; otherwise recurse right. This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
+The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Let $\mathit{lef} = (f_\text{new}(l) < f_\text{stored}(l))$ and $\mathit{midf} = (f_\text{new}(m) < f_\text{stored}(m))$. If $\mathit{lef} \neq \mathit{midf}$, the intersection lies in $[l, m]$, so recurse left; otherwise recurse right. This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
 
 Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
 When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
-
-\begin{definition}[Li Chao Tree]\label{def:lict}
-A \emph{Li Chao Tree} over a domain $[L, R]$ is a binary tree where:
-\begin{itemize}
-  \item Each node owns an interval $[l, r] \subseteq [L, R]$ with midpoint $m = (l+r)/2$, and stores at most one line $f(x) = kx + b$.
-  \item \textbf{Invariant.} The stored line achieves the minimum value at $m$ among all lines ever routed through that node.
-  \item \textbf{Children.} Left child owns $[l, m]$; right child owns $[m, r]$. Children are created lazily on first insertion.
-  \item \textbf{Initial state.} An empty tree is a single null root over $[L, R]$.
-\end{itemize}
-\end{definition}
-
-The correctness of this invariant follows from Lemma~\ref{lem:linear-dom} and Lemma~\ref{lem:routing-dom} below.
 
 \begin{algorithm}[H]
 \caption{LICT Line Insertion}
