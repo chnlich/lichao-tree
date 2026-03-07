@@ -12,8 +12,8 @@ run:
 
 pdf: doc/report.pdf
 
-doc/report.pdf: doc/report.tex
-	cd doc && pdflatex -interaction=nonstopmode report.tex && pdflatex -interaction=nonstopmode report.tex
+doc/report.pdf: doc/report.tex doc/references.bib
+	cd doc && pdflatex -interaction=nonstopmode report.tex && bibtex report && pdflatex -interaction=nonstopmode report.tex && pdflatex -interaction=nonstopmode report.tex
 
 watch-pdf:
 	@echo "Watching doc/report.tex for changes..."
