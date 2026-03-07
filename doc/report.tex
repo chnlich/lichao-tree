@@ -237,7 +237,7 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Remark (tie-breaking).} When $f_\text{new}(m) = f_\text{stored}(m)$, the strict $<$ comparison on line~8 evaluates to false, so the stored line is kept and the new line is pushed down. This convention is arbitrary but must be consistent; it ensures the tree invariant (Definition~\ref{def:lict}) is maintained.
+\textbf{Remark (tie-breaking).} When $f_\text{new}(m) = f_\text{stored}(m)$, the strict $<$ comparison on line~8 evaluates to false, so the stored line is kept and the new line is pushed down. This convention is arbitrary; since both lines achieve the same value at $m$, either choice satisfies the invariant (Definition~\ref{def:lict}).
 
 \begin{figure}[H]
 \centering
