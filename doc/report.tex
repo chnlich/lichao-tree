@@ -189,8 +189,6 @@ A \emph{Li Chao Tree} over a domain $[L, R]$ is a binary tree where:
 \end{itemize}
 \end{definition}
 
-The correctness of this invariant follows from Lemma~\ref{lem:linear-dom} and Lemma~\ref{lem:routing-dom} below.
-
 The LICT offers a fundamentally different approach based on implicit envelope maintenance through interval subdivision. Rather than tracking the convex hull geometry explicitly, the structure maintains the best line at each interval, recursively partitioning the query range.
 
 We first consider the simplest and most common setting: all queried $x$-coordinates are integers. In this case, if the coordinate range is $[0, C-1]$ for some positive integer $C$, the tree recursively bisects this range into subintervals $[l, r]$ where $l, r \in \mathbb{Z}$. Every leaf corresponds to a single integer, so the tree has depth $\lceil \log_2 C \rceil$ and every query lands at a unique leaf. This integer setting is the one most frequently encountered in competitive programming and in many algorithm design applications, and we use it throughout the examples below.
