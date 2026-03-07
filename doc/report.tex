@@ -150,20 +150,7 @@ m = \frac{l+r}{2}
 \]
 is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
 
-The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Define boolean comparison values:
-\begin{align*}
-L &= [f_\text{new}(l) < f_\text{stored}(l)] \\
-M &= [f_\text{new}(m) < f_\text{stored}(m)]
-\end{align*}
-where $[\cdot]$ denotes 1 if true and 0 if false. The child selection rule is:
-\begin{equation*}
-\text{child} =
-\begin{cases}
-\text{left} & \text{if } L \neq M \\
-\text{right} & \text{if } L = M
-\end{cases}
-\end{equation*}
-This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
+The appropriate child is determined by where the relative ordering changes. Let $\mathit{lef} = (f_\text{new}(l) < f_\text{stored}(l))$ and $\mathit{midf} = (f_\text{new}(m) < f_\text{stored}(m))$. If $\mathit{lef} \neq \mathit{midf}$, the intersection lies in $[l, m]$, so recurse left; otherwise recurse right. This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
 
 Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
@@ -181,7 +168,7 @@ A \emph{Li Chao Tree} over a domain $[L, R]$ is a binary tree where:
 
 The correctness of this invariant follows from Lemma~\ref{lem:linear-dom} and Lemma~\ref{lem:routing-dom} below.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{LICT Line Insertion}
 \label{alg:insert}
 \begin{algorithmic}[1]
@@ -272,7 +259,7 @@ Store displaced $f_2$.
 \label{fig:insertion-example-after}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[scale=1.0]
 % Draw axes
@@ -317,7 +304,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 
 \paragraph{Query.} We traverse the path to $x_0$, evaluating all stored lines along the path. The minimum value encountered equals the lower envelope at $x_0$ because any line that could be optimal at $x_0$ is stored on this path.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{LICT Query}
 \label{alg:query}
 \begin{algorithmic}[1]
@@ -384,7 +371,7 @@ Note that this is \emph{local} optimality only. Lines routed down other branches
 
 The LICT extends naturally from full lines to line segments. To insert a line segment defined on $[x_l, x_r]$, we decompose this interval into $O(\log C)$ \emph{canonical intervals} of the implicit segment tree. Each canonical interval corresponds to a node whose range is entirely contained within $[x_l, x_r]$. Algorithm~\ref{alg:insert} is then called independently on each such interval to insert the line restricted to that subrange.
 
-\begin{algorithm}[h]
+\begin{algorithm}[H]
 \caption{LICT Segment Insertion}
 \label{alg:segment-insert}
 \begin{algorithmic}[1]
