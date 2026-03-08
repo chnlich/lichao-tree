@@ -233,7 +233,7 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Remark (tie-breaking).} When both lines achieve the same value at $m$, the strict $<$ comparison on line~8 keeps the resident line and pushes the incoming line down. This convention is arbitrary. In particular, inserting a duplicate line (identical $k$ and $b$) triggers this case at every level; the duplicate sinks to maximum depth and is discarded, which is correct since it does not change the lower envelope.
+\textbf{Remark (tie-breaking).} When both lines achieve the same value at $m$, the strict $<$ comparison on line~8 keeps the resident line and pushes the incoming line down. This convention is arbitrary and preserves correctness. A duplicate line (identical $k$ and $b$) is a special case: whenever it meets an identical resident line, no swap occurs and the duplicate is routed to one child. The process then terminates either at the first null child (where the duplicate is stored) or at maximum depth (where it is dropped). In both cases, query answers are unchanged.
 
 \begin{figure}[H]
 \centering
