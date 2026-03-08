@@ -205,8 +205,6 @@ is designated the \emph{winner} and stored at the node; the \emph{loser} continu
 
 The appropriate child is determined by where the two candidates' relative ordering changes. Compare the two lines at the left endpoint $l$ and at the midpoint $m$: if the ordering differs (one line is lower at $l$ but the other is lower at $m$), the intersection lies in $[l, m]$, so the loser is routed to the left child; if the ordering is the same, the intersection lies in $[m, r]$, so the loser is routed right.
 
-Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
-
 When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
 
 \begin{algorithm}[H]
