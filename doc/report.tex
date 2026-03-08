@@ -387,14 +387,6 @@ The total cost per segment insertion is $O(\log^2 C)$: the interval $[x_l, x_r]$
 
 We now present a formal analysis of the LICT's correctness and complexity.
 
-\begin{definition}[Coordinate Universe]
-The LICT operates on a discrete domain where
-\[
-C = \frac{\text{coordinate range}}{\text{precision level}}.
-\]
-The tree depth is $h = \lceil \log_2 C \rceil$.
-\end{definition}
-
 \subsubsection{Correctness}
 
 We establish the correctness of the LICT through three results: a foundational property of linear functions, a routing invariant maintained by insertion, and a global correctness theorem for queries.
