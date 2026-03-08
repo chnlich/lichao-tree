@@ -152,9 +152,9 @@ This interval-halving property yields the logarithmic query time and forms the b
 
 % Draw two intersecting lines
 % Line A: y = -0.4x + 4 (stored at node - lower at midpoint, higher at left)
-\draw[thick, blue] (0.5,3.8) -- (9.5,0.2) node[right] {Line $A$ (stored)};
+\draw[thick, blue] (0.5,3.8) -- (9.5,0.2) node[right] {Line $A$ (winner)};
 % Line B: y = 0.4x + 1 (routed to left child - lower at left, higher at mid)
-\draw[thick, red, dashed] (0.5,1.2) -- (9.5,4.8) node[right] {Line $B$ (routed)};
+\draw[thick, red, dashed] (0.5,1.2) -- (9.5,4.8) node[right] {Line $B$ (loser)};
 
 % Mark intersection point (at x = 3.75)
 \filldraw[black] (3.75,2.5) circle (2pt);
@@ -171,7 +171,7 @@ This interval-halving property yields the logarithmic query time and forms the b
 \filldraw[red] (1,1.4) circle (2pt);
 \node[left] at (0.9,1.4) {\small $B(l) < A(l)$};
 \end{tikzpicture}
-\caption{Interval Advantage Line Diagram. The node stores Line $A$ because it achieves the lower value at the midpoint. Line $B$ is routed to the left child where it may be optimal.}
+\caption{Interval Advantage Line Diagram. Line $A$ wins at the midpoint and is stored; Line $B$ (the loser) is routed to the left child where it may be optimal.}
 \label{fig:interval-advantage}
 \end{figure}
 
@@ -197,13 +197,13 @@ We first consider the simplest and most common setting: all queried $x$-coordina
 
 Each node in the tree represents an interval $[l, r]$ and stores one line.
 
-\paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. At each node on this path, the new line is compared with the currently stored line. The line that achieves the lower value at the midpoint
+\paragraph{Insertion.} A line is \emph{routed} through the tree following a single path from root to leaf. If the current node is empty, the new line is stored directly and routing terminates. Otherwise, two candidate lines compete at the node: the resident (currently stored) line and the incoming (new) line. The line that achieves the lower value at the midpoint
 \[
 m = \frac{l+r}{2}
 \]
-is \emph{stored} at that node; the suboptimal line continues downward to be routed through the appropriate child subtree.
+is designated the \emph{winner} and stored at the node; the \emph{loser} continues downward to the appropriate child subtree.
 
-The appropriate child is determined by where the relative ordering changes. Let $f_\text{new}(x) = k_\text{new} x + b_\text{new}$ denote the new line and $f_\text{stored}(x) = k_\text{stored} x + b_\text{stored}$ denote the line currently stored at the node. Let $\mathit{lef} = (f_\text{new}(l) < f_\text{stored}(l))$ and $\mathit{midf} = (f_\text{new}(m) < f_\text{stored}(m))$. If $\mathit{lef} \neq \mathit{midf}$, the intersection lies in $[l, m]$, so recurse left; otherwise recurse right. This follows from the single-intersection property: if the ordering changes between $l$ and $m$, the intersection point lies in $[l, m]$; otherwise, it lies in $[m, r]$.
+The appropriate child is determined by where the two candidates' relative ordering changes. Compare the two lines at the left endpoint $l$ and at the midpoint $m$: if the ordering differs (one line is lower at $l$ but the other is lower at $m$), the intersection lies in $[l, m]$, so the loser is routed to the left child; if the ordering is the same, the intersection lies in $[m, r]$, so the loser is routed right.
 
 Algorithms~\ref{alg:insert} and~\ref{alg:query} present the insertion and query procedures.
 
@@ -235,7 +235,9 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Remark (tie-breaking).} When $f_\text{new}(m) = f_\text{stored}(m)$, the strict $<$ comparison on line~8 evaluates to false, so the stored line is kept and the new line is pushed down. This convention is arbitrary; since both lines achieve the same value at $m$, either choice satisfies the invariant (Definition~\ref{def:lict}).
+\textbf{Remark (tie-breaking).} When both lines achieve the same value at $m$, the strict $<$ comparison on line~8 keeps the resident line and pushes the incoming line down. This convention is arbitrary; since both lines achieve the same value at $m$, either choice satisfies the invariant.
+
+\textbf{Remark (duplicate lines).} If the incoming line is identical to the resident line, no swap occurs and the duplicate is routed downward until it reaches maximum depth, where it is discarded. This is correct: inserting the same line twice does not change the lower envelope.
 
 \begin{figure}[H]
 \centering
