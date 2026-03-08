@@ -58,7 +58,7 @@ tabsize=2
 \maketitle
 
 \begin{abstract}
-The Li-Chao Insertion Tree (LICT) was first introduced in lecture materials~\cite{lichao2012} as an efficient data structure for dynamic lower envelope maintenance. In the years since, it has achieved widespread adoption within the competitive programming community, yet no formal specification has appeared in the peer-reviewed literature. This paper provides the definitive formalization of the Li-Chao tree, serving as both the official specification and an expansion of the original lecture materials~\cite{lichao2012}. We present complete algorithmic specifications, establish formal correctness proofs, analyze theoretical complexity, and provide empirical performance characterization. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
+The Li-Chao tree (LICT) was first introduced in lecture materials~\cite{lichao2012} as an efficient data structure for dynamic lower envelope maintenance. In the years since, it has achieved widespread adoption within the competitive programming community, yet no formal specification has appeared in the peer-reviewed literature. This paper provides the definitive formalization of the Li-Chao tree, serving as both the official specification and an expansion of the original lecture materials~\cite{lichao2012}. We present complete algorithmic specifications, establish formal correctness proofs, analyze theoretical complexity, and provide empirical performance characterization. The LICT offers distinct advantages in implementation simplicity, numerical stability, and extensibility to advanced variants such as persistence and line segments.
 \end{abstract}
 
 \section{Introduction}
@@ -616,7 +616,7 @@ $10^7$ & All on Hull & Dynamic CHT & 6163.38 & 6579.40 & 12742.78 \\
 
 \subsection{Analysis}
 
-When $C$ is larger than $N$, the LICT exhibits comparable performance to Dynamic CHT despite its theoretically larger $O(\log C)$ complexity. The absolute difference between $\log C$ and $\log N$ remains modest (e.g., $\log(10^9) \approx 30$ vs $\log(10^7) \approx 23$), so the LICT's smaller constant factor---arising from division-free comparisons and the absence of tree rebalancing---compensates for the additional tree depth.
+When $C$ is larger than $N$, the LICT exhibits comparable performance to Dynamic CHT despite its theoretically larger $O(\log C)$ complexity. The absolute difference between $\log C$ and $\log N$ remains modest (e.g., $\log(10^9) \approx 30$ vs $\log(10^7) \approx 23$), so the LICT's smaller constant factor, arising from division-free comparisons and the absence of tree rebalancing, compensates for the additional tree depth.
 
 In the $N = C$ regime, the ZKW LICT variant demonstrates substantial gains over both alternatives on dense hull inputs, with the $N = C = 10^7$ all-on-hull benchmark completed approximately $4\times$ faster than Dynamic CHT. 
 
