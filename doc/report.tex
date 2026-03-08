@@ -203,7 +203,7 @@ m = \frac{l+r}{2}
 \]
 is designated the \emph{winner} and stored at the node; the \emph{loser} continues downward to the appropriate child subtree.
 
-The appropriate child is determined by where the two candidates' relative ordering changes. Compare the two lines at the left endpoint $l$ and at the midpoint $m$: if the ordering differs (one line is lower at $l$ but the other is lower at $m$), the intersection lies in $[l, m]$, so the loser is routed to the left child; if the ordering is the same, the intersection lies in $[m, r]$, so the loser is routed right.
+Since the winner is already determined at $m$, the remaining question is which half contains the intersection. If the loser is lower at $l$ (ordering at $l$ differs from $m$), the intersection lies in $[l, m]$, so the loser is routed to the left child. Otherwise, the intersection lies in $[m, r]$, and the loser is routed right.
 
 When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ is the required precision), the interval is too narrow to distinguish any two query points. The stored line already resolves every query in that interval, so the losing line is simply dropped: no further recursion is needed. For integer coordinates ($\epsilon = 1$), this condition simplifies to $l = r$.
 
@@ -233,9 +233,7 @@ When the insertion reaches maximum depth ($r - l < \epsilon$, where $\epsilon$ i
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Remark (tie-breaking).} When both lines achieve the same value at $m$, the strict $<$ comparison on line~8 keeps the resident line and pushes the incoming line down. This convention is arbitrary; since both lines achieve the same value at $m$, either choice satisfies the invariant.
-
-\textbf{Remark (duplicate lines).} If the incoming line is identical to the resident line, no swap occurs and the duplicate is routed downward until it reaches maximum depth, where it is discarded. This is correct: inserting the same line twice does not change the lower envelope.
+\textbf{Remark (tie-breaking).} When both lines achieve the same value at $m$, the strict $<$ comparison on line~8 keeps the resident line and pushes the incoming line down. This convention is arbitrary. In particular, inserting a duplicate line (identical $k$ and $b$) triggers this case at every level; the duplicate sinks to maximum depth and is discarded, which is correct since it does not change the lower envelope.
 
 \begin{figure}[H]
 \centering
