@@ -23,6 +23,7 @@
 \theoremstyle{plain}
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -443,9 +444,9 @@ The interval $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals of the
 
 \subsubsection{Complexity Analysis}
 
-\begin{lemma}[Time Complexity]\label{lem:time-complexity}
+\begin{proposition}[Time Complexity]\label{prop:time-complexity}
 Line insertion and query operations require $O(\log C)$ time. Line segment insertion (Algorithm~\ref{alg:segment-insert}) requires $O(\log^2 C)$ time.
-\end{lemma}
+\end{proposition}
 
 \begin{proof}
 The LICT is a binary tree of depth
@@ -460,9 +461,9 @@ For query: The traversal follows one root-to-leaf path with $O(1)$ work per node
 For segment insertion: The segment $[x_l, x_r]$ decomposes into $O(\log C)$ canonical intervals, each invoking Algorithm~\ref{alg:insert} at cost $O(\log C)$. The total time is $O(\log C) \times O(\log C) = O(\log^2 C)$.
 \end{proof}
 
-\begin{lemma}[Space Complexity]\label{lem:space-complexity}
+\begin{proposition}[Space Complexity]\label{prop:space-complexity}
 The LICT stores at most $O(N)$ nodes in the worst case, where $N$ is the number of inserted lines.
-\end{lemma}
+\end{proposition}
 
 \begin{proof}
 Each full-line insertion follows a single root-to-leaf path. At each existing node, the algorithm performs $O(1)$ comparisons and recurses into exactly one child. If the path reaches a null child, it creates one new node and returns; if the path terminates at an existing leaf, no new node is created. Therefore each insertion creates at most one new node. With $N$ insertions, the total number of nodes is at most $N$, giving $O(N)$ space.
