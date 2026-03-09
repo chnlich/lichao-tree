@@ -247,41 +247,81 @@ void run_n_equals_c() {
         llint c = tc.second;
         
         for (const auto& dist : distributions) {
-            cout << "Testing N=" << n << ", C=" << c << ", Dist=" << dist << "..." << endl;
-            
+            cerr << "Testing N=" << n << ", C=" << c << ", Dist=" << dist
+                 << " (" << NUM_RUNS << " runs, average)..." << endl;
+
             Generator gen(42);
             auto [inserts, queries] = (dist == "Random")
                 ? gen.generate_nc(n, c)
                 : gen.generate_nc_all_on_hull(n, c);
-            
+
             // Compute range that covers all query points
             llint max_range = c / 2;
             for (auto x : queries) max_range = max(max_range, abs(x));
-            
-            // Run LICT
-            auto res_lichao = run_nc_lichao(inserts, queries, max_range);
+
+            // Run LICT - NUM_RUNS times, take average
+            NCResult res_lichao;
+            {
+              vector<double> ins_t, q_t, tot_t;
+              for (int r = 0; r < NUM_RUNS; ++r) {
+                auto res = run_nc_lichao(inserts, queries, max_range);
+                ins_t.push_back(res.insert_time_ms);
+                q_t.push_back(res.query_time_ms);
+                tot_t.push_back(res.total_time_ms);
+                res_lichao = res;
+              }
+              res_lichao.insert_time_ms = average_time(ins_t);
+              res_lichao.query_time_ms = average_time(q_t);
+              res_lichao.total_time_ms = average_time(tot_t);
+            }
             res_lichao.n = n;
             res_lichao.c = c;
             res_lichao.distribution = dist;
             results.push_back(res_lichao);
-            
-            // Run ZKW LICT
-            auto res_zkw = run_nc_zkw(inserts, queries, max_range);
+
+            // Run ZKW LICT - NUM_RUNS times, take average
+            NCResult res_zkw;
+            {
+              vector<double> ins_t, q_t, tot_t;
+              for (int r = 0; r < NUM_RUNS; ++r) {
+                auto res = run_nc_zkw(inserts, queries, max_range);
+                ins_t.push_back(res.insert_time_ms);
+                q_t.push_back(res.query_time_ms);
+                tot_t.push_back(res.total_time_ms);
+                res_zkw = res;
+              }
+              res_zkw.insert_time_ms = average_time(ins_t);
+              res_zkw.query_time_ms = average_time(q_t);
+              res_zkw.total_time_ms = average_time(tot_t);
+            }
             res_zkw.n = n;
             res_zkw.c = c;
             res_zkw.distribution = dist;
             results.push_back(res_zkw);
-            
-            // Run CHT
-            auto res_cht = run_nc_cht(inserts, queries, c);
+
+            // Run CHT - NUM_RUNS times, take average
+            NCResult res_cht;
+            {
+              vector<double> ins_t, q_t, tot_t;
+              for (int r = 0; r < NUM_RUNS; ++r) {
+                auto res = run_nc_cht(inserts, queries, c);
+                ins_t.push_back(res.insert_time_ms);
+                q_t.push_back(res.query_time_ms);
+                tot_t.push_back(res.total_time_ms);
+                res_cht = res;
+              }
+              res_cht.insert_time_ms = average_time(ins_t);
+              res_cht.query_time_ms = average_time(q_t);
+              res_cht.total_time_ms = average_time(tot_t);
+            }
             res_cht.n = n;
             res_cht.c = c;
             res_cht.distribution = dist;
             results.push_back(res_cht);
-            
-            // Verify checksums match
+
+            // Verify checksums match (using last run's checksum)
             if (res_lichao.checksum != res_cht.checksum) {
-                cerr << "WARNING: Checksum mismatch! LICT: " << res_lichao.checksum 
+                cerr << "WARNING: Checksum mismatch! LICT: " << res_lichao.checksum
                      << " CHT: " << res_cht.checksum << endl;
             }
             if (res_lichao.checksum != res_zkw.checksum) {
@@ -292,7 +332,7 @@ void run_n_equals_c() {
     }
     
     // Output Markdown Table
-    cout << "\n## Experiment 1: N = C Regime\n" << endl;
+    cout << "\n## Experiment 1: N = C Regime (Average of " << NUM_RUNS << " runs)\n" << endl;
     cout << "| N = C | Distribution | Algorithm | Insert Time (ms) | Query Time (ms) | Total Time (ms) |" << endl;
     cout << "|-------|-------------|-----------|------------------|-----------------|-----------------|" << endl;
     for (const auto& r : results) {
