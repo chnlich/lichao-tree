@@ -27,7 +27,7 @@ public:
         return dist(rng);
     }
 
-    // Random operations: O(sqrt(N)) lines on hull
+    // Random operations: Theta(log N) lines on hull
     vector<Operation> generate_random(int n, double query_ratio = 0.5) {
         vector<Operation> ops;
         ops.reserve(n);
