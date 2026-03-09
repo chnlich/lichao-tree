@@ -13,3 +13,6 @@ doc/report.log
 
 # Built PDF (tracked builds go through CI or local-only)
 doc/*.pdf
+
+# arXiv submission archive
+arxiv.tar.gz

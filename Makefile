@@ -1,4 +1,4 @@
-.PHONY: all clean run pdf
+.PHONY: all clean run pdf arxiv
 
 all:
 	$(MAKE) -C benchmark
@@ -14,6 +14,12 @@ pdf: doc/report.pdf
 
 doc/report.pdf: doc/report.tex doc/references.bib
 	cd doc && pdflatex -interaction=nonstopmode report.tex && bibtex report && pdflatex -interaction=nonstopmode report.tex && pdflatex -interaction=nonstopmode report.tex
+
+arxiv: doc/report.bbl
+	tar czf arxiv.tar.gz -C doc report.tex report.bbl references.bib
+
+doc/report.bbl: doc/report.tex doc/references.bib
+	cd doc && pdflatex -interaction=nonstopmode report.tex && bibtex report
 
 watch-pdf:
 	@echo "Watching doc/report.tex for changes..."
