@@ -122,11 +122,7 @@ The Li-Chao tree is built upon a fundamental observation about line dominance ov
 \[
 f_1(x) = k_1x + b_1 \quad \text{and} \quad f_2(x) = k_2x + b_2.
 \]
-Since two distinct lines intersect at most once, one line must be lower than the other on at least half of the interval.
-
-Without loss of generality, assume $f_1$ achieves the lower value at the midpoint $m = \frac{l+r}{2}$, and that the intersection of the two lines (if it exists within $[l, r]$) falls in the left half $[l, m]$. Then by Lemma~\ref{lem:linear-dom} (Linear Domination), $f_1$ dominates $f_2$ on the entire right half $[m, r]$. We designate $f_1$ as the \emph{representative} line for the node, serving as the locally optimal answer for queries in $[m, r]$.
-
-The key insight is that $f_2$ only requires consideration when the query falls in the opposite half $[l, m]$, which comprises at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the current representative, or we recurse on a subproblem of strictly half the size.
+Since two distinct lines intersect at most once, one line must be lower than the other on at least half of the interval. We store the line that wins at the midpoint $m = \frac{l+r}{2}$ and push the other line into the child that contains the intersection. The pushed line only requires consideration on at most half the original interval. This observation enables a recursive decomposition: either the query is answered by the stored line, or we recurse on a subproblem of strictly half the size.
 
 This interval-halving property yields the logarithmic query time and forms the basis of the tree structure.
 
@@ -386,6 +382,14 @@ The total cost per segment insertion is $O(\log^2 C)$: the interval $[x_l, x_r]$
 \subsection{Theoretical Analysis}
 
 We now present a formal analysis of the LICT's correctness and complexity.
+
+\begin{definition}[Coordinate Universe]
+The LICT operates on a discrete domain where
+\[
+C = \frac{\text{coordinate range}}{\text{precision level}}.
+\]
+The tree depth is $h = \lceil \log_2 C \rceil$.
+\end{definition}
 
 \subsubsection{Correctness}
 
